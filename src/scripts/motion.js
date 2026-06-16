@@ -180,8 +180,14 @@ if (!reduce) {
           ease: 'power3.out',
         })
       })
+      // press-feedback: лёгкий «вдавливание» при нажатии (Emil: кнопка отвечает на клик)
+      el.addEventListener('pointerdown', () =>
+        gsap.to(el, { scale: 0.96, duration: 0.15, ease: 'power2.out' }))
+      el.addEventListener('pointerup', () =>
+        gsap.to(el, { scale: 1, duration: 0.3, ease: 'power3.out' }))
+      // возврат без elastic — чистый ease-out (Impeccable/Emil: без bounce/elastic)
       el.addEventListener('pointerleave', () =>
-        gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' }))
+        gsap.to(el, { x: 0, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' }))
     })
   }
 

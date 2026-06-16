@@ -165,6 +165,8 @@ section { padding: 140px 0; position: relative; }
 .btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
 .btn-ghost:hover { border-color: rgba(231,237,245,0.28); background: rgba(231,237,245,0.04); }
 .btn-ghost:hover svg { transform: translateX(3px); }
+/* press-feedback: на тач — фоном/рамкой (transform у hero-CTA занят GSAP) */
+.btn-ghost:active { border-color: rgba(231,237,245,0.34); background: rgba(231,237,245,0.08); }
 
 /* ════════════════════════════════════════════════
    НАВИГАЦИЯ
@@ -211,9 +213,9 @@ nav.nav.scrolled {
   align-items: center; width: 100%;
 }
 .hero-text { max-width: 600px; }
-.hero-title { font-size: clamp(2.4rem, 5.2vw, 4.4rem); font-weight: 700; letter-spacing: -0.035em; line-height: 1.05; margin-bottom: 28px; color: #fff; }
+.hero-title { font-size: clamp(2.4rem, 5.2vw, 4.4rem); font-weight: 700; letter-spacing: -0.035em; line-height: 1.05; margin-bottom: 28px; color: #fff; text-wrap: balance; }
 .hero-title-accent { color: var(--text-dim); font-weight: 600; }
-.hero-desc { font-size: clamp(1rem, 1.2vw, 1.15rem); color: var(--text-dim); line-height: 1.75; max-width: 540px; margin-bottom: 40px; }
+.hero-desc { font-size: clamp(1rem, 1.2vw, 1.15rem); color: var(--text-dim); line-height: 1.75; max-width: 540px; margin-bottom: 40px; text-wrap: pretty; }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
 .hero-stats { display: flex; gap: clamp(28px, 4vw, 52px); margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--line); }

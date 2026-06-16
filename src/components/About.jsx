@@ -30,7 +30,7 @@ export default function About() {
       <div className="container about-layout">
         <div className="about-intro">
           <div className="eyebrow reveal">О компании</div>
-          <h2 className="h-title reveal">Инженерные решения<br />для нефтегазовой отрасли</h2>
+          <h2 className="h-title reveal">Инженерные решения <br />для нефтегазовой отрасли</h2>
           <p className="lead reveal">
             ГЕОТЕХНАВИГАЦИЯ — российский разработчик и производитель
             телеметрического оборудования и ПО для контроля траектории бурения.

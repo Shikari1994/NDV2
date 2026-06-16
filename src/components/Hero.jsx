@@ -26,11 +26,10 @@ export default function Hero() {
           </p>
 
           <div className="hero-actions reveal">
-            <a className="btn btn-primary" href="#software">
+            <a className="btn btn-ghost" href="#software">
               Смотреть платформу
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
             </a>
-            <a className="btn btn-ghost" href="#contact">Получить консультацию</a>
           </div>
 
           <div className="hero-stats reveal">

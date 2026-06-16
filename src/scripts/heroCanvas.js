@@ -45,7 +45,8 @@ if (canvas) {
 
   const draw = () => {
     ctx.clearRect(0, 0, w, h)
-    const pad = Math.max(28, w * 0.04)
+    // на узком экране почти убираем боковой отступ — кривые до краёв
+    const pad = w < 700 ? Math.max(10, w * 0.022) : Math.max(28, w * 0.04)
     const scaleX = w - pad * 2
     const trackW = scaleX / TRACKS.length
 

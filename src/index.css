@@ -811,9 +811,9 @@ section { padding: 168px 0; }
      экране это и читается как «обрезанно». Глушим до уровня лёгкой
      приборной текстуры и меняем маску на мягкую вертикальную. */
   .hero-bg-canvas {
-    opacity: 0.14;
-    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 18%, transparent 68%);
-            mask-image: linear-gradient(180deg, #000 0%, #000 18%, transparent 68%);
+    opacity: 0.34;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 96%);
+            mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 96%);
   }
 
   /* bento: короче плитки — меньше «бесконечной простыни» */

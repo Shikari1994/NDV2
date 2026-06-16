@@ -58,7 +58,7 @@ export default function Software() {
           <div>
             <div className="eyebrow reveal">Программный комплекс</div>
             <h2 className="h-title reveal">
-              Drill&nbsp;Monitor — мониторинг<br />бурения в реальном времени
+              Drill&nbsp;Monitor — мониторинг <br />бурения в реальном времени
             </h2>
           </div>
           <div className="sw-head-side reveal">

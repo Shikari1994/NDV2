@@ -806,6 +806,16 @@ section { padding: 168px 0; }
   .hero-readout .tm { flex: 1 1 auto; justify-content: center; }
   .hero-readout .tm:last-child { border-right: none; }
 
+  /* каротажный фон: десктопная горизонтальная маска даёт резкий
+     вертикальный «шов» по центру и яркий левый край — на узком
+     экране это и читается как «обрезанно». Глушим до уровня лёгкой
+     приборной текстуры и меняем маску на мягкую вертикальную. */
+  .hero-bg-canvas {
+    opacity: 0.14;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 18%, transparent 68%);
+            mask-image: linear-gradient(180deg, #000 0%, #000 18%, transparent 68%);
+  }
+
   /* bento: короче плитки — меньше «бесконечной простыни» */
   .bento-tile { min-height: 300px; }
   .bento-tile.is-lg, .bento-tile.is-tall { min-height: 360px; }

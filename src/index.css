@@ -255,6 +255,9 @@ nav.nav.scrolled {
 /* ════════════════════════════════════════════════
    О КОМПАНИИ
    ════════════════════════════════════════════════ */
+/* About короткий по смыслу — намеренно плотнее соседних секций по вертикали
+   (правит «излишнюю вертикальность»; адаптивно, чтобы не ломать мобильный ритм) */
+#about { padding-block: clamp(72px, 9vw, 128px); }
 /* двухколоночная раскладка: рассказ слева, преимущества справа */
 .about-layout { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 96px); align-items: start; }
 .about-intro { max-width: 540px; }
@@ -268,14 +271,21 @@ nav.nav.scrolled {
 .about-meta-k { flex: 0 0 96px; font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); }
 .about-meta-v { font-size: 0.92rem; color: var(--text); }
 
-/* карточки-преимущества стопкой, иконка сбоку */
-.about-cards { display: flex; flex-direction: column; gap: 16px; }
-.about-card { display: flex; gap: 22px; padding: 26px 28px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-raised); transition: border-color 0.3s, transform 0.4s var(--ease), box-shadow 0.3s; }
-.about-card:hover { border-color: var(--accent-line); transform: translateY(-4px); box-shadow: 0 24px 56px -28px rgba(0,0,0,0.8); }
-.feature-icon { width: 50px; height: 50px; flex-shrink: 0; border: 1px solid var(--accent-line); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent); background: var(--accent-soft); }
-.feature-icon svg { width: 24px; }
-.about-card-body h4 { font-size: 1.08rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
-.about-card-body p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.65; }
+/* преимущества — приборным списком с hairline-разделителями (в ритме about-meta),
+   а не стопкой карточек: ниже по высоте, ближе к «панели», без card-soup */
+.about-points { border-top: 1px solid var(--line); }
+.about-point {
+  display: grid; grid-template-columns: 44px 1fr; gap: 20px; align-items: start;
+  padding: 22px 2px; border-bottom: 1px solid var(--line);
+}
+.about-point-icon {
+  width: 44px; height: 44px; flex-shrink: 0; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); border: 1px solid var(--accent-line); background: var(--accent-soft);
+}
+.about-point-icon svg { width: 22px; }
+.about-point-body h4 { font-size: 1.04rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; }
+.about-point-body p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.6; }
 
 /* ════════════════════════════════════════════════
    ТЕГИ-ЧИПЫ · карусель оборудования + bento ПО
@@ -694,11 +704,11 @@ section { padding: 168px 0; }
    Маской вырезаем середину — подсвечивается только
    1px рамка, текст карточки не затрагивается.
    ════════════════════════════════════════════════ */
-.about-card, .contact-card { position: relative; }
-.about-card, .car-card, .contact-card {
+.contact-card { position: relative; }
+.car-card, .contact-card {
   --mx: 50%; --my: 0%;
 }
-.about-card::before, .car-card::before, .contact-card::before {
+.car-card::before, .contact-card::before {
   content: ''; position: absolute; inset: 0; z-index: 3;
   border-radius: inherit; padding: 1px; pointer-events: none;
   opacity: 0; transition: opacity 0.3s var(--ease);
@@ -707,8 +717,7 @@ section { padding: 168px 0; }
           mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
 }
-.about-card:hover::before, .car-card:hover::before,
-a.contact-card:hover::before { opacity: 0.9; }
+.car-card:hover::before, a.contact-card:hover::before { opacity: 0.9; }
 
 /* ─── магнитные hero-CTA: transform отдаём GSAP, убираем его из CSS-transition ─── */
 .hero-actions .btn {
@@ -721,7 +730,7 @@ a.contact-card:hover::before { opacity: 0.9; }
 
 @media (prefers-reduced-motion: reduce) {
   .scroll-progress { display: none; }
-  .about-card::before, .car-card::before, .contact-card::before { display: none; }
+  .car-card::before, .contact-card::before { display: none; }
 }
 
 /* ════════════════════════════════════════════════

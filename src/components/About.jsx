@@ -49,17 +49,17 @@ export default function About() {
           </dl>
         </div>
 
-        <div className="about-cards">
+        <ul className="about-points">
           {FEATURES.map((f) => (
-            <div className="about-card reveal" key={f.title}>
-              <div className="feature-icon">{f.icon}</div>
-              <div className="about-card-body">
+            <li className="about-point reveal" key={f.title}>
+              <span className="about-point-icon">{f.icon}</span>
+              <div className="about-point-body">
                 <h4>{f.title}</h4>
                 <p>{f.text}</p>
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   )

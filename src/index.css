@@ -162,6 +162,8 @@ section { padding: 140px 0; position: relative; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-strong); }
 .btn-primary:hover svg { transform: translateX(3px); }
+/* press-feedback (Emil: кнопка отвечает на нажатие); primary не магнитная — transform свободен */
+.btn-primary:active { transform: scale(0.97); }
 .btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
 .btn-ghost:hover { border-color: rgba(231,237,245,0.28); background: rgba(231,237,245,0.04); }
 .btn-ghost:hover svg { transform: translateX(3px); }
@@ -327,7 +329,10 @@ nav.nav.scrolled {
 #contact .container { text-align: center; }
 .contact-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 50px; text-align: left; }
 .contact-card { display: flex; align-items: center; gap: 18px; padding: 30px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-raised); text-decoration: none; color: inherit; transition: border-color 0.3s, background 0.3s, transform 0.3s var(--ease); }
-.contact-card:hover { border-color: var(--accent-line); background: rgba(59,158,255,0.04); transform: translateY(-4px); }
+/* hover-подъём и press — только у настоящих ссылок (tel/mailto);
+   карточка-адрес — div, не должна притворяться кликабельной */
+a.contact-card:hover { border-color: var(--accent-line); background: rgba(59,158,255,0.04); transform: translateY(-4px); }
+a.contact-card:active { transform: translateY(-2px) scale(0.99); }
 .ci-icon { width: 48px; height: 48px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--accent-line); color: var(--accent); background: var(--accent-soft); }
 .ci-icon svg { width: 20px; }
 .ci-text label { display: block; font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; }
@@ -748,7 +753,7 @@ section { padding: 168px 0; }
   -webkit-mask-composite: xor; mask-composite: exclude;
 }
 .about-card:hover::before, .product-card:hover::before, .car-card:hover::before,
-.blog-card:hover::before, .contact-card:hover::before { opacity: 0.9; }
+.blog-card:hover::before, a.contact-card:hover::before { opacity: 0.9; }
 
 /* ─── магнитные hero-CTA: transform отдаём GSAP, убираем его из CSS-transition ─── */
 .hero-actions .btn {

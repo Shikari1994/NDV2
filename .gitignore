@@ -5,3 +5,4 @@ _source
 .DS_Store
 *.local
 .vite
+.claude/

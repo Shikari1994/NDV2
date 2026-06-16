@@ -1,0 +1,63 @@
+---
+import '../index.css'
+
+const {
+  title = 'ГЕОТЕХНАВИГАЦИЯ — Телеметрия и геонавигация бурения',
+  description = 'Разработка и производство телеметрического оборудования MWD/LWD и программного комплекса Drill Monitor для контроля траектории бурения в реальном времени.',
+} = Astro.props
+
+const canonical = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : Astro.url.pathname
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'ГЕОТЕХНАВИГАЦИЯ',
+  url: canonical,
+  logo: Astro.site ? new URL('/logo.webp', Astro.site).href : '/logo.webp',
+  description,
+  areaServed: ['RU', 'СНГ'],
+  knowsAbout: ['Телеметрия MWD/LWD', 'Геонавигация бурения', 'Программный комплекс Drill Monitor'],
+}
+---
+
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/webp" href="/logo.webp" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content="/logo.webp" />
+    <meta name="theme-color" content="#07090d" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Перейти к содержимому</a>
+    <div class="scroll-progress" aria-hidden="true"><i></i></div>
+    <slot />
+    <script>
+      import '../scripts/motion.js'
+    </script>
+    <script>
+      import '../scripts/heroCanvas.js'
+    </script>
+  </body>
+</html>

@@ -1,48 +1,52 @@
+import { asset } from '../lib/asset.js'
+
 const MODULES = [
   {
     key: 'drilling',
     n: '01',
     tab: 'Бурение',
     img: '/app-drilling.webp',
+    size: 'lg',
     title: 'Мониторинг бурения в реальном времени',
     text: 'Единый пульт бурильщика: проходка, нагрузка на долото, момент, обороты, давление и вибрация — десятки каналов телеметрии с обновлением в реальном времени. Компас азимута и автоматическая SCC-коррекция.',
     tags: ['Real-time', 'Телеметрия MWD', 'Коррекция азимута'],
-  },
-  {
-    key: 'survey',
-    n: '02',
-    tab: 'Инклинометрия',
-    img: '/app-survey.webp',
-    title: 'Инклинометрия и 3D-траектория',
-    text: 'Журнал замеров «факт» и «план», ввод новых точек прямо на буровой и интерактивная 3D-визуализация ствола скважины с наложением проектного профиля и отклонений.',
-    tags: ['3D-ствол', 'План / факт', 'Замеры'],
-  },
-  {
-    key: 'logging',
-    n: '03',
-    tab: 'Каротаж',
-    img: '/app-logging.webp',
-    title: 'Каротажный планшет LWD',
-    text: 'Гамма-каротаж, механическая скорость и индукционный каротаж на одном планшете с привязкой по глубине. Экспорт результатов в форматах PDF и LAS для передачи заказчику.',
-    tags: ['Гамма-каротаж', 'Индукционный', 'Экспорт LAS / PDF'],
-  },
-  {
-    key: 'bha',
-    n: '04',
-    tab: 'Оборудование',
-    img: '/app-bha.webp',
-    title: 'Компоновка КНБК и ресурс оборудования',
-    text: 'Наглядная схема компоновки низа бурильной колонны, контроль наработки модулей телеметрии до ТО, параметры УБТ, ВЗД и долота, проверка стыков в допустимом диапазоне.',
-    tags: ['КНБК / BHA', 'Ресурс до ТО', 'Контроль стыков'],
   },
   {
     key: 'mobile',
     n: '05',
     tab: 'Мобайл',
     img: '/app-mobile.webp',
+    size: 'tall',
     title: 'Мобильное приложение',
-    text: 'Ключевые показатели скважины и метрики бурения прямо на смартфоне — для супервайзера и офиса. Доступ к данным буровой в любой точке.',
-    tags: ['iOS / Android', 'Live-данные', 'Доступ из офиса'],
+    text: 'Ключевые показатели скважины и метрики бурения прямо на смартфоне — для супервайзера и офиса.',
+    tags: ['iOS / Android', 'Live-данные'],
+  },
+  {
+    key: 'survey',
+    n: '02',
+    tab: 'Инклинометрия',
+    img: '/app-survey.webp',
+    size: 'sm',
+    title: 'Инклинометрия и 3D-траектория',
+    tags: ['3D-ствол', 'План / факт'],
+  },
+  {
+    key: 'logging',
+    n: '03',
+    tab: 'Каротаж',
+    img: '/app-logging.webp',
+    size: 'sm',
+    title: 'Каротажный планшет LWD',
+    tags: ['Гамма-каротаж', 'Экспорт LAS / PDF'],
+  },
+  {
+    key: 'bha',
+    n: '04',
+    tab: 'Оборудование',
+    img: '/app-bha.webp',
+    size: 'sm',
+    title: 'Компоновка КНБК и ресурс',
+    tags: ['КНБК / BHA', 'Ресурс до ТО'],
   },
 ]
 
@@ -73,30 +77,22 @@ export default function Software() {
           </div>
         </div>
 
-        <div className="sw-rows">
+        <div className="sw-bento">
           {MODULES.map((m) => (
-            <div className={`sw-row reveal${m.key === 'mobile' ? ' sw-row--mobile' : ''}`} key={m.key}>
-              <div className="sw-row-text">
-                <div className="sw-row-kicker mono">{m.n} · {m.tab}</div>
+            <article className={`bento-tile instr-frame is-${m.size} reveal`} key={m.key}>
+              <img className="bento-shot" src={asset(m.img)} alt={m.title} loading="lazy" />
+              <div className="bento-bar">
+                <span className="bento-kicker mono">{m.n} · {m.tab}</span>
+                <span className="bento-live"><span className="bento-live-dot" />LIVE</span>
+              </div>
+              <div className="bento-body">
                 <h3>{m.title}</h3>
-                <p>{m.text}</p>
+                {m.text && <p>{m.text}</p>}
                 <div className="tag-row">
                   {m.tags.map((t) => <span className="tag" key={t}>{t}</span>)}
                 </div>
               </div>
-
-              <div className="sw-row-media">
-                <div className="sw-window instr-frame">
-                  <div className="sw-window-bar">
-                    <span className="sw-window-title">DRILL&nbsp;MONITOR · {m.tab}</span>
-                    <span className="sw-live"><span className="sw-live-dot" />LIVE</span>
-                  </div>
-                  <div className={`sw-shot${m.key === 'mobile' ? ' is-mobile' : ''}`}>
-                    <img src={m.img} alt={m.title} loading="lazy" />
-                  </div>
-                </div>
-              </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>

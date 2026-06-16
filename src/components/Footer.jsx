@@ -1,3 +1,5 @@
+import { asset } from '../lib/asset.js'
+
 const NAV = [
   ['#about', 'О компании'],
   ['#software', 'Платформа'],
@@ -12,7 +14,7 @@ export default function Footer() {
       <div className="container footer-top">
         <div className="footer-brand">
           <div className="footer-logo">
-            <img src="/logo.webp" alt="ГЕОТЕХНАВИГАЦИЯ" />
+            <img src={asset('/logo.webp')} alt="ГЕОТЕХНАВИГАЦИЯ" />
             <span className="footer-logo-text">Геотехнавигация</span>
           </div>
           <p className="footer-desc">

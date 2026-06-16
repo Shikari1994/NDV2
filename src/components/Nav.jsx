@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { asset } from '../lib/asset.js'
 
 const LINKS = [
   ['#about', 'О компании'],
@@ -27,7 +28,7 @@ export default function Nav() {
     <>
       <nav className={`nav${scrolled ? ' scrolled' : ''}`}>
         <a className="nav-logo" href="#hero">
-          <img src="/logo.webp" alt="ГЕОТЕХНАВИГАЦИЯ" />
+          <img src={asset('/logo.webp')} alt="ГЕОТЕХНАВИГАЦИЯ" />
           <span className="nav-logo-text">Геотехнавигация</span>
         </a>
         <ul className="nav-links">

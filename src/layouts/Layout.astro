@@ -1,5 +1,8 @@
 ---
 import '../index.css'
+import { asset } from '../lib/asset.js'
+
+const logoHref = asset('/logo.webp')
 
 const {
   title = 'ГЕОТЕХНАВИГАЦИЯ — Телеметрия и геонавигация бурения',
@@ -15,7 +18,7 @@ const orgSchema = {
   '@type': 'Organization',
   name: 'ГЕОТЕХНАВИГАЦИЯ',
   url: canonical,
-  logo: Astro.site ? new URL('/logo.webp', Astro.site).href : '/logo.webp',
+  logo: Astro.site ? new URL(logoHref, Astro.site).href : logoHref,
   description,
   areaServed: ['RU', 'СНГ'],
   knowsAbout: ['Телеметрия MWD/LWD', 'Геонавигация бурения', 'Программный комплекс Drill Monitor'],
@@ -27,7 +30,7 @@ const orgSchema = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/webp" href="/logo.webp" />
+    <link rel="icon" type="image/webp" href={logoHref} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -37,7 +40,7 @@ const orgSchema = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content="/logo.webp" />
+    <meta property="og:image" content={Astro.site ? new URL(logoHref, Astro.site).href : logoHref} />
     <meta name="theme-color" content="#07090d" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />

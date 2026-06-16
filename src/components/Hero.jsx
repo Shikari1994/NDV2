@@ -1,3 +1,5 @@
+import { asset } from '../lib/asset.js'
+
 const STATS = [
   { count: 15, suffix: '+', label: 'лет на рынке' },
   { count: 200, suffix: '+', label: 'скважин с MWD/LWD' },
@@ -56,7 +58,7 @@ export default function Hero() {
               <span className="hero-window-title mono">DRILL MONITOR · БУРЕНИЕ</span>
               <span className="hero-live"><span className="hero-live-dot" />LIVE</span>
             </div>
-            <img src="/app-drilling.webp" alt="Интерфейс программного комплекса Drill Monitor — мониторинг бурения" />
+            <img src={asset('/app-drilling.webp')} alt="Интерфейс программного комплекса Drill Monitor — мониторинг бурения" />
             <div className="hero-readout mono">
               <span className="tm"><i className="tm-k">ГЛУБИНА</i><b className="tm-v is-live" data-tm="depth">3 842</b><i className="tm-u">м</i></span>
               <span className="tm"><i className="tm-k">АЗИМУТ</i><b className="tm-v" data-tm="azimuth">252,74</b><i className="tm-u">°</i></span>
@@ -65,7 +67,7 @@ export default function Hero() {
             </div>
           </div>
           <div className="hero-window hero-window--back" aria-hidden="true">
-            <img src="/app-logging.webp" alt="" />
+            <img src={asset('/app-logging.webp')} alt="" />
           </div>
         </div>
       </div>

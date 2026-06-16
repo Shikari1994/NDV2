@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { asset } from '../lib/asset.js'
 
 const PRODUCTS = [
   {
@@ -17,17 +18,12 @@ const PRODUCTS = [
     tags: ['LWD', 'Гамма-каротаж'],
   },
   {
-    n: '04', img: '/noroot.webp', title: 'Программный комплекс Drill Monitor',
-    text: 'Диспетчерский комплекс для 3D-визуализации траектории скважины, контроля отклонений от проектного профиля и автоматического формирования отчётности.',
-    tags: ['ПО', '3D', 'Реестр РФ'],
-  },
-  {
-    n: '05', img: '/kitrent.webp', title: 'Датчик давления и температуры',
+    n: '04', img: '/kitrent.webp', title: 'Датчик давления и температуры',
     text: 'Пьезорезистивные датчики контролируют давление промывочной жидкости, забойную температуру и вибрационную нагрузку на КНБК.',
     tags: ['Сенсор', 'P / T'],
   },
   {
-    n: '06', img: '/kit4psd.webp', title: 'Сервис и ЗИП',
+    n: '05', img: '/kit4psd.webp', title: 'Сервис и ЗИП',
     text: 'Запасные части, расходные материалы и комплектующие для всех моделей. Постоянное наличие на складе, срочная отгрузка и сервисное обслуживание 24/7.',
     tags: ['ЗИП', 'Сервис 24/7'],
   },
@@ -112,8 +108,8 @@ export default function Showcase() {
       <div className="container">
         <div className="car-head">
           <div>
-            <div className="eyebrow reveal">Линейка продуктов</div>
-            <h2 className="h-title reveal">Оборудование и модули</h2>
+            <div className="eyebrow reveal">Линейка оборудования</div>
+            <h2 className="h-title reveal">Оборудование и сервис</h2>
           </div>
           <div className="car-controls reveal">
             <button className="car-arrow" aria-label="Назад" disabled={atStart} onClick={() => scrollToIndex(active - 1)}>
@@ -131,7 +127,7 @@ export default function Showcase() {
           {PRODUCTS.map((p) => (
             <article className="car-card" key={p.n}>
               <div className="car-card-media">
-                <img src={p.img} alt={p.title} loading="lazy" draggable="false" />
+                <img src={asset(p.img)} alt={p.title} loading="lazy" draggable="false" />
                 <span className="car-num">{p.n}</span>
               </div>
               <div className="car-body">

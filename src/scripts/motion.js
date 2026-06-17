@@ -253,8 +253,8 @@ if (!reduce) {
   const back = document.querySelector('.hero-window--back')
   const text = document.querySelector('.hero-text')
   const st = { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 0.5 }
-  if (front) gsap.to(front, { y: -52, ease: 'none', scrollTrigger: st })
-  if (back) gsap.to(back, { y: -96, ease: 'none', scrollTrigger: st })
+  if (front) gsap.to(front, { y: -72, ease: 'none', scrollTrigger: st })
+  if (back) gsap.to(back, { y: -170, ease: 'none', scrollTrigger: st })
   if (text) gsap.to(text, { y: -16, opacity: 0.55, ease: 'none', scrollTrigger: st })
 }
 

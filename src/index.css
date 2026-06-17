@@ -221,7 +221,7 @@ nav.nav.scrolled {
    ════════════════════════════════════════════════ */
 #hero { position: relative; min-height: 100svh; display: flex; align-items: center; padding: 120px 0 80px; overflow: hidden; }
 .hero-inner {
-  display: grid; grid-template-columns: 0.9fr 1.15fr; gap: clamp(32px, 4.5vw, 80px);
+  display: grid; grid-template-columns: 0.82fr 1.25fr; gap: clamp(28px, 4vw, 72px);
   align-items: center; width: 100%;
 }
 .hero-text { max-width: 600px; }
@@ -249,7 +249,7 @@ nav.nav.scrolled {
 .hero-window img { width: 100%; height: auto; display: block; }
 /* второе окно — лёгкий «слой глубины» за основным */
 .hero-window--back {
-  position: absolute; z-index: 1; top: -26px; right: -34px; width: 62%;
+  position: absolute; z-index: 1; top: -44px; right: -56px; width: 72%;
   opacity: 0.5; box-shadow: 0 40px 80px -40px rgba(0,0,0,0.8);
 }
 .hero-window--back .hero-window-bar { display: none; }

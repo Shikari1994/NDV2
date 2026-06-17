@@ -260,13 +260,15 @@ nav.nav.scrolled {
 #about { padding-block: clamp(72px, 9vw, 128px); }
 /* двухколоночная раскладка: рассказ слева, преимущества справа */
 .about-layout { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 96px); align-items: start; }
-.about-intro { max-width: 540px; }
-.about-intro .h-title { margin-top: 20px; }
-.about-intro .lead { margin-top: 24px; }
-.about-text { margin-top: 18px; font-size: 0.96rem; color: var(--text-dim); line-height: 1.8; }
+.about-intro { max-width: 520px; }
+/* заголовок раздела намеренно скромнее общего .h-title: в узкой колонке
+   дисплейные 4.2rem ломались на 5 строк и раздували секцию по вертикали */
+.about-intro .h-title { margin-top: 16px; font-size: clamp(1.9rem, 3.2vw, 2.8rem); line-height: 1.1; }
+.about-intro .lead { margin-top: 20px; }
+.about-text { margin-top: 14px; font-size: 0.96rem; color: var(--text-dim); line-height: 1.75; }
 
 /* строка ключевых фактов — «хребет» раздела вместо плашки с цифрами */
-.about-meta { margin-top: 36px; border-top: 1px solid var(--line); }
+.about-meta { margin-top: 28px; border-top: 1px solid var(--line); }
 .about-meta-item { display: flex; align-items: baseline; gap: 24px; padding: 15px 0; border-bottom: 1px solid var(--line); }
 .about-meta-k { flex: 0 0 96px; font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); }
 .about-meta-v { font-size: 0.92rem; color: var(--text); }

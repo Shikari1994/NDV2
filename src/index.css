@@ -319,23 +319,30 @@ nav.nav.scrolled {
 /* мобильный / без JS: лента разворачивается в стек, карточки — свайпом */
 @media (max-width: 900px) {
   #about, #products { padding: clamp(72px, 9vw, 110px) 0; }
-  .about-stage { min-height: 0; overflow: visible; padding-block: 0; }
+  /* блок, а не флекс-строка: иначе .about-track тянется по контенту карточек
+     (5×80vw) и распирает страницу — overflow-x на ленте не клиппит */
+  .about-stage { display: block; min-height: 0; overflow: visible; padding-block: 0; }
   .about-track {
-    flex-direction: column; align-items: stretch; width: auto;
+    flex-direction: column; align-items: stretch; width: 100%; min-width: 0;
     gap: 36px; padding-inline: 28px; transform: none !important;
   }
   .about-intro { width: auto; }
+  /* ручной горизонтальный свайп: лента ограничена шириной трека, карточки
+     прокручиваются внутри со scroll-snap */
   .about-cards {
-    align-items: stretch; gap: 16px; overflow-x: auto;
+    align-items: stretch; gap: 16px; min-width: 0; max-width: 100%;
+    overflow-x: auto; overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory; scrollbar-width: none;
     margin-inline: -28px; padding-inline: 28px;
   }
   .about-cards::-webkit-scrollbar { display: none; }
-  .about-card { width: 80vw; min-height: 420px; scroll-snap-align: start; }
+  .about-card { flex: 0 0 auto; width: 80vw; min-height: 420px; scroll-snap-align: start; }
 }
 @media (max-width: 700px) {
   .about-track { padding-inline: 20px; }
   .about-cards { margin-inline: -20px; padding-inline: 20px; }
+  .about-card { width: 84vw; }
 }
 
 /* ════════════════════════════════════════════════

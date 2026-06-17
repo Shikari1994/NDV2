@@ -553,7 +553,7 @@ section { padding: 168px 0; }
 .sw-bento {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: clamp(235px, 24vw, 310px);
+  grid-auto-rows: clamp(252px, 25vw, 326px);
   gap: 16px;
 }
 .bento-tile {
@@ -571,7 +571,11 @@ section { padding: 168px 0; }
 }
 .bento-tile.is-lg   { grid-column: span 8; grid-row: span 2; }
 .bento-tile.is-tall { grid-column: span 4; grid-row: span 2; }
-.bento-tile.is-sm   { grid-column: span 4; grid-row: span 1; }
+.bento-tile.is-sm   { grid-column: span 4;  grid-row: span 1; }
+.bento-tile.is-md   { grid-column: span 6;  grid-row: span 1; }
+.bento-tile.is-wide { grid-column: span 12; grid-row: span 1; }
+/* КНБК делит ряд с инклинометрией: 8 колонок под широкую таблицу */
+.bento-tile.bt-bha  { grid-column: span 8; }
 
 /* скриншот занимает всё место над подвалом */
 .bento-shot {
@@ -581,6 +585,12 @@ section { padding: 168px 0; }
   transition: transform 0.6s var(--ease);
 }
 .bento-tile.is-tall .bento-shot { object-position: top center; }
+.bento-tile.is-sm .bento-shot,
+.bento-tile.is-md .bento-shot { object-position: top center; }
+/* инклинометрия: показываем 3D-ствол целиком по центру кадра */
+.bento-tile.bt-survey .bento-shot { object-position: center; }
+/* КНБК: широкая таблица — баннер во всю ширину */
+.bento-tile.bt-bha .bento-shot { object-position: center; }
 .bento-tile:hover .bento-shot { transform: scale(1.03); }
 
 /* верхний readout-бар — тонкий оверлей поверх скриншота */
@@ -621,12 +631,44 @@ section { padding: 168px 0; }
 .bento-tile.is-tall .bento-body p { font-size: 0.86rem; }
 .bento-body .tag-row { margin-top: 16px; }
 
+/* мелкие плитки — скриншот во всю высоту, подпись поверх лёгким градиентом */
+.bento-tile.is-sm .bento-body,
+.bento-tile.is-md .bento-body,
+.bento-tile.is-wide .bento-body {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  border-top: none;
+  padding: 40px 16px 15px;
+  background: linear-gradient(180deg,
+    rgba(5,8,15,0) 0%, rgba(5,8,15,0.55) 38%, rgba(5,8,15,0.9) 100%);
+}
+.bento-tile.is-sm .bento-body h3,
+.bento-tile.is-md .bento-body h3,
+.bento-tile.is-wide .bento-body h3 { text-shadow: 0 1px 10px rgba(0,0,0,0.7); }
+.bento-tile.is-sm .bento-body .tag-row,
+.bento-tile.is-md .bento-body .tag-row,
+.bento-tile.is-wide .bento-body .tag-row { margin-top: 12px; }
+.bento-tile.is-sm .tag,
+.bento-tile.is-md .tag,
+.bento-tile.is-wide .tag {
+  background: rgba(5,8,15,0.5);
+  backdrop-filter: blur(4px);
+}
+
 @media (max-width: 900px) {
   .sw-head { grid-template-columns: 1fr; gap: 26px; align-items: start; }
   .sw-bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
   .bento-tile { grid-column: auto !important; grid-row: auto !important; min-height: 340px; }
   .bento-tile.is-lg, .bento-tile.is-tall { min-height: 400px; }
   .bento-body p { max-width: none; }
+
+  /* широкие кадры (видео-каротаж 3.76:1, таблица КНБК 2.68:1) на узком
+     экране показываем целиком: задаём пропорцию окна и contain, иначе
+     cover в почти квадратной плитке срезал бы боковые дорожки/столбцы.
+     Оверлей-подпись ложится на тёмные поля снизу и контент не перекрывает. */
+  .bento-tile.bt-logging,
+  .bento-tile.bt-bha { min-height: 0; aspect-ratio: 3 / 2; }
+  .bento-tile.bt-logging .bento-shot,
+  .bento-tile.bt-bha .bento-shot { object-fit: contain; object-position: center; }
 }
 
 /* ════════════════════════════════════════════════

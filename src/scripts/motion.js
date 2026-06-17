@@ -126,6 +126,34 @@ if (reduce) {
   window.addEventListener('load', () => ScrollTrigger.refresh())
 }
 
+/* ─── Ленивое видео в плитке (тяжёлый файл грузим только у вьюпорта) ───
+   src проставляется при подходе к экрану, не на загрузке страницы.
+   При reduced-motion видео не грузим — остаётся постер-скриншот. */
+{
+  const vids = document.querySelectorAll('video[data-lazy-video]')
+  if (vids.length && !reduce && 'IntersectionObserver' in window) {
+    const load = new IntersectionObserver((entries, obs) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return
+        const v = e.target
+        if (!v.src) { v.src = v.dataset.lazyVideo; v.load() }
+        obs.unobserve(v)
+      })
+    }, { rootMargin: '300px' })
+
+    // играем только пока плитка видна — экономим CPU/батарею
+    const play = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const v = e.target
+        if (e.isIntersecting) v.play?.().catch(() => {})
+        else v.pause?.()
+      })
+    }, { threshold: 0.25 })
+
+    vids.forEach((v) => { load.observe(v); play.observe(v) })
+  }
+}
+
 /* ─── Живой hero-readout: значения слегка «дышат» (RU-формат) ─── */
 {
   const tms = document.querySelectorAll('.hero-readout [data-tm]')

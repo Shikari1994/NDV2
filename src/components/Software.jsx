@@ -31,15 +31,6 @@ const MODULES = [
     tags: ['3D-ствол', 'План / факт'],
   },
   {
-    key: 'logging',
-    n: '03',
-    tab: 'Каротаж',
-    img: '/app-logging.webp',
-    size: 'sm',
-    title: 'Каротажный планшет LWD',
-    tags: ['Гамма-каротаж', 'Экспорт LAS / PDF'],
-  },
-  {
     key: 'bha',
     n: '04',
     tab: 'Оборудование',
@@ -47,6 +38,16 @@ const MODULES = [
     size: 'sm',
     title: 'Компоновка КНБК и ресурс',
     tags: ['КНБК / BHA', 'Ресурс до ТО'],
+  },
+  {
+    key: 'logging',
+    n: '03',
+    tab: 'Каротаж',
+    img: '/app-logging.webp',
+    video: '/app-logging.mp4',
+    size: 'wide',
+    title: 'Каротажный планшет LWD',
+    tags: ['Гамма-каротаж', 'Экспорт LAS / PDF'],
   },
 ]
 
@@ -79,8 +80,21 @@ export default function Software() {
 
         <div className="sw-bento">
           {MODULES.map((m) => (
-            <article className={`bento-tile instr-frame is-${m.size} reveal`} key={m.key}>
-              <img className="bento-shot" src={asset(m.img)} alt={m.title} loading="lazy" />
+            <article className={`bento-tile instr-frame is-${m.size} bt-${m.key} reveal`} key={m.key}>
+              {m.video ? (
+                <video
+                  className="bento-shot"
+                  poster={asset(m.img)}
+                  data-lazy-video={asset(m.video)}
+                  muted
+                  loop
+                  playsInline
+                  preload="none"
+                  aria-label={m.title}
+                />
+              ) : (
+                <img className="bento-shot" src={asset(m.img)} alt={m.title} loading="lazy" />
+              )}
               <div className="bento-bar">
                 <span className="bento-kicker mono">{m.n} · {m.tab}</span>
                 <span className="bento-live"><span className="bento-live-dot" />LIVE</span>

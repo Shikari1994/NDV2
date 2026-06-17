@@ -6,3 +6,6 @@ _source
 *.local
 .vite
 .claude/
+
+# исходник видео в корне — рабочая копия живёт в public/app-logging.mp4
+0101.mp4

@@ -587,8 +587,9 @@ section { padding: 168px 0; }
 .bento-tile.is-tall .bento-shot { object-position: top center; }
 .bento-tile.is-sm .bento-shot,
 .bento-tile.is-md .bento-shot { object-position: top center; }
-/* инклинометрия: показываем 3D-ствол целиком по центру кадра */
-.bento-tile.bt-survey .bento-shot { object-position: center; }
+/* инклинометрия: видео 1.71:1 в узком окне — вписываем целиком,
+   чтобы 3D-ствол не срезался по бокам */
+.bento-tile.bt-survey .bento-shot { object-fit: contain; object-position: center; }
 /* КНБК: широкая таблица — баннер во всю ширину */
 .bento-tile.bt-bha .bento-shot { object-position: center; }
 .bento-tile:hover .bento-shot { transform: scale(1.03); }
@@ -666,9 +667,11 @@ section { padding: 168px 0; }
      cover в почти квадратной плитке срезал бы боковые дорожки/столбцы.
      Оверлей-подпись ложится на тёмные поля снизу и контент не перекрывает. */
   .bento-tile.bt-logging,
-  .bento-tile.bt-bha { min-height: 0; aspect-ratio: 3 / 2; }
+  .bento-tile.bt-bha,
+  .bento-tile.bt-survey { min-height: 0; aspect-ratio: 3 / 2; }
   .bento-tile.bt-logging .bento-shot,
-  .bento-tile.bt-bha .bento-shot { object-fit: contain; object-position: center; }
+  .bento-tile.bt-bha .bento-shot,
+  .bento-tile.bt-survey .bento-shot { object-fit: contain; object-position: center; }
 }
 
 /* ════════════════════════════════════════════════

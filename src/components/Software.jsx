@@ -26,6 +26,7 @@ const MODULES = [
     n: '02',
     tab: 'Инклинометрия',
     img: '/app-survey.webp',
+    video: '/app-survey.mp4',
     size: 'sm',
     title: 'Инклинометрия и 3D-траектория',
     tags: ['3D-ствол', 'План / факт'],

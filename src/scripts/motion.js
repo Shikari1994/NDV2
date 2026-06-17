@@ -82,15 +82,16 @@ if (reduce) {
     })
   })
 
-  // прогресс-линия "Как работает": высоту задаём вручную в onUpdate/onRefresh,
-  // читая offsetHeight вживую — устойчиво к сдвигам раскладки и дозагрузке картинок
+  // прогресс-линия "Как работает": высота заливки = прогресс скролла сквозь
+  // блок шагов (start..end), привязанный к ScrollTrigger — устойчиво к pin
+  // соседних секций, ресайзу и дозагрузке картинок
   const fill = document.querySelector('.how-line-fill')
   const line = document.querySelector('.how-line')
   const steps = document.querySelector('.steps')
+  const done = document.querySelector('.how-done')
   const nodes = steps ? steps.querySelectorAll('.step-node') : []
   if (fill && line && steps && nodes.length) {
-    // трек и заливка идут от центра первого узла до центра последнего —
-    // линия завершается ровно на шаге 04, без «хвоста» внизу
+    // трек и заливка идут от центра первого узла до центра последнего
     let topY = 0
     let span = 0
     const layout = () => {
@@ -102,22 +103,22 @@ if (reduce) {
       gsap.set(line, { top: topY, bottom: 'auto', height: span })
       gsap.set(fill, { top: topY })
     }
-    // высота заливки = путь от первого узла до «линии сканирования»
-    // на 58% высоты экрана; точка-голова идёт ровно за позицией скролла
-    const draw = () => {
-      const sr = steps.getBoundingClientRect()
-      const h = window.innerHeight * 0.58 - (sr.top + topY)
-      gsap.set(fill, { height: Math.max(0, Math.min(span, h)) })
-    }
+    layout()
     ScrollTrigger.create({
       trigger: steps,
-      start: 'top bottom',
-      end: 'bottom top',
-      onUpdate: draw,
-      onRefresh: () => { layout(); draw() },
+      // «линия сканирования» на 60% экрана: 0 — когда верх шагов на ней,
+      // 1 — когда низ шагов её прошёл
+      start: 'top 60%',
+      end: 'bottom 60%',
+      onRefresh: layout,
+      onUpdate: (self) => {
+        gsap.set(fill, { height: span * self.progress })
+        // достигли низа блока → состояние «цель достигнута»
+        const complete = self.progress > 0.985
+        steps.classList.toggle('is-complete', complete)
+        if (done) done.classList.toggle('show', complete)
+      },
     })
-    layout()
-    draw()
   }
 
   ScrollTrigger.refresh()
@@ -144,18 +145,8 @@ if (reduce) {
   }
 }
 
-/* ─── Прогресс-бар скролла + scrollspy + магнитные CTA + spotlight ─── */
+/* ─── scrollspy + магнитные CTA + spotlight ─── */
 if (!reduce) {
-  // прогресс-бар «проходки» сверху
-  const bar = document.querySelector('.scroll-progress > i')
-  if (bar) {
-    ScrollTrigger.create({
-      start: 0,
-      end: 'max',
-      onUpdate: (self) => gsap.set(bar, { scaleX: self.progress }),
-    })
-  }
-
   // scrollspy: подсветка активного пункта навигации по видимой секции
   document.querySelectorAll('section[id]').forEach((sec) => {
     const link = document.querySelector(`.nav-links a[href="#${sec.id}"]`)
@@ -198,6 +189,102 @@ if (!reduce) {
       const r = card.getBoundingClientRect()
       card.style.setProperty('--mx', `${e.clientX - r.left}px`)
       card.style.setProperty('--my', `${e.clientY - r.top}px`)
+    })
+  })
+}
+
+/* ─── Секционный HUD: приборное табло текущего раздела ───
+   Работает и при reduced-motion (это навигационный индикатор,
+   а не декоративная анимация) — гасим только «перещёлк» номера. */
+{
+  const hud = document.querySelector('.section-hud')
+  if (hud) {
+    const noEl = hud.querySelector('[data-shud-no]')
+    const labelEl = hud.querySelector('[data-shud-label]')
+    const barEl = hud.querySelector('[data-shud-bar]')
+    // id секции → [номер, имя]; hero — «00 / Обзор»
+    const META = {
+      hero:     ['00', 'Обзор'],
+      about:    ['01', 'О компании'],
+      software: ['02', 'Программный комплекс'],
+      products: ['03', 'Линейка оборудования'],
+      how:      ['04', 'Принцип работы'],
+      store:    ['05', 'Онлайн-магазин'],
+      contact:  ['06', 'Контакты'],
+    }
+    let current = null
+    const setMeta = (id) => {
+      const m = META[id]
+      if (!m || current === id) return
+      current = id
+      labelEl.textContent = m[1]
+      if (reduce) { noEl.textContent = m[0]; return }
+      // номер «перещёлкивается», как разряд на табло прибора
+      gsap.timeline()
+        .to(noEl, { yPercent: -70, opacity: 0, duration: 0.16, ease: 'power2.in' })
+        .add(() => { noEl.textContent = m[0] })
+        .fromTo(noEl, { yPercent: 70, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.3, ease: 'power3.out' })
+    }
+    // активная секция и прогресс внутри неё (линия 50% экрана)
+    document.querySelectorAll('section[id]').forEach((sec) => {
+      ScrollTrigger.create({
+        trigger: sec,
+        start: 'top 50%',
+        end: 'bottom 50%',
+        onToggle: (self) => { if (self.isActive) setMeta(sec.id) },
+        onUpdate: (self) => { if (self.isActive) gsap.set(barEl, { scaleX: self.progress }) },
+      })
+    })
+    // HUD появляется после ухода с первого экрана
+    ScrollTrigger.create({
+      trigger: '#hero',
+      start: 'bottom 60%',
+      onEnter: () => hud.classList.add('show'),
+      onLeaveBack: () => hud.classList.remove('show'),
+    })
+  }
+}
+
+/* ─── Параллакс-глубина hero: окна интерфейса уходят вверх
+   быстрее текста, создавая слоистую глубину при скролле ─── */
+if (!reduce) {
+  const front = document.querySelector('.hero-visual .hero-window:not(.hero-window--back)')
+  const back = document.querySelector('.hero-window--back')
+  const text = document.querySelector('.hero-text')
+  const st = { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 0.5 }
+  if (front) gsap.to(front, { y: -52, ease: 'none', scrollTrigger: st })
+  if (back) gsap.to(back, { y: -96, ease: 'none', scrollTrigger: st })
+  if (text) gsap.to(text, { y: -16, opacity: 0.55, ease: 'none', scrollTrigger: st })
+}
+
+/* ─── Закреплённые ленты (.pin-lane): «О компании» и «Оборудование» ───
+   Секция прилипает, вся лента (интро + карточки) едет вбок по мере
+   вертикального скролла — интро уезжает влево, карточки встают на место.
+   Только десктоп + без reduced-motion; иначе стек/свайп. */
+if (!reduce && window.matchMedia('(min-width: 901px)').matches) {
+  document.querySelectorAll('.pin-lane').forEach((stage) => {
+    const track = stage.querySelector('.pin-track')
+    if (!track) return
+    // дистанция прокрутки = насколько лента шире экрана
+    const distance = () => Math.max(0, track.scrollWidth - stage.clientWidth)
+    gsap.to(track, {
+      x: () => -distance(),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: stage,
+        start: 'top top',
+        end: () => '+=' + distance(),
+        pin: true,
+        scrub: 1,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        // пины создаются последними и не по порядку страницы → без приоритета
+        // их спейсеры встают ПОСЛЕ того, как HUD/scrollspy измерят свои позиции,
+        // и счётчик секций перещёлкивается раньше времени. Высокий приоритет
+        // заставляет пины пересчитаться первыми — спейсеры на месте до замеров.
+        refreshPriority: 1,
+      },
     })
   })
 }

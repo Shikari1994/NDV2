@@ -141,11 +141,21 @@ section { padding: 140px 0; position: relative; }
 .eyebrow {
   display: inline-flex; align-items: center; gap: 12px;
   font-size: 0.72rem; letter-spacing: 0.26em; text-transform: uppercase;
-  color: var(--accent); font-weight: 600; margin-bottom: 26px;
+  color: var(--ink-dim); font-weight: 600; margin-bottom: 26px;
   font-family: 'JetBrains Mono', monospace;
 }
-.eyebrow::before { content: ''; width: 28px; height: 1px; background: linear-gradient(90deg, var(--accent), transparent); }
+.eyebrow::before { content: ''; width: 28px; height: 1px; background: linear-gradient(90deg, var(--brand-line), transparent); }
 .eyebrow.center { justify-content: center; }
+
+/* ── индекс секции «01 / 06» — единственный цветовой акцент в шапке,
+   мотив инструкции-вкладыша Control: номер ведёт, лейбл уходит в серый ── */
+.eyebrow .ey-no {
+  order: -1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.86rem; letter-spacing: 0.04em; font-weight: 500;
+  color: var(--brand);
+}
+.eyebrow .ey-no .ey-den { color: var(--ink-faint); }
 
 .h-title { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.08; }
 .lead { font-size: 1.05rem; color: var(--text-dim); line-height: 1.75; max-width: 560px; }
@@ -215,7 +225,7 @@ nav.nav.scrolled {
   align-items: center; width: 100%;
 }
 .hero-text { max-width: 600px; }
-.hero-title { font-size: clamp(2.4rem, 5.2vw, 4.4rem); font-weight: 700; letter-spacing: -0.035em; line-height: 1.05; margin-bottom: 28px; color: #fff; text-wrap: balance; }
+.hero-title { font-size: clamp(2.4rem, 5.2vw, 4.4rem); font-weight: 700; letter-spacing: -0.038em; line-height: 1.04; margin-bottom: 28px; color: #fff; text-wrap: balance; }
 .hero-title-accent { color: var(--text-dim); font-weight: 600; }
 .hero-desc { font-size: clamp(1rem, 1.2vw, 1.15rem); color: var(--text-dim); line-height: 1.75; max-width: 540px; margin-bottom: 40px; text-wrap: pretty; }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
@@ -255,39 +265,78 @@ nav.nav.scrolled {
 /* ════════════════════════════════════════════════
    О КОМПАНИИ
    ════════════════════════════════════════════════ */
-/* About короткий по смыслу — намеренно плотнее соседних секций по вертикали
-   (правит «излишнюю вертикальность»; адаптивно, чтобы не ломать мобильный ритм) */
-#about { padding-block: clamp(72px, 9vw, 128px); }
-/* двухколоночная раскладка: рассказ слева, преимущества справа */
-.about-layout { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 96px); align-items: start; }
-.about-intro { max-width: 520px; }
-/* заголовок раздела намеренно скромнее общего .h-title: в узкой колонке
-   дисплейные 4.2rem ломались на 5 строк и раздували секцию по вертикали */
+/* «О компании» — интро и карточки едут единой горизонтальной лентой:
+   при скролле интро уезжает за левый край, карточки занимают его место
+   (pin + scrub в motion.js). Без JS / на мобильном — стек + свайп.
+   Те же классы переиспользует раздел «Оборудование» (#products). */
+#about, #products { padding: 0; }
+
+.about-stage {
+  min-height: 100vh; display: flex; align-items: center;
+  overflow: hidden;                              /* клипует уезжающую ленту */
+  padding-block: clamp(80px, 10vh, 120px);
+}
+.about-track {
+  display: flex; align-items: center; width: max-content;
+  gap: clamp(28px, 3.4vw, 64px); will-change: transform;
+  /* края ленты выровнены по сетке контейнера */
+  padding-inline: max(40px, calc((100vw - var(--maxw)) / 2));
+}
+
+/* интро — первый «кадр» ленты */
+.about-intro { flex: 0 0 auto; width: clamp(300px, 33vw, 440px); }
 .about-intro .h-title { margin-top: 16px; font-size: clamp(1.9rem, 3.2vw, 2.8rem); line-height: 1.1; }
 .about-intro .lead { margin-top: 20px; }
-.about-text { margin-top: 14px; font-size: 0.96rem; color: var(--text-dim); line-height: 1.75; }
-
-/* строка ключевых фактов — «хребет» раздела вместо плашки с цифрами */
 .about-meta { margin-top: 28px; border-top: 1px solid var(--line); }
-.about-meta-item { display: flex; align-items: baseline; gap: 24px; padding: 15px 0; border-bottom: 1px solid var(--line); }
-.about-meta-k { flex: 0 0 96px; font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); }
-.about-meta-v { font-size: 0.92rem; color: var(--text); }
+.about-meta-item { display: flex; align-items: baseline; gap: 24px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.about-meta-k { flex: 0 0 90px; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); }
+.about-meta-v { font-size: 0.9rem; color: var(--text); }
 
-/* преимущества — приборным списком с hairline-разделителями (в ритме about-meta),
-   а не стопкой карточек: ниже по высоте, ближе к «панели», без card-soup */
-.about-points { border-top: 1px solid var(--line); }
-.about-point {
-  display: grid; grid-template-columns: 44px 1fr; gap: 20px; align-items: start;
-  padding: 22px 2px; border-bottom: 1px solid var(--line);
+/* карточки — следом за интро в той же ленте */
+.about-cards { display: flex; align-items: stretch; gap: clamp(16px, 1.6vw, 22px); }
+.about-card {
+  position: relative; flex: 0 0 auto;
+  width: clamp(280px, 32vw, 440px); min-height: clamp(420px, 64vh, 600px);
+  display: flex; flex-direction: column;
+  padding: clamp(26px, 2.4vw, 40px);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel);
+  transition: border-color 0.35s, transform 0.4s var(--ease);
 }
-.about-point-icon {
-  width: 44px; height: 44px; flex-shrink: 0; border-radius: 11px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--accent); border: 1px solid var(--accent-line); background: var(--accent-soft);
+.about-card:hover { border-color: var(--brand-line); transform: translateY(-4px); }
+.ac-idx {
+  position: absolute; top: clamp(20px, 2vw, 30px); right: clamp(20px, 2vw, 30px);
+  font-size: 0.66rem; letter-spacing: 0.12em; color: var(--ink-faint);
 }
-.about-point-icon svg { width: 22px; }
-.about-point-body h4 { font-size: 1.04rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; }
-.about-point-body p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.6; }
+.ac-big {
+  font-family: var(--font-display); font-weight: 700; color: var(--brand);
+  font-size: clamp(3rem, 5vw, 4.6rem); letter-spacing: -0.03em; line-height: 0.95;
+}
+.ac-big--text { font-size: clamp(1.9rem, 2.8vw, 2.8rem); line-height: 1.05; letter-spacing: -0.02em; }
+.ac-unit { font-size: 0.42em; font-weight: 600; margin-left: 0.18em; letter-spacing: -0.01em; }
+.ac-kicker { display: block; margin-top: 16px; font-size: 0.96rem; color: var(--ink-dim); font-weight: 500; }
+.ac-text { margin-top: auto; padding-top: 36px; font-size: 0.94rem; color: var(--text-dim); line-height: 1.65; }
+
+/* мобильный / без JS: лента разворачивается в стек, карточки — свайпом */
+@media (max-width: 900px) {
+  #about, #products { padding: clamp(72px, 9vw, 110px) 0; }
+  .about-stage { min-height: 0; overflow: visible; padding-block: 0; }
+  .about-track {
+    flex-direction: column; align-items: stretch; width: auto;
+    gap: 36px; padding-inline: 28px; transform: none !important;
+  }
+  .about-intro { width: auto; }
+  .about-cards {
+    align-items: stretch; gap: 16px; overflow-x: auto;
+    scroll-snap-type: x mandatory; scrollbar-width: none;
+    margin-inline: -28px; padding-inline: 28px;
+  }
+  .about-cards::-webkit-scrollbar { display: none; }
+  .about-card { width: 80vw; min-height: 420px; scroll-snap-align: start; }
+}
+@media (max-width: 700px) {
+  .about-track { padding-inline: 20px; }
+  .about-cards { margin-inline: -20px; padding-inline: 20px; }
+}
 
 /* ════════════════════════════════════════════════
    ТЕГИ-ЧИПЫ · карусель оборудования + bento ПО
@@ -372,7 +421,7 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
    APPLE-POLISH · больше воздуха и крупнее типографика
    ════════════════════════════════════════════════ */
 section { padding: 168px 0; }
-.h-title { font-size: clamp(2.4rem, 5vw, 4.2rem); line-height: 1.04; letter-spacing: -0.035em; }
+.h-title { font-size: clamp(2.3rem, 5vw, 4.4rem); line-height: 1.04; letter-spacing: -0.038em; text-wrap: balance; }
 .lead { font-size: 1.12rem; line-height: 1.8; }
 .eyebrow { margin-bottom: 30px; }
 
@@ -656,8 +705,35 @@ section { padding: 168px 0; }
   width: 9px; height: 9px; border-radius: 50%; background: var(--live);
   box-shadow: 0 0 0 4px var(--live-soft), 0 0 14px var(--live);
 }
+
+/* ── завершение проходки: полоса дошла до низа → «цель достигнута» ── */
+/* последний узел загорается зелёным, как достижение проектной глубины */
+.steps.is-complete .step:last-child .step-node {
+  border-color: var(--live); color: var(--live);
+  box-shadow: 0 0 0 4px var(--live-soft), 0 0 22px rgba(70,201,138,0.5);
+}
+.steps.is-complete .how-line-fill {
+  background: linear-gradient(180deg, var(--brand), var(--live));
+}
+/* приборная плашка-итог под таймлайном */
+.how-done {
+  max-width: 880px; margin: 30px auto 0;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border: 1px solid var(--line); border-radius: var(--r);
+  background: rgba(70,201,138,0.04);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease), border-color 0.55s;
+}
+.how-done.show { opacity: 1; transform: none; border-color: rgba(70,201,138,0.32); }
+.how-done-dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--live); flex-shrink: 0;
+  box-shadow: 0 0 0 4px var(--live-soft), 0 0 12px var(--live);
+}
+.how-done-text { font-size: 0.7rem; letter-spacing: 0.16em; color: var(--live); }
+
 @media (prefers-reduced-motion: reduce) {
   .hero-live-dot, .sw-live-dot { animation: none; }
+  .how-done { transition: opacity 0.2s; transform: none; }
 }
 
 /* ════════════════════════════════════════════════
@@ -681,21 +757,6 @@ section { padding: 168px 0; }
 }
 .skip-link:focus { top: 16px; }
 
-/* ════════════════════════════════════════════════
-   ПРОГРЕСС-БАР СКРОЛЛА · «индикатор проходки» сверху
-   ════════════════════════════════════════════════ */
-.scroll-progress {
-  position: fixed; top: 0; left: 0; right: 0; height: 2px;
-  z-index: 101; pointer-events: none;
-}
-.scroll-progress > i {
-  display: block; height: 100%; width: 100%;
-  transform: scaleX(0); transform-origin: left;
-  background: linear-gradient(90deg, var(--brand), var(--cyan));
-  box-shadow: 0 0 10px rgba(14,143,212,0.5);
-  will-change: transform;
-}
-
 /* ─── активная ссылка навигации (scrollspy) ─── */
 .nav-links a.active { color: var(--ink); }
 .nav-links a.active::after { transform: scaleX(1); }
@@ -707,10 +768,10 @@ section { padding: 168px 0; }
    1px рамка, текст карточки не затрагивается.
    ════════════════════════════════════════════════ */
 .contact-card { position: relative; }
-.car-card, .contact-card {
+.car-card, .contact-card, .about-card {
   --mx: 50%; --my: 0%;
 }
-.car-card::before, .contact-card::before {
+.car-card::before, .contact-card::before, .about-card::before {
   content: ''; position: absolute; inset: 0; z-index: 3;
   border-radius: inherit; padding: 1px; pointer-events: none;
   opacity: 0; transition: opacity 0.3s var(--ease);
@@ -719,7 +780,7 @@ section { padding: 168px 0; }
           mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
 }
-.car-card:hover::before, a.contact-card:hover::before { opacity: 0.9; }
+.car-card:hover::before, a.contact-card:hover::before, .about-card:hover::before { opacity: 0.9; }
 
 /* ─── магнитные hero-CTA: transform отдаём GSAP, убираем его из CSS-transition ─── */
 .hero-actions .btn {
@@ -731,8 +792,7 @@ section { padding: 168px 0; }
 .hero-stat-suffix { color: var(--brand); }
 
 @media (prefers-reduced-motion: reduce) {
-  .scroll-progress { display: none; }
-  .car-card::before, .contact-card::before { display: none; }
+  .car-card::before, .contact-card::before, .about-card::before { display: none; }
 }
 
 /* ════════════════════════════════════════════════
@@ -799,3 +859,38 @@ section { padding: 168px 0; }
   .hero-stat-label { font-size: 0.68rem; }
   .hero-actions .btn, .sw-actions .btn { padding: 14px 20px; }
 }
+
+/* ════════════════════════════════════════════════
+   СЕКЦИОННЫЙ HUD · приборное табло текущего раздела
+   ────────────────────────────────────────────────
+   Фиксированный «индикатор проходки»: номер секции
+   01–06, её имя и прогресс внутри раздела. Появляется
+   после ухода с hero, как панель приборов в работе.
+   ════════════════════════════════════════════════ */
+.section-hud {
+  position: fixed; left: 28px; bottom: 26px; z-index: 90;
+  display: flex; flex-direction: column; gap: 9px;
+  width: 176px; padding: 13px 16px 15px;
+  background: var(--glass); border: 1px solid var(--line);
+  border-radius: var(--r);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  font-family: var(--font-mono); pointer-events: none;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+}
+.section-hud.show { opacity: 1; transform: none; }
+.shud-no { display: flex; align-items: baseline; gap: 3px; line-height: 1; overflow: hidden; }
+.shud-no b { font-size: 1.55rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.shud-no i { font-style: normal; font-size: 0.8rem; color: var(--ink-faint); }
+.shud-label {
+  font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.shud-bar { position: relative; height: 2px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.shud-bar > i {
+  position: absolute; inset: 0; transform-origin: left; transform: scaleX(0);
+  background: linear-gradient(90deg, var(--brand), var(--cyan));
+  box-shadow: 0 0 8px rgba(14,143,212,0.45); will-change: transform;
+}
+@media (max-width: 900px) { .section-hud { display: none; } }

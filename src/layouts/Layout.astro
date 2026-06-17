@@ -54,7 +54,11 @@ const orgSchema = {
   </head>
   <body>
     <a class="skip-link" href="#main">Перейти к содержимому</a>
-    <div class="scroll-progress" aria-hidden="true"><i></i></div>
+    <aside class="section-hud" aria-hidden="true">
+      <span class="shud-no"><b data-shud-no>00</b><i> / 06</i></span>
+      <span class="shud-label" data-shud-label>Обзор</span>
+      <span class="shud-bar"><i data-shud-bar></i></span>
+    </aside>
     <slot />
     <script>
       import '../scripts/motion.js'

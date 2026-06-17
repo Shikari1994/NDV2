@@ -3,7 +3,7 @@ export default function Store() {
     <section id="store">
       <div className="container">
         <div className="store-header">
-          <div className="eyebrow center reveal">Онлайн-магазин</div>
+          <div className="eyebrow center reveal"><span className="ey-no">05<span className="ey-den"> / 06</span></span>Онлайн-магазин</div>
           <h2 className="h-title reveal">Заказ ЗИП и модулей</h2>
           <p className="lead reveal" style={{ marginTop: 22 }}>
             Подбирайте и заказывайте запасные части, расходные материалы

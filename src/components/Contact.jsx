@@ -2,7 +2,7 @@ export default function Contact() {
   return (
     <section id="contact">
       <div className="container">
-        <div className="eyebrow center reveal">Связаться с нами</div>
+        <div className="eyebrow center reveal"><span className="ey-no">06<span className="ey-den"> / 06</span></span>Связаться с нами</div>
         <h2 className="h-title reveal">Контакты</h2>
         <div className="contact-cards">
           <a className="contact-card reveal" href="tel:+78000000000">

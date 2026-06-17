@@ -22,7 +22,7 @@ export default function How() {
     <section id="how">
       <div className="container">
         <div className="how-header">
-          <div className="eyebrow center reveal">Принцип работы</div>
+          <div className="eyebrow center reveal"><span className="ey-no">04<span className="ey-den"> / 06</span></span>Принцип работы</div>
           <h2 className="h-title reveal">От забоя до диспетчерской — в реальном времени</h2>
           <p className="lead reveal" style={{ marginTop: 22 }}>
             Данные о пространственном положении инструмента поступают на поверхность
@@ -43,6 +43,11 @@ export default function How() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="how-done" aria-hidden="true">
+          <span className="how-done-dot" />
+          <span className="how-done-text mono">ЦЕЛЬ ДОСТИГНУТА · ДАННЫЕ В ДИСПЕТЧЕРСКОЙ</span>
         </div>
       </div>
     </section>

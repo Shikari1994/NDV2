@@ -1,15 +1,26 @@
 /* ─────────────────────────────────────────────
-   Глобальная анимация страницы (вне React).
-   Переехало из useSmoothScroll.js + useReveal.js:
+   Глобальная анимация страницы (вне React):
    инерционный скролл Lenis, синхронизация со
-   ScrollTrigger, появление .reveal, счётчики,
-   активация шагов и прогресс-линия в How.
+   ScrollTrigger, появление .reveal, активация
+   шагов и прогресс-линия в How, колода экранов,
+   разворот «Ключевые цифры».
+
+   ЕДИНЫЙ ЯЗЫК ДВИЖЕНИЯ (одна шкала на весь сайт):
+     ease   — power3.out и только он; ничего
+              упругого, никаких bounce/elastic
+     0.3 c  — микро-отклик (подмена значения)
+     0.6 c  — появление элемента
+     1.0 c  — крупный жест
+   Скролл-приёмов на странице ровно два: колода
+   в hero и прибитая сцена «О компании».
    ───────────────────────────────────────────── */
 import Lenis from 'lenis'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const EASE = 'power3.out'
 
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -36,41 +47,22 @@ if (!reduce) {
   })
 }
 
-/* ─── Появление .reveal + счётчики + шаги + прогресс ─── */
+/* ─── Появление .reveal + шаги + прогресс ─── */
 if (reduce) {
   gsap.set('.reveal', { opacity: 1, y: 0 })
 } else {
+  // сдержанное появление: короткий сдвиг и почти синхронный выход группы
   ScrollTrigger.batch('.reveal', {
     start: 'top 85%',
     onEnter: (batch) =>
       gsap.to(batch, {
         opacity: 1,
         y: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-        stagger: 0.08,
+        duration: 0.6,
+        ease: EASE,
+        stagger: 0.05,
         overwrite: true,
       }),
-  })
-
-  // счётчики статистики (count-up при появлении)
-  gsap.utils.toArray('.count').forEach((node) => {
-    const end = parseInt(node.dataset.count, 10) || 0
-    const obj = { v: 0 }
-    ScrollTrigger.create({
-      trigger: node,
-      start: 'top 88%',
-      once: true,
-      onEnter: () =>
-        gsap.to(obj, {
-          v: end,
-          duration: 1.4,
-          ease: 'power2.out',
-          onUpdate: () => {
-            node.textContent = Math.round(obj.v)
-          },
-        }),
-    })
   })
 
   // активация шагов
@@ -131,7 +123,15 @@ if (reduce) {
    При reduced-motion видео не грузим — остаётся постер-скриншот. */
 {
   const vids = document.querySelectorAll('video[data-lazy-video]')
-  if (vids.length && !reduce && 'IntersectionObserver' in window) {
+
+  /* Ролики фактурой весят около 9,5 МБ на двоих. На экономии трафика и на
+     медленном соединении это заметная плата за подложку, которая идёт под
+     заливкой с прозрачностью 0.22: вместо видео там остаётся постер —
+     тот же кадр, только статичный, и раздел выглядит так же. */
+  const conn = navigator.connection
+  const frugal = !!conn && (conn.saveData === true || /(^|-)2g$/.test(conn.effectiveType || ''))
+
+  if (vids.length && !reduce && !frugal && 'IntersectionObserver' in window) {
     const load = new IntersectionObserver((entries, obs) => {
       entries.forEach((e) => {
         if (!e.isIntersecting) return
@@ -169,13 +169,44 @@ if (reduce) {
       else if (k === 'gamma') el.textContent = fmt(base.gamma + (Math.random() - 0.5) * 4, 0)
     }
     tms.forEach(tick)
-    setInterval(() => tms.forEach(tick), 1400)
+
+    /* Тикаем только пока ридаут виден и вкладка активна: значения
+       «дышат» ради первого экрана, а интервал раньше жил до конца
+       сессии — перерисовывал невидимый текст и будил фоновые вкладки.
+       Показания при возврате продолжаются с текущих, скачка нет. */
+    const readout = tms[0].closest('.hero-readout') || tms[0]
+    let timer = 0
+    let onScreen = true
+
+    const play = () => {
+      if (timer || !onScreen || document.hidden) return
+      timer = setInterval(() => tms.forEach(tick), 1400)
+    }
+    const stop = () => {
+      if (!timer) return
+      clearInterval(timer)
+      timer = 0
+    }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        (entries) => {
+          onScreen = entries[0].isIntersecting
+          onScreen ? play() : stop()
+        },
+        { threshold: 0 },
+      ).observe(readout)
+    }
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()))
+    play()
   }
 }
 
-/* ─── scrollspy + магнитные CTA + spotlight ─── */
+/* ─── scrollspy ───
+   Магнитные CTA и spotlight-граница убраны: игривая микро-механика
+   спорит с промышленным тоном. Отклик на нажатие остался, но чисто
+   на CSS (:active) — без слежения за курсором. */
 if (!reduce) {
-  // scrollspy: подсветка активного пункта навигации по видимой секции
   document.querySelectorAll('section[id]').forEach((sec) => {
     const link = document.querySelector(`.nav-links a[href="#${sec.id}"]`)
     if (!link) return
@@ -186,133 +217,204 @@ if (!reduce) {
       onToggle: (self) => link.classList.toggle('active', self.isActive),
     })
   })
-
-  // магнитные hero-CTA (только для точного указателя)
-  if (window.matchMedia('(pointer: fine)').matches) {
-    document.querySelectorAll('.hero-actions .btn').forEach((el) => {
-      el.addEventListener('pointermove', (e) => {
-        const r = el.getBoundingClientRect()
-        gsap.to(el, {
-          x: (e.clientX - r.left - r.width / 2) * 0.3,
-          y: (e.clientY - r.top - r.height / 2) * 0.4,
-          duration: 0.4,
-          ease: 'power3.out',
-        })
-      })
-      // press-feedback: лёгкий «вдавливание» при нажатии (Emil: кнопка отвечает на клик)
-      el.addEventListener('pointerdown', () =>
-        gsap.to(el, { scale: 0.96, duration: 0.15, ease: 'power2.out' }))
-      el.addEventListener('pointerup', () =>
-        gsap.to(el, { scale: 1, duration: 0.3, ease: 'power3.out' }))
-      // возврат без elastic — чистый ease-out (Impeccable/Emil: без bounce/elastic)
-      el.addEventListener('pointerleave', () =>
-        gsap.to(el, { x: 0, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' }))
-    })
-  }
-
-  // spotlight: светящаяся граница карточек следует за курсором
-  const spotSel = '.about-card, .product-card, .car-card, .blog-card, .contact-card'
-  document.querySelectorAll(spotSel).forEach((card) => {
-    card.addEventListener('pointermove', (e) => {
-      const r = card.getBoundingClientRect()
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`)
-      card.style.setProperty('--my', `${e.clientY - r.top}px`)
-    })
-  })
 }
 
-/* ─── Секционный HUD: приборное табло текущего раздела ───
-   Работает и при reduced-motion (это навигационный индикатор,
-   а не декоративная анимация) — гасим только «перещёлк» номера. */
-{
-  const hud = document.querySelector('.section-hud')
-  if (hud) {
-    const noEl = hud.querySelector('[data-shud-no]')
-    const labelEl = hud.querySelector('[data-shud-label]')
-    const barEl = hud.querySelector('[data-shud-bar]')
-    // id секции → [номер, имя]; hero — «00 / Обзор»
-    const META = {
-      hero:     ['00', 'Обзор'],
-      about:    ['01', 'О компании'],
-      software: ['02', 'Программный комплекс'],
-      products: ['03', 'Линейка оборудования'],
-      how:      ['04', 'Принцип работы'],
-      store:    ['05', 'Онлайн-магазин'],
-      contact:  ['06', 'Контакты'],
-    }
-    let current = null
-    const setMeta = (id) => {
-      const m = META[id]
-      if (!m || current === id) return
-      current = id
-      labelEl.textContent = m[1]
-      if (reduce) { noEl.textContent = m[0]; return }
-      // номер «перещёлкивается», как разряд на табло прибора
-      gsap.timeline()
-        .to(noEl, { yPercent: -70, opacity: 0, duration: 0.16, ease: 'power2.in' })
-        .add(() => { noEl.textContent = m[0] })
-        .fromTo(noEl, { yPercent: 70, opacity: 0 },
-          { yPercent: 0, opacity: 1, duration: 0.3, ease: 'power3.out' })
-    }
-    // активная секция и прогресс внутри неё (линия 50% экрана)
-    document.querySelectorAll('section[id]').forEach((sec) => {
-      ScrollTrigger.create({
-        trigger: sec,
-        start: 'top 50%',
-        end: 'bottom 50%',
-        onToggle: (self) => { if (self.isActive) setMeta(sec.id) },
-        onUpdate: (self) => { if (self.isActive) gsap.set(barEl, { scaleX: self.progress }) },
-      })
-    })
-    // HUD появляется после ухода с первого экрана
-    ScrollTrigger.create({
-      trigger: '#hero',
-      start: 'bottom 60%',
-      onEnter: () => hud.classList.add('show'),
-      onLeaveBack: () => hud.classList.remove('show'),
-    })
-  }
-}
+/* Параллакс-глубина hero убрана: её роль перешла к механике колоды.
+   Оба эффекта двигали вложенные друг в друга узлы одного экрана —
+   трансформы складывались, и содержимое уезжало вдвое быстрее самого
+   экрана. Слоистость окон теперь держится на .hero-window--back. */
 
-/* ─── Параллакс-глубина hero: окна интерфейса уходят вверх
-   быстрее текста, создавая слоистую глубину при скролле ─── */
+/* ─── Колода экранов ───
+   Приём первоисточника: секции не пиннятся и не липнут — они обычные,
+   по 100svh, но обрезают содержимое. Уходящий экран уезжает вниз на
+   свою высоту, приходящий выезжает сверху из-за той же кромки. Оба
+   движения scrub'ятся один-в-один со скроллом (scrub: 0), поэтому
+   колода ощущается как прямое продолжение жеста, а не как анимация.
+   invalidateOnRefresh — чтобы значения пересчитались при ресайзе. */
 if (!reduce) {
-  const front = document.querySelector('.hero-visual .hero-window:not(.hero-window--back)')
-  const back = document.querySelector('.hero-window--back')
-  const text = document.querySelector('.hero-text')
-  const st = { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 0.5 }
-  if (front) gsap.to(front, { y: -72, ease: 'none', scrollTrigger: st })
-  if (back) gsap.to(back, { y: -170, ease: 'none', scrollTrigger: st })
-  if (text) gsap.to(text, { y: -16, opacity: 0.55, ease: 'none', scrollTrigger: st })
-}
+  const contents = gsap.utils.toArray('.deck-content')
+  const inners = gsap.utils.toArray('.deck-inner')
 
-/* ─── Закреплённые ленты (.pin-lane): «О компании» и «Оборудование» ───
-   Секция прилипает, вся лента (интро + карточки) едет вбок по мере
-   вертикального скролла — интро уезжает влево, карточки встают на место.
-   Только десктоп + без reduced-motion; иначе стек/свайп. */
-if (!reduce && window.matchMedia('(min-width: 901px)').matches) {
-  document.querySelectorAll('.pin-lane').forEach((stage) => {
-    const track = stage.querySelector('.pin-track')
-    if (!track) return
-    // дистанция прокрутки = насколько лента шире экрана
-    const distance = () => Math.max(0, track.scrollWidth - stage.clientWidth)
-    gsap.to(track, {
-      x: () => -distance(),
+  contents.forEach((el) => {
+    gsap.to(el, {
+      y: () => window.innerHeight,
       ease: 'none',
       scrollTrigger: {
-        trigger: stage,
-        start: 'top top',
-        end: () => '+=' + distance(),
-        pin: true,
-        scrub: 1,
-        anticipatePin: 1,
+        trigger: el,
+        start: '100% 100%',            // низ экрана дошёл до низа вьюпорта
+        end: () => '+=' + window.innerHeight,
+        scrub: 0,
         invalidateOnRefresh: true,
-        // пины создаются последними и не по порядку страницы → без приоритета
-        // их спейсеры встают ПОСЛЕ того, как HUD/scrollspy измерят свои позиции,
-        // и счётчик секций перещёлкивается раньше времени. Высокий приоритет
-        // заставляет пины пересчитаться первыми — спейсеры на месте до замеров.
-        refreshPriority: 1,
       },
     })
   })
+
+  // первый экран приходить неоткуда — он уже на месте
+  inners.slice(1).forEach((el) => {
+    gsap.set(el, { y: () => -window.innerHeight })
+    gsap.to(el, {
+      y: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: el,
+        start: '0% 0%',
+        end: () => '+=' + window.innerHeight,
+        scrub: 0,
+        invalidateOnRefresh: true,
+      },
+    })
+  })
+}
+
+/* ─── Шапка перенимает тему секции, проходящей под ней ───
+   rootMargin схлопывает область наблюдения до полоски у верхней
+   кромки экрана: «видимой» считается ровно та секция, что сейчас
+   под шапкой. Работает и при reduced-motion — это не анимация,
+   а читаемость текста на меняющемся фоне. */
+{
+  const nav = document.querySelector('nav.nav')
+  const themed = document.querySelectorAll('[data-theme]')
+  if (nav && themed.length && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) nav.setAttribute('data-theme', e.target.dataset.theme)
+        })
+      },
+      { rootMargin: '0px 0px -100% 0px', threshold: 0 },
+    )
+    themed.forEach((s) => io.observe(s))
+  }
+}
+
+/* ─── Бесконечные ленты (.marquee) ───
+   Список клонируется, обе копии едут встык — шов не виден.
+   Скорость привязана к ширине, чтобы длинные и короткие ленты
+   двигались одинаково; за пределами экрана анимация на паузе. */
+if (!reduce) {
+  document.querySelectorAll('.marquee').forEach((lane) => {
+    const list = lane.querySelector('.marquee-list')
+    if (!list) return
+    list.after(list.cloneNode(true))
+
+    const speed = Number(lane.dataset.marqueeSpeed) || 45 // px/сек
+    const dir = lane.dataset.marqueeDir === 'right' ? 1 : -1
+    const tweens = [...lane.querySelectorAll('.marquee-list')].map((el) =>
+      gsap.to(el, {
+        x: dir * el.scrollWidth,
+        repeat: -1,
+        paused: true,
+        duration: el.scrollWidth / speed,
+        ease: 'none',
+      }),
+    )
+
+    new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => tweens.forEach((t) => (e.isIntersecting ? t.play() : t.pause())))
+      },
+      { threshold: 0 },
+    ).observe(lane)
+  })
+}
+
+/* ─── Факты: цифра в прибитой колонке подменяется на скролле ───
+   Превью-за-курсором убрано: оно повторяло скриншоты приложения и
+   было самым «игровым» приёмом страницы. Остался тихий эффект —
+   значение слева меняется тем пунктом, что сейчас в фокусе экрана. */
+{
+  const countEl = document.querySelector('[data-facts-count]')
+  const unitEl = document.querySelector('[data-facts-unit]')
+  const items = document.querySelectorAll('[data-facts-item]')
+
+  if (countEl && unitEl && items.length && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return
+          countEl.textContent = e.target.dataset.count
+          unitEl.textContent = e.target.dataset.unit
+          // текстовое значение («Реестр ПО») набирается мельче цифры
+          countEl.classList.toggle('is-text', e.target.dataset.textual === '1')
+        })
+      },
+      // узкая полоса на трети экрана — активен ровно один пункт
+      { rootMargin: '-30% 0px -60% 0px', threshold: 0 },
+    )
+    items.forEach((el) => io.observe(el))
+  }
+}
+
+/* ─── Разворот «Ключевые цифры»: наезд колонок со сдвигом ───
+   Правую колонку скрипт не трогает вовсе: панели с числами непрозрачны
+   и липнут к одной кромке, поэтому штабель собирается на чистом CSS.
+   Здесь — только левая колонка и счётчик.
+
+   Картинка повторяет тот же жест: приходящий слой выезжает снизу из-за
+   кромки рамки, уходящий подаётся вверх — разная скорость читается как
+   слоистость, а не как подмена кадра. Окно наезда — тот же экран, что
+   у панели справа, но обрывается на 20% раньше: левый шов уходит вперёд
+   правого, и в переходе видно оба — на разной высоте.
+
+   Пин-сцены нет намеренно: прошлая версия уводила ленту абсолютным
+   позиционированием и наезжала панелями на левую колонку.
+
+   Ниже 900px колонок нет — есть один список, наезжать нечему; слои,
+   кроме первого, остаются отведёнными за кромку средствами CSS. */
+{
+  const spread = document.querySelector('[data-spread]')
+  const items = spread ? gsap.utils.toArray('[data-spread-item]', spread) : []
+  const shots = spread ? gsap.utils.toArray('[data-spread-shot]', spread) : []
+  const count = spread ? spread.querySelector('[data-spread-count]') : null
+
+  // счётчик ведём отдельно: он должен работать и при reduced-motion
+  if (items.length && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting || !count) return
+          count.textContent = String(Number(e.target.dataset.spreadItem) + 1).padStart(2, '0')
+        })
+      },
+      // узкая полоса по середине экрана — активен ровно один пункт
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
+    )
+    items.forEach((el) => io.observe(el))
+  }
+
+  if (!reduce && shots.length > 1 && window.matchMedia('(min-width: 901px)').matches) {
+    /* Стартовое смещение слоёв задано в CSS (это же фолбэк без скрипта),
+       но GSAP разбирает готовый transform в пиксельную базу y и кладёт
+       yPercent поверх неё — слой тогда не поднимается выше кромки.
+       Переписываем то же состояние своими единицами: база в нуле,
+       смещение целиком в процентах. */
+    gsap.set(shots.slice(1), { y: 0, yPercent: 100 })
+
+    /* Отметки отмеряем от самого разворота, а не от панели справа: та
+       липкая, и её замеренная позиция зависит от того, где стоял скролл
+       в момент refresh. Здесь отсчёт чистый — по экрану на пункт.
+       Конфиг собираем заново для каждого твина: ScrollTrigger дописывает
+       в переданный объект ссылку на свою анимацию, и общий литерал увёл
+       бы второй твин на первый. */
+    const seg = (i) => ({
+      trigger: spread,
+      start: () => 'top top-=' + (i - 1) * window.innerHeight,
+      end: () => '+=' + window.innerHeight * 0.8,   // на 20% экрана раньше правого шва
+      scrub: 0,
+      invalidateOnRefresh: true,
+    })
+
+    shots.slice(1).forEach((shot, k) => {
+      const i = k + 1
+
+      gsap.fromTo(shot,
+        { yPercent: 100 },
+        { yPercent: 0, ease: 'none', immediateRender: false, scrollTrigger: seg(i) })
+
+      // уходящий слой подаётся вверх — параллакс между картинками
+      gsap.fromTo(shots[i - 1],
+        { yPercent: 0 },
+        { yPercent: -8, ease: 'none', immediateRender: false, scrollTrigger: seg(i) })
+    })
+  }
 }

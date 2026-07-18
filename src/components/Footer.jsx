@@ -14,7 +14,7 @@ export default function Footer() {
       <div className="container footer-top">
         <div className="footer-brand">
           <div className="footer-logo">
-            <img src={asset('/logo.webp')} alt="ГЕОТЕХНАВИГАЦИЯ" />
+            <img src={asset('/logo.webp')} alt="ГЕОТЕХНАВИГАЦИЯ" loading="lazy" />
             <span className="footer-logo-text">Геотехнавигация</span>
           </div>
           <p className="footer-desc">
@@ -34,6 +34,7 @@ export default function Footer() {
 
         <div className="footer-col">
           <h4>Контакты</h4>
+          {/* TODO: заменить на реальные контакты */}
           <ul>
             <li><a href="tel:+78000000000">+7 (800) 000-00-00</a></li>
             <li><a href="mailto:info@telemetrylab.ru">info@telemetrylab.ru</a></li>

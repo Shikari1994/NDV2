@@ -1,5 +1,7 @@
 import { asset } from '../lib/asset.js'
 
+/* TODO: подписи описывают железо, а изображения — скриншоты приложения.
+   Свериться с реальными фото продукции. */
 const PRODUCTS = [
   {
     n: '01', img: '/direct.webp', title: 'Телеметрическая система MWD',
@@ -28,38 +30,46 @@ const PRODUCTS = [
   },
 ]
 
+/* Линейка-«аккордеон»: карточки стоят в ряд равными долями, а под
+   курсором нужная раскрывается на бо́льшую долю ряда — соседние
+   сжимаются и уходят в затемнение. Фокус ведёт указатель, поэтому
+   листалка со стрелками и перетаскиванием больше не нужна.
+
+   Тот же эффект работает с клавиатуры (:focus-within), а на тач и при
+   reduced-motion ряд превращается в обычную сетку плиток — раскрывать
+   там нечего, наведения нет. */
 export default function Showcase() {
   return (
-    <section id="products">
-      <div className="about-stage pin-lane">
-        <div className="about-track pin-track">
-          <div className="about-intro">
-            <div className="eyebrow reveal"><span className="ey-no">03<span className="ey-den"> / 06</span></span>Линейка оборудования</div>
+    <section id="products" data-theme="gray">
+      <div className="container">
+        <div className="car-head">
+          <div>
+            <div className="eyebrow reveal"><span className="ey-no">03<span className="ey-den"> / 07</span></span>Линейка оборудования</div>
             <h2 className="h-title reveal">Оборудование <br />и сервис</h2>
             <p className="lead reveal">
               Полная линейка телеметрии MWD/LWD собственной разработки —
               от забойных датчиков до наземных станций декодирования и сервиса.
             </p>
           </div>
-
-          <div className="about-cards">
-            {PRODUCTS.map((p) => (
-              <article className="car-card" key={p.n}>
-                <div className="car-card-media">
-                  <img src={asset(p.img)} alt={p.title} loading="lazy" draggable="false" />
-                  <span className="car-num">{p.n}</span>
-                </div>
-                <div className="car-body">
-                  <h3>{p.title}</h3>
-                  <p>{p.text}</p>
-                  <div className="tag-row">
-                    {p.tags.map((t) => <span className="tag" key={t}>{t}</span>)}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
         </div>
+      </div>
+
+      <div className="exp-row reveal">
+        {PRODUCTS.map((p) => (
+          <article className="exp-card" key={p.n} tabIndex={0}>
+            <img className="exp-img" src={asset(p.img)} alt={p.title} loading="lazy" draggable="false" />
+
+            <div className="exp-body">
+              <h3 className="exp-title">{p.title}</h3>
+              <div className="exp-more">
+                <p className="exp-text">{p.text}</p>
+                <span className="exp-tags mono">{p.tags.join(' · ')}</span>
+              </div>
+            </div>
+
+            <span className="exp-num mono" aria-hidden="true">{p.n}</span>
+          </article>
+        ))}
       </div>
     </section>
   )

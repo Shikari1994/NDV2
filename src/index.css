@@ -2,13 +2,17 @@
    ДИЗАЙН-СИСТЕМА · GTN · «ПРИБОРНАЯ ПАНЕЛЬ»
    ────────────────────────────────────────────────
    Почти чёрная основа (как пульт Drill Monitor).
-   Акценты — СЕМАНТИЧЕСКИЕ, как на реальном приборе:
-     • live  (зелёный)  = данные в реальном времени / OK
-     • gamma (янтарь)   = каротаж ГК
-     • cyan             = глубокий зонд / вторичные данные
-   Бренд/интерактив — лазурь логотипа. Красный — только
-   alarm и один намеренный бренд-момент. Максимум 2 акцента
-   в кадре; в текстовых секциях — почти монохром.
+
+   ПАЛИТРА ИНТЕРФЕЙСА САЙТА — мел + один синий акцент.
+   Больше ничего: ни цветных градиентов линий, ни цветных
+   точек, ни свечений.
+
+   Приборные сигналы — live (зелёный) и gamma (янтарь) —
+   живут ТОЛЬКО внутри реальных экранов продукта: readout
+   под окном Drill Monitor, бейдж LIVE на плитке real-time
+   монитора, каротажный планшет в фоне hero. Там они
+   повторяют настоящий UI прибора; как украшение сайта
+   не применяются.
    ════════════════════════════════════════════════ */
 :root {
   /* ─── SURFACES ─── */
@@ -33,20 +37,23 @@
   --brand-strong: #0b78b4;
   --brand-soft:   rgba(14,143,212,0.12);
   --brand-line:   rgba(14,143,212,0.28);
-  --alarm:        #cc2a28;   /* малиновый «G» — только danger/бренд-момент */
 
-  /* ─── SIGNALS · приборные, семантические ─── */
+  /* ─── SIGNALS · только внутри экранов прибора ─── */
   --live:      #46c98a;             /* terminal-green: real-time / OK */
   --live-soft: rgba(70,201,138,0.12);
   --gamma:     #d98a3a;             /* янтарь — ГК / каротаж */
-  --cyan:      #5bd1e8;             /* глубокий зонд / вторичные данные */
 
   /* ─── TYPOGRAPHY ─── */
-  --font-display: 'Geologica', 'Golos Text', system-ui, sans-serif;
+  /* Unbounded — сверхширокий гротеск с кириллицей: замена Monument Extended
+     из референса. Живёт только на крупных заголовках; ниже h3 он нечитаем,
+     там работает Geologica. */
+  --font-display: 'Unbounded', 'Geologica', 'Golos Text', system-ui, sans-serif;
+  --font-sub:     'Geologica', 'Golos Text', system-ui, sans-serif;
   --font-text:    'Golos Text', system-ui, -apple-system, sans-serif;
   --font-mono:    'JetBrains Mono', ui-monospace, monospace;
 
   /* модульная шкала — широкий динамический диапазон */
+  --fs-mega: clamp(2.2rem, 11vw, 11rem);   /* заголовок в пол-экрана */
   --fs-hero: clamp(2.6rem, 6vw, 5.2rem);
   --fs-h2:   clamp(2rem, 4.4vw, 3.4rem);
   --fs-h3:   clamp(1.4rem, 2.4vw, 2rem);
@@ -59,9 +66,30 @@
   --track-label:  0.22em;
 
   /* ─── SPACING / LAYOUT ─── */
-  --maxw: 1200px;
-  --gut: 40px;
-  --section-y: clamp(96px, 12vw, 168px);
+  /* Контента-«островка» по центру нет: полоса набора — весь экран,
+     поля фиксированные. На широком мониторе это главное отличие
+     первоисточника — типографика идёт от края до края, а пустоту
+     размечают вертикальные линии колонок (.rails), а не поля. */
+  --maxw: none;
+  /* Поля учитывают вырезы экрана: в альбомной ориентации на телефоне с
+     «чёлкой» левая или правая безопасная зона доходит до 44px, и без
+     этого слагаемого типографика от края до края уезжала под вырез.
+     На устройствах без вырезов env(...) равен нулю — величина та же. */
+  --gut: calc(clamp(20px, 2.4vw, 44px) + max(env(safe-area-inset-left), env(safe-area-inset-right)));
+
+  /* ─── КОЛОНКИ · вертикальные линии сетки ───
+     Шесть направляющих. Между ними живут пункты меню, к ним же
+     привязаны раскладки секций. Крайние поля намеренно шире
+     внутренних колонок — так композиция читается как разворот. */
+  --rail-1: 22%;
+  --rail-2: 34%;
+  --rail-3: 46%;
+  --rail-4: 58%;
+  --rail-5: 70%;
+  --rail-6: 82%;
+  /* один вертикальный ритм на все ширины: от 80px на телефоне
+     до 168px на большом экране, без брейкпоинт-исключений */
+  --section-y: clamp(80px, 12vw, 168px);
 
   /* ─── RADII · приборные: строже ─── */
   --r-sm: 4px;
@@ -86,9 +114,91 @@
   --accent-strong: var(--brand-strong);
   --accent-soft:   var(--brand-soft);
   --accent-line:   var(--brand-line);
-  --brand-red:     var(--alarm);
   --ok:            var(--live);
 }
+
+/* ════════════════════════════════════════════════
+   ТЕМЫ СЕКЦИЙ · [data-theme]
+   ────────────────────────────────────────────────
+   Приём из референса: страница — не единое полотно,
+   а лента полноэкранных заливок, каждая со своей
+   темой. Тема переопределяет токены целиком, так что
+   компоненты внутри не знают, на каком фоне лежат.
+
+   Ритм страницы — спокойное чередование ТЁМНАЯ ↔ СВЕТЛАЯ:
+   hero → каротаж(blue) → Drill Monitor(gray) → о компании(black)
+   → факты(gray) → платформа(black) → лента(gray) → оборудование(gray)
+   → принцип(black) → магазин(gray) → контакты(black).
+   Синяя заливка во весь экран — РОВНО ОДНА на всю страницу
+   (экран 02 колоды). Везде остальном синий работает акцентной
+   линией и цифрой, а не фоном.
+
+   ВАЖНО: legacy-алиасы (--text: var(--ink)) резолвятся
+   в :root и НЕ пересчитываются при переопределении --ink
+   ниже по дереву. Поэтому каждая тема задаёт обе пары
+   явно. Убрать дублирование можно будет только после
+   того, как компоненты перейдут на --ink/--line.
+   ════════════════════════════════════════════════ */
+[data-theme] { background: var(--surface); color: var(--ink); }
+
+[data-theme="black"] {
+  --surface:     #07090d;
+  --ink:         #eef2f7;  --text:       #eef2f7;
+  --ink-dim:     rgba(238,242,247,0.66);  --text-dim:   rgba(238,242,247,0.66);
+  --ink-faint:   rgba(238,242,247,0.46);  --text-faint: rgba(238,242,247,0.46);
+  --line:        rgba(231,237,245,0.10);
+  --line-soft:   rgba(231,237,245,0.05);
+  --line-strong: rgba(231,237,245,0.20);
+  --panel:       #0e1219;  --bg-raised:   #0e1219;
+  --panel-2:     #141a23;  --bg-raised-2: #141a23;
+  --ink-ghost:   rgba(238,242,247,0.26);
+}
+
+[data-theme="gray"] {
+  --surface:     #f1f2f4;
+  --ink:         #14181f;  --text:       #14181f;
+  --ink-dim:     rgba(20,24,31,0.68);  --text-dim:   rgba(20,24,31,0.68);
+  --ink-faint:   rgba(20,24,31,0.50);  --text-faint: rgba(20,24,31,0.50);
+  --line:        rgba(20,24,31,0.14);
+  --line-soft:   rgba(20,24,31,0.07);
+  --line-strong: rgba(20,24,31,0.26);
+  --panel:       #ffffff;  --bg-raised:   #ffffff;
+  --panel-2:     #e7e9ec;  --bg-raised-2: #e7e9ec;
+  /* на светлом лазурь логотипа теряет контраст — уводим в глубокий тон */
+  --brand:       #0a63a8;  --accent:        #0a63a8;
+  --brand-strong:#084f88;  --accent-strong: #084f88;
+  --brand-soft:  rgba(10,99,168,0.10);  --accent-soft: rgba(10,99,168,0.10);
+  --brand-line:  rgba(10,99,168,0.34);  --accent-line: rgba(10,99,168,0.34);
+  --ink-ghost:   rgba(20,24,31,0.26);
+}
+
+[data-theme="blue"] {
+  --surface:     #0a63a8;
+  --ink:         #ffffff;  --text:       #ffffff;
+  --ink-dim:     rgba(255,255,255,0.78);  --text-dim:   rgba(255,255,255,0.78);
+  --ink-faint:   rgba(255,255,255,0.62);  --text-faint: rgba(255,255,255,0.62);
+  --line:        rgba(255,255,255,0.22);
+  --line-soft:   rgba(255,255,255,0.12);
+  --line-strong: rgba(255,255,255,0.40);
+  --panel:       rgba(255,255,255,0.09);  --bg-raised:   rgba(255,255,255,0.09);
+  --panel-2:     rgba(255,255,255,0.14);  --bg-raised-2: rgba(255,255,255,0.14);
+  /* на фирменном синем акцент — белый: цветной на цветном не читается */
+  --brand:       #ffffff;  --accent:        #ffffff;
+  --brand-strong:#ffffff;  --accent-strong: rgba(255,255,255,0.86);
+  --brand-soft:  rgba(255,255,255,0.12);  --accent-soft: rgba(255,255,255,0.12);
+  --brand-line:  rgba(255,255,255,0.40);  --accent-line: rgba(255,255,255,0.40);
+  /* тёмный флот на синем — так имя продукта «проваливается» под заливку,
+     а меняющееся слово остаётся белым и держит контраст */
+  --ink-ghost:   rgba(4,32,56,0.62);
+}
+
+/* Плоскость темы — правило референса: никаких теней и градиентов
+   на цветных заливках. Тени остаются только на окнах интерфейса
+   внутри тёмных секций, где они несут глубину, а не декор. */
+[data-theme="gray"] .btn-ghost:hover,
+[data-theme="blue"] .btn-ghost:hover { background: var(--brand-soft); }
+[data-theme="gray"] .btn-primary { background: var(--brand); color: #fff; }
+[data-theme="blue"] .btn-primary { background: #fff; color: #0a63a8; }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -101,7 +211,9 @@ body {
   font-family: var(--font-text);
   color: var(--text);
   font-size: var(--fs-body);
-  overflow-x: hidden;
+  /* clip, а не hidden: hidden делает body scroll-контейнером и ломает
+     position:sticky у прибитого счётчика в «Фактах» */
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -117,12 +229,29 @@ img { display: block; max-width: 100%; }
 /* ─── ТИПОГРАФИКА: display-гарнитура на крупных заголовках ───
    Geologica — «чертёжный» гротеск, уводит от дефолтного Manrope.
    Карточные h4 остаются в текстовой гарнитуре ради читаемости. */
-.hero-title, .h-title, h1, h2, h3 {
+.hero-title, .h-title, h1, h2 {
   font-family: var(--font-display);
   font-optical-sizing: auto;
+  /* Unbounded широкий по рисунку — на крупных кеглях его надо
+     поджимать трекингом, иначе строка рассыпается */
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+/* ниже h2 сверхширокий гротеск нечитаем — там «чертёжная» Geologica */
+h3, h4 { font-family: var(--font-sub); }
+
+/* заголовок в пол-экрана — главный типографический жест референса */
+.mega {
+  font-family: var(--font-display);
+  font-size: var(--fs-mega);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  text-wrap: balance;
 }
 /* единицы и числа — табличные везде */
-.mono, .stat-num, .hero-stat-num { font-variant-numeric: tabular-nums; }
+.mono, .facts-count { font-variant-numeric: tabular-nums; }
 
 /* спокойная глубина фона — очень тонкая, без неона и сетки */
 /* плоская near-black основа — без клише-свечения сверху;
@@ -134,9 +263,75 @@ img { display: block; max-width: 100%; }
 .bg-grid { display: none; }
 
 /* ─── КОНТЕЙНЕР И СЕКЦИИ ─── */
-.container { max-width: var(--maxw); margin: 0 auto; padding: 0 40px; }
-section { padding: 140px 0; position: relative; }
-.divider { max-width: var(--maxw); margin: 0 auto; height: 1px; background: var(--line); }
+.container { max-width: var(--maxw); margin: 0; padding: 0 var(--gut); }
+/* Длинные абзацы ширину экрана не наследуют — им меру задаёт
+   собственный max-width (.lead, .sc-text и т.п.). Полную ширину
+   забирает только типографика и сетка. */
+
+/* ─── RAILS · вертикальные линии колонок ───
+   Приём точечный, а не сквозной: направляющие живут только на
+   двух экранах колоды (Drill Monitor · Скорость / Точность), где
+   они держат мега-заголовок и подчёркивают смену заливки. На
+   остальных секциях они превращались в фоновый шум, поэтому
+   включаются явным data-rails="on". Рисуются подложкой темы —
+   берут цвет линии текущей заливки и едут вместе с секцией. */
+[data-theme] { position: relative; }
+[data-rails="on"]::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--line), var(--line)),
+    linear-gradient(var(--line), var(--line)),
+    linear-gradient(var(--line), var(--line)),
+    linear-gradient(var(--line), var(--line)),
+    linear-gradient(var(--line), var(--line)),
+    linear-gradient(var(--line), var(--line));
+  background-size: 1px 100%;
+  background-repeat: no-repeat;
+  background-position:
+    var(--rail-1) 0, var(--rail-2) 0, var(--rail-3) 0,
+    var(--rail-4) 0, var(--rail-5) 0, var(--rail-6) 0;
+}
+/* контент всегда над направляющими */
+[data-theme] > * { position: relative; z-index: 1; }
+
+@media (max-width: 900px) {
+  /* на телефоне шесть колонок превращаются в шум — оставляем две */
+  [data-rails="on"]::before {
+    background-position: 33.333% 0, 66.666% 0, -10px 0, -10px 0, -10px 0, -10px 0;
+  }
+}
+/* единый вертикальный ритм всей страницы — один токен, без исключений
+   по секциям: воздух одинаковый везде, поэтому смена темы читается как
+   граница раздела, а не как случайный отступ */
+section { padding: var(--section-y) 0; position: relative; }
+/* границы секций теперь несёт смена темы, а не линия */
+.divider { display: none; }
+
+/* ─── MARQUEE · бегущая лента-«шов» между секциями ─── */
+.marquee {
+  display: flex; overflow: hidden; width: 100%;
+  padding: clamp(18px, 2.2vw, 30px) 0;
+  user-select: none;
+}
+.marquee-list {
+  display: flex; align-items: center; flex: 0 0 auto;
+  list-style: none; gap: 0; white-space: nowrap;
+  will-change: transform;
+}
+.marquee-list li {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.4vw, 2.1rem);
+  font-weight: 600; letter-spacing: -0.02em;
+  text-transform: uppercase; color: var(--ink);
+}
+.marquee-sep { color: var(--ink-faint); margin: 0 clamp(20px, 3vw, 44px); font-weight: 400; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* без анимации лента превращается в обычную строку — не обрезаем контент */
+  .marquee { overflow-x: auto; }
+}
 
 .eyebrow {
   display: inline-flex; align-items: center; gap: 12px;
@@ -172,37 +367,72 @@ section { padding: 140px 0; position: relative; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-strong); }
 .btn-primary:hover svg { transform: translateX(3px); }
-/* press-feedback (Emil: кнопка отвечает на нажатие); primary не магнитная — transform свободен */
+/* press-feedback — единственная микро-реакция кнопки: тихое «вдавливание» */
 .btn-primary:active { transform: scale(0.97); }
 .btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
-.btn-ghost:hover { border-color: rgba(231,237,245,0.28); background: rgba(231,237,245,0.04); }
+.btn-ghost:hover { border-color: var(--line-strong); background: var(--brand-soft); }
 .btn-ghost:hover svg { transform: translateX(3px); }
-/* press-feedback: на тач — фоном/рамкой (transform у hero-CTA занят GSAP) */
-.btn-ghost:active { border-color: rgba(231,237,245,0.34); background: rgba(231,237,245,0.08); }
+.btn-ghost:active { transform: scale(0.97); border-color: var(--line-strong); background: var(--accent-soft); }
 
 /* ════════════════════════════════════════════════
    НАВИГАЦИЯ
    ════════════════════════════════════════════════ */
+/* Шапка живёт в той же колоночной сетке, что и линии --rail-*:
+   каждый пункт меню начинается сразу за своей направляющей.
+   Поэтому боковых полей у самой шапки нет — их несут крайние
+   ячейки, иначе проценты считались бы от content-box и меню
+   разъехалось бы с линиями. */
 nav.nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 22px 40px; border-bottom: 1px solid transparent;
+  display: grid;
+  grid-template-columns: var(--rail-1) repeat(5, calc((var(--rail-6) - var(--rail-1)) / 5)) 1fr;
+  align-items: center;
+  padding: 22px 0; border-bottom: 1px solid transparent;
   transition: padding 0.4s var(--ease), background 0.4s, border-color 0.4s;
 }
 nav.nav.scrolled {
-  padding: 14px 40px; background: var(--bg-glass);
+  padding: 14px 0; background: var(--bg-glass);
   backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
   border-bottom-color: var(--line);
 }
-.nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+
+/* ── Шапка перекрашивается под тему секции, проходящей под ней ──
+   data-theme проставляет motion.js. Токены темы наследуются
+   от блока выше; здесь снимаем только заливку — шапка поверх
+   секции должна оставаться прозрачной, пока не проскроллена. */
+nav.nav[data-theme] { background: transparent; color: var(--ink); }
+nav.nav.scrolled[data-theme] {
+  background: var(--surface);
+  /* на плоской заливке блюр даёт грязь — референс держит шапку плоской */
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+nav.nav[data-theme] .nav-burger span { background: var(--ink); }
+.nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; padding-left: var(--gut); }
 .nav-logo img { height: 34px; width: auto; }
 .nav-logo-text { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-.nav-links { display: flex; gap: 38px; list-style: none; }
-.nav-links a { position: relative; color: var(--text-dim); text-decoration: none; font-size: 0.83rem; letter-spacing: 0.04em; font-weight: 500; transition: color 0.25s; }
+/* ul растворяется, чтобы каждый li стал ячейкой сетки шапки */
+.nav-links { display: contents; list-style: none; }
+.nav-links li { min-width: 0; padding-left: clamp(10px, 1vw, 18px); }
+.nav-links a { position: relative; color: var(--text-dim); text-decoration: none; font-size: 0.83rem; letter-spacing: 0.04em; font-weight: 500; transition: color 0.25s; white-space: nowrap; }
 .nav-links a::after { content: ''; position: absolute; left: 0; bottom: -6px; width: 100%; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease); }
 .nav-links a:hover { color: var(--text); }
 .nav-links a:hover::after { transform: scaleX(1); }
-.nav-cta { font-size: 0.8rem; padding: 11px 22px; }
+.nav-cta { justify-self: end; margin-right: var(--gut); }
+
+/* ─── PILL · маленькая кнопка-таблетка строчными ───
+   Приём первоисточника: единственная «кнопочная» форма на сайте.
+   Всё остальное — линии и типографика, никаких плашек. */
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px 10px; border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.01em;
+  color: var(--ink); text-decoration: none; white-space: nowrap;
+  transition: background 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.pill:hover { background: var(--ink); color: var(--surface, var(--bg)); border-color: var(--ink); }
+.pill--solid { background: var(--brand); border-color: var(--brand); color: #fff; }
+.pill--solid:hover { background: var(--brand-strong); border-color: var(--brand-strong); color: #fff; }
 
 .nav-burger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; z-index: 101; }
 .nav-burger span { display: block; width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s, opacity 0.3s; }
@@ -217,22 +447,322 @@ nav.nav.scrolled {
 .nav-mobile a:hover { opacity: 1; }
 
 /* ════════════════════════════════════════════════
+   ФАКТЫ · тихий список + прибитый счётчик
+   ════════════════════════════════════════════════ */
+.facts-grid { display: grid; grid-template-columns: 0.6fr 1.4fr; gap: clamp(32px, 6vw, 96px); }
+
+/* колонка прибита: цифра меняется, пока список едет мимо */
+.facts-aside { position: sticky; top: 30vh; align-self: start; }
+.facts-count {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(2.6rem, 6vw, 5.4rem); line-height: 1; letter-spacing: -0.045em;
+  color: var(--ink);
+}
+/* текстовое значение вместо числа — тем же голосом, но мельче */
+.facts-count.is-text { font-size: clamp(1.7rem, 3.4vw, 2.8rem); letter-spacing: -0.03em; }
+.facts-unit {
+  font-size: 0.74rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-faint); margin-top: 14px;
+}
+
+.facts-list { list-style: none; }
+.facts-item {
+  padding: clamp(28px, 4vw, 54px) 0;
+  border-top: 1px solid var(--line);
+}
+.facts-item:last-child { border-bottom: 1px solid var(--line); }
+.facts-no { font-size: 0.78rem; letter-spacing: 0.08em; color: var(--ink); }
+.facts-no-den { opacity: 0.3; }
+.facts-title {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: clamp(1.5rem, 3.4vw, 3rem); line-height: 1.06; letter-spacing: -0.035em;
+  color: var(--ink); margin-top: clamp(12px, 1.6vw, 22px);
+}
+.facts-text {
+  max-width: 520px; margin-top: 14px;
+  color: var(--ink-dim); font-size: 0.95rem; line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+  .facts-grid { grid-template-columns: 1fr; gap: 32px; }
+  .facts-aside { position: static; }
+}
+
+/* ════════════════════════════════════════════════
+   РАЗВОРОТ «КЛЮЧЕВЫЕ ЦИФРЫ» · О компании
+   ────────────────────────────────────────────────
+   Две колонки одной grid-сетки: левая прибита sticky
+   (рубрика + карточка-изображение), правая — штабель
+   панелей с числами, по экрану на пункт.
+
+   Наложение — приём: следующий пункт наезжает на
+   предыдущий, кромка наезда видна. Справа штабель
+   собирается на чистом sticky — панели непрозрачны
+   и липнут к одной кромке, поэтому каждая следующая
+   закрывает предыдущую сама, без скрипта. Слева тот
+   же наезд отыгрывают слои картинок (motion.js),
+   и идут они с опережением — швы не совпадают.
+
+   Пин-сцены здесь нет намеренно: прошлая версия
+   уводила ленту абсолютным позиционированием и на
+   реальных высотах экрана ломала левую колонку.
+   ════════════════════════════════════════════════ */
+.spread {
+  display: grid;
+  grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+  padding: 0 var(--gut);
+}
+
+/* левая колонка — стоит на месте всю ленту цифр */
+.spread-aside {
+  position: sticky; top: 0; align-self: start;
+  height: 100svh;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: clamp(24px, 4vh, 52px);
+  padding: clamp(72px, 10vh, 120px) clamp(24px, 3vw, 56px) clamp(40px, 6vh, 80px) 0;
+}
+.spread-title {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(1.8rem, 3.4vw, 3.4rem); line-height: 1.02;
+  letter-spacing: -0.04em; text-transform: uppercase;
+  color: var(--ink); margin-top: 4px;
+}
+.spread-aside .lead { margin-top: clamp(14px, 1.6vw, 22px); max-width: none; font-size: 0.95rem; }
+.spread-aside .pill { align-self: flex-start; margin-top: clamp(18px, 2.2vw, 28px); }
+
+/* карточка-изображение: слои наезжают снизу, как панели справа.
+   Слой, ещё не вступивший в дело, отведён вниз за кромку рамки —
+   это же и статичный фолбэк: без скрипта видна только первая
+   картинка, а не все три разом. */
+.spread-media {
+  position: relative; aspect-ratio: 16 / 10; overflow: hidden;
+  border-radius: var(--r); background: var(--panel);
+  border: 1px solid var(--line);
+}
+.spread-shot {
+  position: absolute; inset: 0;
+  transform: translateY(100%); will-change: transform;
+}
+.spread-shot:first-child { transform: none; }
+.spread-shot img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+}
+/* шов наезда — верхняя кромка приходящего слоя */
+.spread-shot + .spread-shot::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 1;
+  background: rgba(238, 242, 247, 0.22);
+}
+
+/* правая колонка — штабель панелей с числами */
+.spread-main {
+  position: relative; min-width: 0;
+  border-left: 1px solid var(--line);
+}
+/* счётчик висит у верхней кромки экрана и не занимает высоты в потоке;
+   он над штабелем, иначе панели наедут и на него */
+.spread-count {
+  position: sticky; top: clamp(84px, 12vh, 130px); z-index: 5;
+  display: block; height: 0; text-align: right;
+  font-size: 0.8rem; letter-spacing: 0.06em;
+}
+.spread-count b { font-weight: 500; color: var(--ink); }
+.spread-count i { font-style: normal; color: var(--ink-faint); }
+
+/* панель липнет к верхней кромке и остаётся там, пока следующая
+   не проедет поверх. Заливка обязательна — на ней держится наезд.
+   Отступ слева живёт здесь, а не на колонке: иначе заливка не
+   достаёт до разделительной линии и в шов видно нижний слой. */
+.spread-item {
+  position: sticky; top: 0;
+  min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: center;
+  align-items: flex-start;
+  padding: clamp(40px, 8vh, 96px) 0 clamp(40px, 8vh, 96px) clamp(24px, 4vw, 80px);
+  background: var(--surface);
+}
+.spread-item + .spread-item { border-top: 1px solid var(--line); }
+.sc-big {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(2.6rem, 7vw, 6.5rem); line-height: 0.94; letter-spacing: -0.04em;
+  color: var(--brand); display: inline-flex; align-items: baseline; gap: 0.18em;
+}
+.sc-unit { font-size: 0.28em; font-weight: 500; letter-spacing: 0.04em; color: var(--ink-dim); text-transform: uppercase; }
+.sc-kicker {
+  font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--ink-faint); margin-top: 18px;
+}
+.sc-text { max-width: 46ch; color: var(--ink-dim); line-height: 1.7; margin-top: 16px; font-size: 0.95rem; }
+
+@media (max-width: 900px) {
+  /* колонки складываются: картинка идёт шапкой раздела, цифры — списком */
+  .spread { grid-template-columns: 1fr; }
+  .spread-aside {
+    position: static; height: auto; padding: 0 0 clamp(32px, 6vh, 56px);
+  }
+  .spread-main { border-left: 0; }
+  .spread-count { position: static; height: auto; text-align: left; margin-bottom: 24px; }
+  /* штабель распускается в обычный список: липнуть некуда, наезжать
+     нечем — колонка одна. Заливку панелей тоже снимаем, иначе она
+     перекрывает подложку секции. */
+  .spread-item {
+    position: static; background: none;
+    min-height: 0; padding: clamp(28px, 6vh, 48px) 0;
+    border-top: 1px solid var(--line);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   ГЛОБУС · финал раздела «О компании»
+   ────────────────────────────────────────────────
+   Прибитая сцена внутри длинной обёртки: один прогресс
+   скролла набирает строку по словам и одновременно
+   выводит снизу земной шар, доворачивая его Россией
+   к зрителю (scripts/globeCanvas.js, earth_orbit1.glb).
+   ════════════════════════════════════════════════ */
+.globe { position: relative; height: 320svh; margin-top: clamp(60px, 10vh, 140px); }
+.globe-stage {
+  position: sticky; top: 0; height: 100svh; overflow: hidden;
+  background:
+    radial-gradient(130% 95% at 50% 118%, #0f57a8 0%, #0a3d7d 34%, #061f45 64%, #04122a 100%);
+}
+.globe-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* вертикальная кромка с вертикальной подписью — как на развороте */
+.globe-stage::after {
+  content: ''; position: absolute; top: 0; bottom: 0;
+  right: clamp(56px, 6vw, 100px); width: 1px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.globe-label {
+  position: absolute; z-index: 2; top: 50%; right: clamp(20px, 3vw, 46px);
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-size: 0.62rem; letter-spacing: 0.24em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+.globe-count {
+  position: absolute; z-index: 2;
+  left: var(--gut); bottom: clamp(24px, 4vh, 44px);
+  font-size: 0.8rem; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.5);
+}
+.globe-count b { font-weight: 500; color: #fff; }
+
+.globe-headline {
+  position: absolute; z-index: 2;
+  left: var(--gut); top: clamp(56px, 11vh, 130px);
+  right: clamp(96px, 12vw, 220px);
+  max-width: 22ch;
+  font-family: var(--font-sub); font-weight: 400;
+  font-size: clamp(1.5rem, 3.4vw, 3.1rem); line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+/* слово гаснет до тех пор, пока прокрутка до него не дошла */
+.globe-word { color: rgba(255, 255, 255, 0.26); transition: color 0.45s var(--ease); }
+.globe-word.is-on { color: #fff; }
+
+/* без WebGL и при reduced-motion сцена сжимается в обычный экран:
+   набирать строку прокруткой нечем, поэтому она сразу читаемая */
+.globe.is-static { height: auto; }
+.globe.is-static .globe-stage { position: static; height: clamp(360px, 62svh, 640px); }
+.globe.is-static .globe-word { color: #fff; }
+
+@media (max-width: 900px) {
+  .globe { height: 260svh; }
+  .globe-headline { right: clamp(64px, 14vw, 110px); }
+}
+
+/* ════════════════════════════════════════════════
+   КОЛОДА ЭКРАНОВ · приём первоисточника
+   ────────────────────────────────────────────────
+   Секции идут обычным потоком по 100svh, но каждая
+   обрезает своё содержимое. Внутри .deck-content
+   уезжает вниз, а .deck-inner следующего экрана
+   выезжает сверху — получается «колода карт»,
+   где карта уходит вниз, открывая лежащую под ней.
+   Вся механика — в motion.js.
+   ════════════════════════════════════════════════ */
+.deck-screen { overflow: hidden; padding: 0; }
+.deck-content { backface-visibility: hidden; will-change: transform; }
+.deck-inner {
+  position: relative;
+  min-height: 100svh;
+  display: flex; flex-direction: column;
+  /* контент прижат к низу экрана — ключевая черта первоисточника */
+  justify-content: flex-end;
+  padding-bottom: clamp(28px, 3vw, 44px);
+  overflow: hidden;
+}
+
+/* ── типографические экраны 02–03 ── */
+.deck-body { position: relative; z-index: 2; width: 100%; }
+.deck-kicker {
+  display: block; font-size: 0.72rem; letter-spacing: 0.26em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 18px;
+}
+.deck-heading { color: var(--ink); margin-bottom: clamp(24px, 3vw, 40px); text-wrap: nowrap; }
+.deck-heading-line { display: block; }
+/* постоянная строка — «призрак»: остаётся на месте при смене экрана
+   и только меняет тон вместе с заливкой */
+.deck-brand { color: var(--ink-ghost); transition: color 0.5s var(--ease); }
+.deck-reg { font-size: 0.32em; vertical-align: super; letter-spacing: 0; }
+.deck-foot {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 32px; flex-wrap: wrap;
+  border-top: 1px solid var(--line); padding-top: clamp(18px, 2vw, 28px);
+}
+.deck-descr { font-size: clamp(0.92rem, 1.1vw, 1.08rem); color: var(--ink-dim); line-height: 1.6; }
+
+/* счётчик «01 / 03» — знаменатель приглушён, как в первоисточнике */
+.deck-count { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; color: var(--ink); }
+.deck-count-den { opacity: 0.3; }
+#hero .deck-count { margin-top: 32px; }
+
+/* видео-подложка экрана: не иллюстрация, а фактура */
+.deck-media {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none;
+}
+.deck-media video {
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0.22;
+  /* сводим кадр к монохрому темы, чтобы не спорил с плоской заливкой */
+  filter: grayscale(1) contrast(1.15);
+}
+[data-theme="gray"] .deck-media video { opacity: 0.3; }
+/* растворяем низ кадра в заливку темы — текст ложится на чистый цвет */
+.deck-media::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 30%, var(--surface) 96%);
+}
+
+@media (max-width: 700px) {
+  /* нижняя кромка экрана колоды не должна попадать под индикатор «домой» */
+  .deck-inner { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+  .deck-foot { flex-direction: column; align-items: flex-start; gap: 18px; }
+}
+
+/* ════════════════════════════════════════════════
    HERO · редакционный сплит + реальный продукт
    ════════════════════════════════════════════════ */
-#hero { position: relative; min-height: 100svh; display: flex; align-items: center; padding: 120px 0 80px; overflow: hidden; }
+/* продуктовый экран колоды: контент по центру, счётчик прижат к низу */
+#hero .deck-inner { justify-content: center; padding-top: 118px; }
+#hero .deck-count { margin-top: auto; padding-top: 28px; }
+#hero .hero-inner { flex: 0 0 auto; }
+/* Колонки hero совпадают с направляющими: текст занимает поле до
+   --rail-4, окно прибора — всё, что правее. На широком мониторе
+   это разводит композицию по краям экрана вместо островка по центру. */
 .hero-inner {
-  display: grid; grid-template-columns: 0.82fr 1.25fr; gap: clamp(28px, 4vw, 72px);
+  display: grid;
+  grid-template-columns: calc(var(--rail-4) - var(--gut)) 1fr;
+  gap: clamp(28px, 3vw, 56px);
   align-items: center; width: 100%;
 }
-.hero-text { max-width: 600px; }
-.hero-title { font-size: clamp(2.4rem, 5.2vw, 4.4rem); font-weight: 700; letter-spacing: -0.038em; line-height: 1.04; margin-bottom: 28px; color: #fff; text-wrap: balance; }
+.hero-text { max-width: none; padding-right: clamp(16px, 2vw, 40px); }
+.hero-title { font-size: clamp(2.4rem, 6vw, 6rem); font-weight: 700; letter-spacing: -0.042em; line-height: 1.0; margin-bottom: 28px; color: var(--ink); text-wrap: balance; }
 .hero-title-accent { color: var(--text-dim); font-weight: 600; }
 .hero-desc { font-size: clamp(1rem, 1.2vw, 1.15rem); color: var(--text-dim); line-height: 1.75; max-width: 540px; margin-bottom: 40px; text-wrap: pretty; }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
-
-.hero-stats { display: flex; gap: clamp(28px, 4vw, 52px); margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--line); }
-.hero-stat-num { font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
-.hero-stat-label { font-size: 0.82rem; color: var(--text-faint); margin-top: 10px; line-height: 1.4; }
 
 /* окно с реальным интерфейсом */
 .hero-visual { position: relative; }
@@ -265,84 +795,18 @@ nav.nav.scrolled {
 /* ════════════════════════════════════════════════
    О КОМПАНИИ
    ════════════════════════════════════════════════ */
-/* «О компании» — интро и карточки едут единой горизонтальной лентой:
-   при скролле интро уезжает за левый край, карточки занимают его место
-   (pin + scrub в motion.js). Без JS / на мобильном — стек + свайп.
-   Те же классы переиспользует раздел «Оборудование» (#products). */
-#about, #products { padding: 0; }
+/* Сцена занимает ровно экран — собственных отступов секции не нужно.
+   Горизонтальная pin-лента, которую переиспользовало «Оборудование»,
+   снята: там теперь обычная карусель (.car-*). */
+#about { padding: 0; }
 
-.about-stage {
-  min-height: 100vh; display: flex; align-items: center;
-  overflow: hidden;                              /* клипует уезжающую ленту */
-  padding-block: clamp(80px, 10vh, 120px);
-}
-.about-track {
-  display: flex; align-items: center; width: max-content;
-  gap: clamp(28px, 3.4vw, 64px); will-change: transform;
-  /* края ленты выровнены по сетке контейнера */
-  padding-inline: max(40px, calc((100vw - var(--maxw)) / 2));
-}
-
-/* интро — первый «кадр» ленты */
-.about-intro { flex: 0 0 auto; width: clamp(300px, 33vw, 440px); }
-.about-intro .h-title { margin-top: 16px; font-size: clamp(1.9rem, 3.2vw, 2.8rem); line-height: 1.1; }
-.about-intro .lead { margin-top: 20px; }
 .about-meta { margin-top: 28px; border-top: 1px solid var(--line); }
 .about-meta-item { display: flex; align-items: baseline; gap: 24px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .about-meta-k { flex: 0 0 90px; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); }
 .about-meta-v { font-size: 0.9rem; color: var(--text); }
 
-/* карточки — следом за интро в той же ленте */
-.about-cards { display: flex; align-items: stretch; gap: clamp(16px, 1.6vw, 22px); }
-.about-card {
-  position: relative; flex: 0 0 auto;
-  width: clamp(280px, 32vw, 440px); min-height: clamp(420px, 64vh, 600px);
-  display: flex; flex-direction: column;
-  padding: clamp(26px, 2.4vw, 40px);
-  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel);
-  transition: border-color 0.35s, transform 0.4s var(--ease);
-}
-.about-card:hover { border-color: var(--brand-line); transform: translateY(-4px); }
-.ac-idx {
-  position: absolute; top: clamp(20px, 2vw, 30px); right: clamp(20px, 2vw, 30px);
-  font-size: 0.66rem; letter-spacing: 0.12em; color: var(--ink-faint);
-}
-.ac-big {
-  font-family: var(--font-display); font-weight: 700; color: var(--brand);
-  font-size: clamp(3rem, 5vw, 4.6rem); letter-spacing: -0.03em; line-height: 0.95;
-}
-.ac-big--text { font-size: clamp(1.9rem, 2.8vw, 2.8rem); line-height: 1.05; letter-spacing: -0.02em; }
-.ac-unit { font-size: 0.42em; font-weight: 600; margin-left: 0.18em; letter-spacing: -0.01em; }
-.ac-kicker { display: block; margin-top: 16px; font-size: 0.96rem; color: var(--ink-dim); font-weight: 500; }
-.ac-text { margin-top: auto; padding-top: 36px; font-size: 0.94rem; color: var(--text-dim); line-height: 1.65; }
-
-/* мобильный / без JS: лента разворачивается в стек, карточки — свайпом */
 @media (max-width: 900px) {
-  #about, #products { padding: clamp(72px, 9vw, 110px) 0; }
-  /* блок, а не флекс-строка: иначе .about-track тянется по контенту карточек
-     (5×80vw) и распирает страницу — overflow-x на ленте не клиппит */
-  .about-stage { display: block; min-height: 0; overflow: visible; padding-block: 0; }
-  .about-track {
-    flex-direction: column; align-items: stretch; width: 100%; min-width: 0;
-    gap: 36px; padding-inline: 28px; transform: none !important;
-  }
-  .about-intro { width: auto; }
-  /* ручной горизонтальный свайп: лента ограничена шириной трека, карточки
-     прокручиваются внутри со scroll-snap */
-  .about-cards {
-    align-items: stretch; gap: 16px; min-width: 0; max-width: 100%;
-    overflow-x: auto; overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory; scrollbar-width: none;
-    margin-inline: -28px; padding-inline: 28px;
-  }
-  .about-cards::-webkit-scrollbar { display: none; }
-  .about-card { flex: 0 0 auto; width: 80vw; min-height: 420px; scroll-snap-align: start; }
-}
-@media (max-width: 700px) {
-  .about-track { padding-inline: 20px; }
-  .about-cards { margin-inline: -20px; padding-inline: 20px; }
-  .about-card { width: 84vw; }
+  #about { padding: clamp(72px, 9vw, 110px) 0; }
 }
 
 /* ════════════════════════════════════════════════
@@ -354,14 +818,30 @@ nav.nav.scrolled {
 /* ════════════════════════════════════════════════
    КАК РАБОТАЕТ
    ════════════════════════════════════════════════ */
-.how-header { text-align: center; max-width: 620px; margin: 0 auto 80px; }
-.how-header .lead { margin: 0 auto; }
-.steps { position: relative; max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 2px; }
+/* ── SPLIT · базовая раскладка раздела по направляющим ──
+   Слева прибитая колонка с названием раздела, справа содержимое.
+   Граница колонок совпадает с --rail-2, поэтому текст садится
+   ровно на линию сетки. Центрированных «островков» посреди
+   широкого экрана на странице больше нет нигде. */
+.split { display: grid; grid-template-columns: var(--rail-2) 1fr; }
+.split-aside {
+  padding-left: var(--gut); padding-right: clamp(16px, 2vw, 36px);
+  position: sticky; top: clamp(120px, 18vh, 220px); align-self: start;
+}
+.split-title {
+  font-family: var(--font-display); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(1.6rem, 2.6vw, 2.6rem); line-height: 1.04; letter-spacing: -0.04em;
+  margin-top: 18px;
+}
+.split-aside .lead { margin-top: 20px; max-width: none; font-size: 0.95rem; }
+.split-aside .pill { margin-top: clamp(20px, 2.4vw, 30px); }
+.split-main { padding-left: clamp(16px, 2vw, 36px); padding-right: var(--gut); min-width: 0; }
+.steps { position: relative; display: flex; flex-direction: column; gap: 2px; }
 .how-line { position: absolute; left: 27px; top: 18px; bottom: 18px; width: 1px; background: var(--line); }
-.how-line-fill { position: absolute; left: 27px; top: 18px; width: 1px; height: 0; background: linear-gradient(180deg, var(--accent), var(--accent-strong)); }
+.how-line-fill { position: absolute; left: 27px; top: 18px; width: 1px; height: 0; background: var(--accent); }
 .step { position: relative; display: grid; grid-template-columns: 56px 1fr; gap: 28px; padding: 26px 0; }
 .step-node { width: 56px; height: 56px; border-radius: 12px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; background: var(--bg-raised); border: 1px solid var(--line); font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 500; color: var(--accent); transition: border-color 0.3s, box-shadow 0.3s; }
-.step.is-visible .step-node { border-color: var(--accent-line); box-shadow: 0 0 0 4px var(--accent-soft); }
+.step.is-visible .step-node { border-color: var(--accent-line); }
 .step-content { padding-top: 6px; }
 .step h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
 .step p { font-size: 0.92rem; color: var(--text-dim); line-height: 1.7; max-width: 620px; }
@@ -369,9 +849,7 @@ nav.nav.scrolled {
 /* ════════════════════════════════════════════════
    МАГАЗИН
    ════════════════════════════════════════════════ */
-.store-header { text-align: center; max-width: 620px; margin: 0 auto 50px; }
-.store-header .lead { margin: 0 auto; }
-.iframe-wrap { max-width: var(--maxw); margin: 0 auto; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--bg-raised); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.8); }
+.iframe-wrap { overflow: hidden; border: 1px solid var(--line); background: var(--bg-raised); }
 .iframe-bar { display: flex; align-items: center; gap: 8px; padding: 13px 18px; border-bottom: 1px solid var(--line); }
 .iframe-bar .d { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
 .iframe-bar .url { margin-left: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-faint); }
@@ -380,17 +858,41 @@ nav.nav.scrolled {
 /* ════════════════════════════════════════════════
    КОНТАКТЫ
    ════════════════════════════════════════════════ */
-#contact .container { text-align: center; }
-.contact-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 50px; text-align: left; }
-.contact-card { display: flex; align-items: center; gap: 18px; padding: 30px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-raised); text-decoration: none; color: inherit; transition: border-color 0.3s, background 0.3s, transform 0.3s var(--ease); }
-/* hover-подъём и press — только у настоящих ссылок (tel/mailto);
-   карточка-адрес — div, не должна притворяться кликабельной */
-a.contact-card:hover { border-color: var(--accent-line); background: rgba(59,158,255,0.04); transform: translateY(-4px); }
-a.contact-card:active { transform: translateY(-2px) scale(0.99); }
-.ci-icon { width: 48px; height: 48px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--accent-line); color: var(--accent); background: var(--accent-soft); }
-.ci-icon svg { width: 20px; }
-.ci-text label { display: block; font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; }
-.ci-text span { font-size: 0.98rem; color: var(--text); font-weight: 500; }
+/* Контакты набраны колонками с волосяной отбивкой — теми же, что
+   в линейке оборудования. Плашек, иконочных чипов и подъёма на
+   наведении нет: единственная кнопочная форма на сайте — пилюля. */
+.contact-cards { display: grid; grid-template-columns: repeat(3, 1fr); }
+.contact-card {
+  display: block; text-decoration: none; color: inherit;
+  padding: clamp(20px, 2.2vw, 30px) clamp(18px, 2vw, 30px);
+  border-left: 1px solid var(--line);
+}
+.contact-card:first-child { border-left: 0; padding-left: 0; }
+.ci-text label {
+  display: block; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 10px; font-family: var(--font-mono);
+}
+.ci-text span {
+  font-size: clamp(1rem, 1.35vw, 1.4rem); color: var(--ink);
+  font-weight: 500; letter-spacing: -0.015em;
+}
+a.contact-card .ci-text span { transition: color 0.25s var(--ease); }
+a.contact-card:hover .ci-text span { color: var(--brand); }
+
+/* ── Контакты в столбик ──
+   Отбивка в этой раскладке вертикальная, а колонки идут одна под другой,
+   поэтому левая линия превращается в ступеньку: первая карточка стоит
+   вровень с текстом секции, а две следующие — с отступом и висящей
+   чертой сбоку. Переводим отбивку в горизонтальную: линия между
+   строками, поля общие. */
+@media (max-width: 1024px) {
+  .contact-cards { grid-template-columns: 1fr; }
+  .contact-card {
+    padding: clamp(18px, 2.2vw, 26px) 0;
+    border-left: 0; border-top: 1px solid var(--line);
+  }
+  .contact-card:first-child { padding-top: 0; border-top: 0; }
+}
 
 /* ════════════════════════════════════════════════
    ФУТЕР
@@ -412,123 +914,157 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 
 @media (max-width: 760px) {
   footer { padding-top: 56px; }
+  .footer-bottom { padding-bottom: calc(26px + env(safe-area-inset-bottom)); }
   .footer-top { grid-template-columns: 1fr; gap: 36px; padding-bottom: 40px; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
 }
 
 /* ─── REVEAL (GSAP управляет, но дефолт скрыт) ─── */
-.reveal { opacity: 0; transform: translateY(28px); }
+/* сдвиг намеренно короткий: элемент «проявляется», а не «взлетает» */
+.reveal { opacity: 0; transform: translateY(14px); }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1 !important; transform: none !important; }
-  .car-card { transform: none !important; }
 }
 
 /* ════════════════════════════════════════════════
-   APPLE-POLISH · больше воздуха и крупнее типографика
+   ВОЗДУХ И КРУПНАЯ ТИПОГРАФИКА
+   (ритм секций задан выше через --section-y)
    ════════════════════════════════════════════════ */
-section { padding: 168px 0; }
 .h-title { font-size: clamp(2.3rem, 5vw, 4.4rem); line-height: 1.04; letter-spacing: -0.038em; text-wrap: balance; }
 .lead { font-size: 1.12rem; line-height: 1.8; }
 .eyebrow { margin-bottom: 30px; }
 
-/* count-up число набирается ровно по ширине */
-.stat-num .count { font-variant-numeric: tabular-nums; }
-
 /* ════════════════════════════════════════════════
-   КАРУСЕЛЬ ПРОДУКТОВ
+   ЛИНЕЙКА ОБОРУДОВАНИЯ · ряд-«аккордеон»
+   ────────────────────────────────────────────────
+   Карточки делят ряд поровну; под курсором нужная
+   забирает бо́льшую долю, соседние сжимаются и уходят
+   в затемнение. Ширина текстового блока фиксирована,
+   поэтому подпись не переверстывается на раскрытии —
+   двигается только кадр.
    ════════════════════════════════════════════════ */
 .car-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; margin-bottom: 48px; }
-.car-controls { display: flex; gap: 12px; flex-shrink: 0; }
-.car-arrow {
-  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
-  border: 1px solid var(--line); background: rgba(232,238,247,0.03); color: var(--text);
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
-  transition: border-color 0.25s, background 0.25s, opacity 0.25s, transform 0.18s var(--ease);
-}
-.car-arrow svg { width: 20px; height: 20px; }
-.car-arrow:hover:not(:disabled) { border-color: var(--accent-line); background: rgba(59,158,255,0.08); }
-.car-arrow:active:not(:disabled) { transform: scale(0.94); }
-.car-arrow:disabled { opacity: 0.3; cursor: default; }
 
-/* лента с горизонтальным скроллом и снапом */
-.car-viewport { width: 100%; overflow: hidden; }
-.car-track {
-  --gut: max(40px, calc((100vw - var(--maxw)) / 2));
-  display: flex; gap: 22px; overflow-x: auto; scroll-snap-type: x mandatory;
-  scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-  scroll-padding-inline: var(--gut);
-  padding: 4px var(--gut) 24px;
-  cursor: grab; scrollbar-width: none;
+.exp-row {
+  display: flex; gap: 8px;
+  padding: 0 var(--gut);
+  height: clamp(420px, 68svh, 720px);
 }
-.car-track::-webkit-scrollbar { display: none; }
-.car-track.dragging { scroll-snap-type: none; scroll-behavior: auto; cursor: grabbing; }
+.exp-card {
+  position: relative; flex: 1 1 0; min-width: 0; overflow: hidden;
+  border-radius: var(--r); background: #0b0f15;
+  cursor: pointer; isolation: isolate;
+  transition: flex-grow 0.6s var(--ease), filter 0.45s var(--ease);
+}
+.exp-card:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
-.car-card {
-  position: relative;
-  scroll-snap-align: start; flex: 0 0 auto; width: clamp(270px, 30vw, 400px);
-  border-radius: 12px; overflow: hidden; background: var(--bg-raised);
-  border: 1px solid var(--line); display: flex; flex-direction: column;
-  transition: border-color 0.3s, box-shadow 0.3s, transform 0.35s var(--ease);
+.exp-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: -2;
+  opacity: 0.82; transform: scale(1.02);
+  transition: transform 0.8s var(--ease), opacity 0.45s var(--ease);
+  -webkit-user-drag: none; user-select: none;
 }
-.car-card:hover { transform: translateY(-5px); border-color: rgba(231,237,245,0.18); box-shadow: 0 32px 70px -32px rgba(0,0,0,0.85); }
-.car-track.dragging .car-card { transition: none; }
-.car-card-media {
-  position: relative; aspect-ratio: 16 / 10; overflow: hidden;
-  border-bottom: 1px solid var(--line);
-  background: radial-gradient(120% 120% at 50% 30%, #f4f6f9 0%, #e7ecf2 100%);
+/* кадр читается только с затемнением: на нём лежит белый текст */
+.exp-card::after {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 10, 16, 0.78) 0%,
+    rgba(6, 10, 16, 0.24) 46%,
+    rgba(6, 10, 16, 0.76) 100%
+  );
 }
-.car-card-media img {
-  width: 100%; height: 100%; object-fit: contain; object-position: center;
-  transition: transform 0.6s var(--ease); -webkit-user-drag: none; user-select: none;
-}
-.car-card:hover .car-card-media img { transform: scale(1.04); }
-.car-num {
-  position: absolute; top: 14px; left: 14px; z-index: 2;
-  font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.12em;
-  color: var(--accent-strong); background: rgba(255,255,255,0.9); border: 1px solid rgba(31,111,194,0.2);
-  padding: 4px 9px; border-radius: 4px;
-}
-.car-body { padding: 26px 28px 30px; display: flex; flex-direction: column; flex: 1; }
-.car-body h3 { font-size: 1.18rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.015em; margin-bottom: 12px; }
-.car-body p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.65; flex: 1; }
-.car-body .tag-row { margin-top: 20px; }
 
-/* точки-пагинация */
-.car-dots { display: flex; justify-content: center; gap: 10px; margin-top: 40px; }
-.car-dot { width: 8px; height: 8px; padding: 0; border: none; border-radius: 20px; background: var(--line); cursor: pointer; transition: width 0.35s var(--ease), background 0.3s; }
-.car-dot.on { width: 26px; background: var(--accent); }
+.exp-body {
+  position: absolute; z-index: 2; top: 0; left: 0;
+  padding: clamp(16px, 1.7vw, 26px);
+  /* фиксированная мера подписи — иначе заголовок перебирается на раскрытии;
+     она же задаёт нижнюю границу сжатия карточки (см. flex-grow ниже) */
+  width: clamp(120px, 10vw, 190px);
+}
+.exp-title { font-size: 0.95rem; font-weight: 500; line-height: 1.3; color: #fff; }
+.exp-more {
+  width: clamp(230px, 26vw, 420px); margin-top: 14px;
+  opacity: 0; transform: translateY(8px); pointer-events: none;
+  transition: opacity 0.35s var(--ease), transform 0.5s var(--ease);
+}
+.exp-text { font-size: 0.88rem; line-height: 1.65; color: rgba(255, 255, 255, 0.76); }
+.exp-tags {
+  display: block; margin-top: 12px;
+  font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.exp-num {
+  position: absolute; z-index: 2;
+  left: clamp(16px, 1.7vw, 26px); bottom: clamp(14px, 1.4vw, 22px);
+  font-size: 0.72rem; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.55);
+}
+
+/* раскрытие — только там, где есть настоящее наведение */
+@media (hover: hover) and (pointer: fine) {
+  /* сжатие мягкое: карточка не должна становиться уже своей подписи,
+     иначе заголовок обрезается вместо переноса */
+  .exp-row:hover .exp-card,
+  .exp-row:focus-within .exp-card { flex-grow: 0.78; filter: brightness(0.5) saturate(0.5); }
+
+  .exp-row:hover .exp-card:hover,
+  .exp-row:focus-within .exp-card:focus-within { flex-grow: 2.4; filter: none; }
+
+  .exp-card:hover .exp-img,
+  .exp-card:focus-within .exp-img { opacity: 1; transform: scale(1.06); }
+
+  .exp-card:hover .exp-more,
+  .exp-card:focus-within .exp-more { opacity: 1; transform: none; pointer-events: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exp-card, .exp-img, .exp-more { transition: none; }
+}
 
 /* ════════════════════════════════════════════════
    RESPONSIVE
    ════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .container { padding: 0 28px; }
-  section { padding: 100px 0; }
-  .contact-cards { grid-template-columns: 1fr; }
-  .car-track { --gut: 28px; }
-  .car-card { width: clamp(280px, 62vw, 440px); }
+  /* пять карточек в ряд перестают читаться — раскладываем сеткой 2×N */
+  .exp-row { flex-wrap: wrap; height: auto; gap: 10px; }
+  .exp-card { flex: 1 1 calc(50% - 5px); height: clamp(240px, 42svh, 380px); }
+  .exp-body { width: auto; right: 0; }
+}
+
+/* ── Описание оборудования на тач-устройствах ──
+   Раскрытие по наведению здесь не работает: наводить нечем. Раньше
+   .exp-more просто скрывался, и с планшета и телефона пропадали разом
+   описание и теги — то есть весь смысл карточки, кроме названия.
+   Возвращаем их на место статично: карточка перестаёт быть «аккордеоном»
+   и становится обычной плиткой, где подпись видна сразу. Кадр под
+   текстом притемняем сильнее — иначе светлый снимок съедает строки. */
+@media (hover: none), (pointer: coarse) {
+  /* ряд-«аккордеон» без наведения раскрываться не может, поэтому он и на
+     широком тач-экране становится обычной сеткой плиток */
+  .exp-row { flex-wrap: wrap; height: auto; gap: 10px; }
+  .exp-card { flex: 1 1 clamp(260px, 30%, 380px); height: auto; min-height: clamp(300px, 46svh, 420px); }
+  .exp-body {
+    top: auto; bottom: 0; width: auto; right: 0;
+    padding: clamp(38px, 6vw, 56px) clamp(16px, 4vw, 22px) clamp(16px, 3vw, 20px);
+    background: linear-gradient(180deg,
+      rgba(6, 10, 16, 0) 0%, rgba(6, 10, 16, 0.62) 34%, rgba(6, 10, 16, 0.94) 100%);
+  }
+  .exp-title { font-size: 1.02rem; }
+  .exp-more {
+    display: block; width: auto; margin-top: 10px;
+    opacity: 1; transform: none; pointer-events: auto;
+  }
+  .exp-text { font-size: 0.85rem; line-height: 1.6; }
+  /* номер уводим наверх: внизу теперь текст */
+  .exp-num { bottom: auto; top: clamp(14px, 3vw, 20px); }
 }
 @media (max-width: 700px) {
-  nav.nav { padding: 16px 20px; }
-  nav.nav.scrolled { padding: 12px 20px; }
-  .nav-links, .nav-cta { display: none; }
-  .nav-burger { display: flex; }
-  .container { padding: 0 20px; }
-  section { padding: 80px 0; }
-  .hero-frame { inset: 14px; }
-  .hero-telemetry-inner { gap: 18px; padding: 14px 20px; }
-  .tm { min-width: 70px; }
-  .tm-sep { display: none; }
-  .tm-status { width: 100%; justify-content: center; order: -1; }
-  .scroll-hint { display: none; }
-  .car-head { flex-direction: row; align-items: center; gap: 16px; }
+  /* (шапка уходит в бургер ниже 1200 — см. блок «МОБИЛЬНАЯ ОГРАНКА») */
+  .car-head { flex-direction: column; align-items: flex-start; gap: 24px; }
   .car-head .h-title { font-size: clamp(1.7rem, 7vw, 2.2rem); }
-  .car-track { --gut: 20px; }
-  .car-card { width: 82vw; }
-  .car-arrow { width: 46px; height: 46px; }
-  .about-layout { grid-template-columns: 1fr; gap: 48px; }
-  .about-intro { max-width: none; }
+  .exp-card { flex: 1 1 100%; height: clamp(220px, 38svh, 320px); }
   .step { grid-template-columns: 44px 1fr; gap: 18px; }
   .step-node { width: 44px; height: 44px; }
   .how-line, .how-line-fill { left: 21px; }
@@ -539,8 +1075,6 @@ section { padding: 168px 0; }
 /* ════════════════════════════════════════════════
    ПРОГРАММНЫЙ КОМПЛЕКС · DRILL MONITOR
    ════════════════════════════════════════════════ */
-#software { background:
-  linear-gradient(180deg, rgba(47,131,212,0.025), transparent 30%); }
 .sw-head {
   display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
   align-items: end; margin-bottom: 56px;
@@ -561,14 +1095,12 @@ section { padding: 168px 0; }
   display: flex; flex-direction: column;
   border: 1px solid var(--line); border-radius: 14px;
   background: var(--bg-raised);
-  box-shadow: 0 40px 80px -34px rgba(0,0,0,0.7), 0 0 0 1px rgba(59,158,255,0.04);
-  transition: border-color 0.35s, transform 0.45s var(--ease), box-shadow 0.35s;
+  box-shadow: 0 40px 80px -34px rgba(0,0,0,0.7);
+  transition: border-color 0.35s var(--ease);
 }
-.bento-tile:hover {
-  border-color: var(--accent-line);
-  transform: translateY(-4px);
-  box-shadow: 0 48px 90px -32px rgba(0,0,0,0.85);
-}
+/* плитки ведут себя строго: на наведении только светлеет рамка —
+   ни подъёма, ни ореола, ни зума скриншота */
+.bento-tile:hover { border-color: var(--line-strong); }
 .bento-tile.is-lg   { grid-column: span 8; grid-row: span 2; }
 .bento-tile.is-tall { grid-column: span 4; grid-row: span 2; }
 .bento-tile.is-sm   { grid-column: span 4;  grid-row: span 1; }
@@ -582,7 +1114,6 @@ section { padding: 168px 0; }
   flex: 1 1 auto; min-height: 0; z-index: 0;
   width: 100%; height: 100%; object-fit: cover; object-position: center;
   background: #05080f;
-  transition: transform 0.6s var(--ease);
 }
 .bento-tile.is-tall .bento-shot { object-position: top center; }
 .bento-tile.is-sm .bento-shot,
@@ -592,7 +1123,6 @@ section { padding: 168px 0; }
 .bento-tile.bt-survey .bento-shot { object-fit: contain; object-position: center; }
 /* КНБК: широкая таблица — баннер во всю ширину */
 .bento-tile.bt-bha .bento-shot { object-position: center; }
-.bento-tile:hover .bento-shot { transform: scale(1.03); }
 
 /* верхний readout-бар — тонкий оверлей поверх скриншота */
 .bento-bar {
@@ -655,6 +1185,22 @@ section { padding: 168px 0; }
   backdrop-filter: blur(4px);
 }
 
+/* ── Планшет: мозаика в две колонки ──
+   Двенадцатиколоночная сетка на планшете рассыпается (плитка в 4 колонки
+   становится уже своей подписи), а одна колонка превращает раздел в
+   бесконечную ленту почти квадратных плиток. Промежуточный шаг —
+   шесть колонок: широкие плитки занимают ряд целиком, обычные встают
+   парами. Мозаика остаётся мозаикой, просто крупнее шаг. */
+@media (min-width: 901px) and (max-width: 1180px) {
+  .sw-bento { grid-template-columns: repeat(6, 1fr); grid-auto-rows: clamp(230px, 24vw, 300px); }
+  .bento-tile.is-lg   { grid-column: span 6; grid-row: span 2; }
+  .bento-tile.is-tall { grid-column: span 3; grid-row: span 2; }
+  .bento-tile.is-sm   { grid-column: span 3; grid-row: span 1; }
+  .bento-tile.is-md   { grid-column: span 3; grid-row: span 1; }
+  .bento-tile.is-wide { grid-column: span 6; grid-row: span 1; }
+  .bento-tile.bt-bha  { grid-column: span 3; }
+}
+
 @media (max-width: 900px) {
   .sw-head { grid-template-columns: 1fr; gap: 26px; align-items: start; }
   .sw-bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
@@ -680,13 +1226,13 @@ section { padding: 168px 0; }
 
 /* — фирменный «бортовой» фрейм вместо macOS-светофоров:
      левый акцент-бар + тонкая брендовая линия под баром — */
-.hero-window-bar, .sw-window-bar, .iframe-bar { position: relative; }
-.hero-window-bar::before, .sw-window-bar::before, .iframe-bar::before {
+.hero-window-bar, .iframe-bar { position: relative; }
+.hero-window-bar::before, .iframe-bar::before {
   content: ''; flex-shrink: 0;
   width: 3px; height: 14px; border-radius: 2px;
-  background: var(--brand); box-shadow: 0 0 10px rgba(14,143,212,0.5);
+  background: var(--brand);
 }
-.hero-window-bar::after, .sw-window-bar::after, .iframe-bar::after {
+.hero-window-bar::after, .iframe-bar::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
   background: linear-gradient(90deg, var(--brand-line), transparent 55%);
 }
@@ -713,7 +1259,7 @@ section { padding: 168px 0; }
   0%, 100% { opacity: 1;    box-shadow: 0 0 0 0 var(--live-soft); }
   50%      { opacity: 0.5;  box-shadow: 0 0 0 5px transparent; }
 }
-.hero-live-dot, .sw-live-dot { animation: led-pulse 1.8s var(--ease) infinite; }
+.hero-live-dot, .bento-live-dot { animation: led-pulse 1.8s var(--ease) infinite; }
 
 /* ── каротажный фон первого экрана ── */
 .hero-bg-canvas {
@@ -745,43 +1291,65 @@ section { padding: 168px 0; }
   .hero-readout .tm-k { display: none; }
 }
 
-/* ── How: «бурящийся» таймлайн с метками глубины ── */
+/* ── How: «бурящийся» таймлайн с метками глубины ──
+   Свечения сняты: зелёный и ореолы — сигналы прибора, а не украшение
+   интерфейса сайта. Линия и точка идут одним брендовым тоном. */
 .step-depth {
   display: inline-block; margin-bottom: 8px;
   font-family: var(--font-mono); font-variant-numeric: tabular-nums;
   font-size: 0.66rem; letter-spacing: 0.12em; color: var(--brand);
 }
-.how-line-fill { box-shadow: 0 0 12px rgba(14,143,212,0.35); }
 .how-line-fill::after {
   content: ''; position: absolute; left: 50%; bottom: -3px; transform: translateX(-50%);
-  width: 9px; height: 9px; border-radius: 50%; background: var(--live);
-  box-shadow: 0 0 0 4px var(--live-soft), 0 0 14px var(--live);
+  width: 9px; height: 9px; border-radius: 50%; background: var(--brand);
 }
 
 /* ── завершение проходки: полоса дошла до низа → «цель достигнута» ── */
-/* последний узел загорается зелёным, как достижение проектной глубины */
 .steps.is-complete .step:last-child .step-node {
-  border-color: var(--live); color: var(--live);
-  box-shadow: 0 0 0 4px var(--live-soft), 0 0 22px rgba(70,201,138,0.5);
+  border-color: var(--brand-line); color: var(--brand);
 }
-.steps.is-complete .how-line-fill {
-  background: linear-gradient(180deg, var(--brand), var(--live));
+/* ── ФИНАЛ ПРОХОДКИ ──
+   Линия дошла до устья → снизу разворачивается правило во всю колонку,
+   за ним поднимается крупная строка. Плашек и рамок нет: событие
+   отбивается типографикой и одной линией, как в первоисточнике.
+   Элементы выходят по очереди, чтобы читалось как «прибытие». */
+.how-done { display: grid; margin-top: clamp(32px, 4vw, 56px); }
+.how-done-rule {
+  height: 1px; background: var(--brand);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.9s var(--ease-out);
 }
-/* приборная плашка-итог под таймлайном */
-.how-done {
-  max-width: 880px; margin: 30px auto 0;
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px 18px; border: 1px solid var(--line); border-radius: var(--r);
-  background: rgba(70,201,138,0.04);
-  opacity: 0; transform: translateY(10px);
-  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease), border-color 0.55s;
+.how-done.show .how-done-rule { transform: scaleX(1); }
+
+.how-done-label, .how-done-title, .how-done-meta {
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
 }
-.how-done.show { opacity: 1; transform: none; border-color: rgba(70,201,138,0.32); }
-.how-done-dot {
-  width: 9px; height: 9px; border-radius: 50%; background: var(--live); flex-shrink: 0;
-  box-shadow: 0 0 0 4px var(--live-soft), 0 0 12px var(--live);
+.how-done.show .how-done-label { opacity: 1; transform: none; transition-delay: 0.35s; }
+.how-done.show .how-done-title { opacity: 1; transform: none; transition-delay: 0.48s; }
+.how-done.show .how-done-meta  { opacity: 1; transform: none; transition-delay: 0.62s; }
+
+.how-done-label {
+  margin-top: clamp(16px, 2vw, 24px);
+  font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--brand);
 }
-.how-done-text { font-size: 0.7rem; letter-spacing: 0.16em; color: var(--live); }
+.how-done-title {
+  font-family: var(--font-display); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(1.7rem, 4.4vw, 4.2rem); line-height: 1; letter-spacing: -0.045em;
+  color: var(--ink); margin-top: 12px;
+}
+.how-done-meta {
+  margin-top: clamp(14px, 1.8vw, 22px);
+  font-size: 0.74rem; letter-spacing: 0.08em; color: var(--ink-faint);
+}
+.how-done-meta b { color: var(--ink); font-weight: 500; }
+
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; gap: clamp(36px, 6vw, 64px); }
+  .split-aside { position: static; padding-right: var(--gut); }
+  .split-main { padding-left: var(--gut); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .hero-live-dot, .sw-live-dot { animation: none; }
@@ -813,39 +1381,6 @@ section { padding: 168px 0; }
 .nav-links a.active { color: var(--ink); }
 .nav-links a.active::after { transform: scaleX(1); }
 
-/* ════════════════════════════════════════════════
-   SPOTLIGHT · светящаяся граница карточек за курсором
-   ────────────────────────────────────────────────
-   Маской вырезаем середину — подсвечивается только
-   1px рамка, текст карточки не затрагивается.
-   ════════════════════════════════════════════════ */
-.contact-card { position: relative; }
-.car-card, .contact-card, .about-card {
-  --mx: 50%; --my: 0%;
-}
-.car-card::before, .contact-card::before, .about-card::before {
-  content: ''; position: absolute; inset: 0; z-index: 3;
-  border-radius: inherit; padding: 1px; pointer-events: none;
-  opacity: 0; transition: opacity 0.3s var(--ease);
-  background: radial-gradient(180px circle at var(--mx) var(--my), var(--brand), transparent 55%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-}
-.car-card:hover::before, a.contact-card:hover::before, .about-card:hover::before { opacity: 0.9; }
-
-/* ─── магнитные hero-CTA: transform отдаём GSAP, убираем его из CSS-transition ─── */
-.hero-actions .btn {
-  transition: background 0.25s var(--ease), border-color 0.25s, color 0.25s;
-  will-change: transform;
-}
-
-/* ─── суффикс у счётчиков статистики hero ─── */
-.hero-stat-suffix { color: var(--brand); }
-
-@media (prefers-reduced-motion: reduce) {
-  .car-card::before, .contact-card::before, .about-card::before { display: none; }
-}
 
 /* ════════════════════════════════════════════════
    МОБИЛЬНАЯ ОГРАНКА · единый ритм и цельность на телефоне
@@ -855,11 +1390,26 @@ section { padding: 168px 0; }
    меню → бургер ровно тогда, когда раскладка уходит в колонку.
    ════════════════════════════════════════════════ */
 
-/* навигация уходит в бургер одновременно со сворачиванием hero (≤980),
-   чтобы не было «десктопного меню над одноколоночным экраном» */
-@media (max-width: 980px) {
+/* ── Порог бургера: 1200, а не 980 ──
+   Шапка стоит в колоночной сетке страницы, и логотип живёт в первой
+   ячейке шириной --rail-1 (22%). Замер: блок «лого + ГЕОТЕХНАВИГАЦИЯ»
+   занимает 234px плюс поле --gut, то есть ячейки хватает только при
+   0.22·W ≥ gut + 234 → примерно от 1200px. Ниже этого пункт меню
+   «О компании» наезжал на название компании — на планшете в альбомной
+   ориентации (1024) наезд был в 34px. Порог 1200 закрывает всю полосу;
+   раскладка hero при этом остаётся двухколоночной до 980 — это разные
+   вещи и разные брейкпоинты. */
+@media (max-width: 1200px) {
+  nav.nav, nav.nav.scrolled { display: flex; justify-content: space-between; padding-left: var(--gut); padding-right: var(--gut); }
+  .nav-logo { padding-left: 0; }
   .nav-links, .nav-cta { display: none; }
   .nav-burger { display: flex; }
+}
+
+/* второе окно hero на планшете уводит за правую кромку экрана —
+   поджимаем вылет, чтобы слой читался как глубина, а не как обрезка */
+@media (max-width: 1100px) {
+  .hero-window--back { top: -30px; right: -22px; width: 66%; }
 }
 
 @media (max-width: 700px) {
@@ -870,21 +1420,25 @@ section { padding: 168px 0; }
   .lead { font-size: 1.05rem; line-height: 1.7; }
   .eyebrow { margin-bottom: 22px; }
 
-  /* hero: плотнее сверху, заголовок без переполнения */
-  #hero { padding: 104px 0 56px; }
-  .hero-title { font-size: clamp(2rem, 9vw, 2.7rem); line-height: 1.08; margin-bottom: 22px; }
-  .hero-desc { font-size: 1rem; line-height: 1.7; margin-bottom: 30px; }
+  /* hero: заголовок без переполнения. Вертикальных отступов секция
+     не получает — экран колоды должен остаться ровно в 100svh,
+     иначе уход и приход соседних экранов расходятся.
+
+     Кегли и отступы здесь подобраны под одну задачу: блок текста
+     должен закончиться достаточно высоко, чтобы окно прибора с живым
+     ридаутом попало на экран целиком. До правки текст съедал столько
+     высоты, что окно показывалось лишь в узкой полосе прокрутки —
+     на телефоне главный кадр продукта фактически проскакивал. */
+  #hero .deck-inner { padding-top: 96px; }
+  .hero-inner { gap: 26px; }
+  .hero-title { font-size: clamp(1.95rem, 8vw, 2.5rem); line-height: 1.06; margin-bottom: 18px; }
+  .hero-desc { font-size: 0.97rem; line-height: 1.62; margin-bottom: 22px; }
+  #hero .deck-count { padding-top: 16px; }
 
   /* CTA — аккуратным стеком на всю ширину, «как в приложении» */
   .hero-actions { gap: 10px; }
   .hero-actions .btn,
   .sw-actions .btn { flex: 1 1 100%; justify-content: center; padding: 15px 24px; }
-
-  /* три показателя остаются в ряд, но соразмерны и без давки */
-  .hero-stats { gap: 12px; margin-top: 38px; padding-top: 26px; }
-  .hero-stat { flex: 1; min-width: 0; }
-  .hero-stat-num { font-size: 1.5rem; }
-  .hero-stat-label { font-size: 0.72rem; margin-top: 8px; }
 
   /* readout: равномерные ячейки, без висячей правой границы на переносе */
   .hero-readout .tm { flex: 1 1 auto; justify-content: center; }
@@ -907,42 +1461,98 @@ section { padding: 168px 0; }
 
 @media (max-width: 380px) {
   .hero-title { font-size: clamp(1.8rem, 9.5vw, 2.4rem); }
-  .hero-stat-num { font-size: 1.3rem; }
-  .hero-stat-label { font-size: 0.68rem; }
   .hero-actions .btn, .sw-actions .btn { padding: 14px 20px; }
 }
 
 /* ════════════════════════════════════════════════
-   СЕКЦИОННЫЙ HUD · приборное табло текущего раздела
+   ТРАЕКТОРИЯ · крупный процедурный объект
    ────────────────────────────────────────────────
-   Фиксированный «индикатор проходки»: номер секции
-   01–06, её имя и прогресс внутри раздела. Появляется
-   после ухода с hero, как панель приборов в работе.
+   Закрывающий разворот в логике первоисточника: один
+   объёмный объект во весь экран, поверх него — короткий
+   заголовок в углу и подписи, приколотые к самому телу
+   объекта. Направляющие здесь отключены (data-rails="off"):
+   на сплошной пластике они читаются мусором.
    ════════════════════════════════════════════════ */
-.section-hud {
-  position: fixed; left: 28px; bottom: 26px; z-index: 90;
-  display: flex; flex-direction: column; gap: 9px;
-  width: 176px; padding: 13px 16px 15px;
-  background: var(--glass); border: 1px solid var(--line);
-  border-radius: var(--r);
-  backdrop-filter: blur(14px) saturate(150%);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
-  font-family: var(--font-mono); pointer-events: none;
-  opacity: 0; transform: translateY(12px);
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+#trajectory { padding: 0; }
+.traj { position: relative; min-height: 100svh; overflow: hidden; }
+/* сцена разлита по всей секции — заголовок и сноска лежат поверх объекта */
+.traj-stage { position: absolute; inset: 0; z-index: 0; }
+.traj-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.traj-head {
+  position: absolute; z-index: 2; left: 0; top: clamp(110px, 16vh, 190px);
+  padding: 0 var(--gut); max-width: min(560px, 52vw);
 }
-.section-hud.show { opacity: 1; transform: none; }
-.shud-no { display: flex; align-items: baseline; gap: 3px; line-height: 1; overflow: hidden; }
-.shud-no b { font-size: 1.55rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
-.shud-no i { font-style: normal; font-size: 0.8rem; color: var(--ink-faint); }
-.shud-label {
-  font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.traj-title {
+  font-family: var(--font-display); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(1.8rem, 3.6vw, 3.6rem); line-height: 1.02; letter-spacing: -0.045em;
+  color: var(--ink); margin: 18px 0 clamp(22px, 2.6vw, 32px);
 }
-.shud-bar { position: relative; height: 2px; border-radius: 2px; background: var(--line); overflow: hidden; }
-.shud-bar > i {
-  position: absolute; inset: 0; transform-origin: left; transform: scaleX(0);
-  background: linear-gradient(90deg, var(--brand), var(--cyan));
-  box-shadow: 0 0 8px rgba(14,143,212,0.45); will-change: transform;
+.traj-note {
+  position: absolute; z-index: 2; right: var(--gut); bottom: clamp(40px, 6vh, 78px);
+  width: min(380px, 44vw);
+  font-size: 0.88rem; line-height: 1.7; color: var(--ink-dim);
+  border-top: 1px solid var(--line-strong); padding-top: 18px;
 }
-@media (max-width: 900px) { .section-hud { display: none; } }
+
+/* подписи на теле объекта: позицию каждый кадр ставит скрипт */
+.traj-marks { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.traj-mark {
+  position: absolute; top: 0; left: 0;
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 10px 14px 11px 16px;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.4s var(--ease);
+  /* мягкое тёмное пятно под текстом — иначе подпись теряется
+     на светлой стороне трубы */
+  background: radial-gradient(60% 70% at 40% 50%, rgba(7,9,13,0.92) 0%, rgba(7,9,13,0) 100%);
+}
+.traj-mark b { font-size: 0.8rem; font-weight: 500; color: var(--ink); letter-spacing: 0.02em; }
+.traj-mark i {
+  font-style: normal; font-size: 0.68rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+
+/* ── Узкий экран: разворот распускается в три яруса ──
+   На широком экране заголовок и сноска намеренно лежат ПОВЕРХ трубы —
+   объект работает подложкой. На телефоне места для наложения нет: пилюля
+   садилась на подпись «устье», сноска шла прямо по трубе, а крайняя метка
+   «3 842 м · забой» уезжала за правую кромку. Поэтому здесь тот же
+   материал выстраивается в поток — заголовок, полоса с объектом, сноска, —
+   и ничто ни на что не наезжает. Сам объект никуда не девается: он просто
+   получает собственную полосу вместо всего экрана. */
+@media (max-width: 900px) {
+  .traj {
+    display: flex; flex-direction: column;
+    min-height: 0; padding: var(--section-y) 0;
+  }
+  /* порядок чтения: рубрика и заголовок → объект → пояснение.
+     В разметке сцена идёт первой (так она лежит подложкой на широком
+     экране), поэтому здесь ярусы расставляет order, а не правка DOM */
+  .traj-head {
+    order: 0;
+    position: static; max-width: none;
+    top: auto; padding: 0 var(--gut);
+  }
+  /* Полоса задана пропорцией, а не высотой: профиль в проекции заметно
+     шире, чем выше, и в квадратной полосе над ним оставалась пустота.
+     Масштаб объекта скрипт подбирает под этот прямоугольник сам
+     (trajectoryCanvas.js), поэтому пропорция здесь — единственная
+     величина, которой раздел управляется. */
+  .traj-stage {
+    order: 1;
+    position: relative; inset: auto;
+    width: 100%; aspect-ratio: 16 / 9;
+    max-height: 52svh;
+    margin: clamp(18px, 3.5vh, 34px) 0;
+  }
+  .traj-note {
+    order: 2;
+    position: static; width: auto; margin: 0 var(--gut);
+    right: auto; bottom: auto; padding-top: 16px; transform: none;
+  }
+  /* подписи на теле трубы мельче — иначе три метки забивают узкую полосу */
+  .traj-mark { padding: 8px 10px 9px 12px; }
+  .traj-mark b { font-size: 0.72rem; }
+  .traj-mark i { font-size: 0.6rem; letter-spacing: 0.1em; }
+}

@@ -5,6 +5,8 @@ const MODULES = [
     key: 'drilling',
     n: '01',
     tab: 'Бурение',
+    // единственный настоящий real-time монитор — только он носит бейдж LIVE
+    live: true,
     img: '/app-drilling.webp',
     size: 'lg',
     title: 'Мониторинг бурения в реальном времени',
@@ -54,11 +56,11 @@ const MODULES = [
 
 export default function Software() {
   return (
-    <section id="software">
+    <section id="software" data-theme="black">
       <div className="container">
         <div className="sw-head">
           <div>
-            <div className="eyebrow reveal"><span className="ey-no">02<span className="ey-den"> / 06</span></span>Программный комплекс</div>
+            <div className="eyebrow reveal"><span className="ey-no">02<span className="ey-den"> / 07</span></span>Программный комплекс</div>
             <h2 className="h-title reveal">
               Drill&nbsp;Monitor — мониторинг <br />бурения в реальном времени
             </h2>
@@ -98,7 +100,7 @@ export default function Software() {
               )}
               <div className="bento-bar">
                 <span className="bento-kicker mono">{m.n} · {m.tab}</span>
-                <span className="bento-live"><span className="bento-live-dot" />LIVE</span>
+                {m.live && <span className="bento-live"><span className="bento-live-dot" />LIVE</span>}
               </div>
               <div className="bento-body">
                 <h3>{m.title}</h3>

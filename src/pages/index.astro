@@ -9,24 +9,32 @@ import How from '../components/How.jsx'
 import Store from '../components/Store.jsx'
 import Contact from '../components/Contact.jsx'
 import Footer from '../components/Footer.jsx'
+import Marquee from '../components/Marquee.jsx'
+import Facts from '../components/Facts.jsx'
+import Trajectory from '../components/Trajectory.jsx'
+
+const CAPABILITIES = [
+  'MWD / LWD', 'Гамма-каротаж', 'Инклинометрия', 'Drill Monitor',
+  'Декодирование сигнала', 'Сервис 24/7', 'Реестр отечественного ПО',
+]
 ---
 
 <Layout>
   <div class="bg-fx"></div>
 
-  <Nav client:load />
+  {/* Без client:load: разметку рисует сервер, поведение — scripts/nav.js.
+      Гидратация здесь стоила бы 136 КБ React ради класса и бургера. */}
+  <Nav />
   <main id="main">
     <Hero />
     <About />
-    <div class="divider"></div>
+    <Facts />
     <Software />
-    <div class="divider"></div>
+    <Marquee items={CAPABILITIES} theme="gray" speed={45} />
     <Showcase />
-    <div class="divider"></div>
     <How />
-    <div class="divider"></div>
+    <Trajectory />
     <Store />
-    <div class="divider"></div>
     <Contact />
   </main>
   <Footer />

@@ -104,8 +104,54 @@ if (canvas) {
     raf = requestAnimationFrame(loop)
   }
 
+  /* ─── Цикл крутится только когда планшет действительно на экране ───
+     Раньше rAF не останавливался никогда: первый экран давно уехал вверх,
+     а сетка, подписи и пять кривых продолжали перерисовываться 60 раз
+     в секунду до конца страницы — на всей её длине и на всех вкладках,
+     открытых в фоне. Ни на вид, ни на поведение это не влияло, зато
+     ощутимо грело процессор и сажало батарею на телефоне.
+
+     Гасим по двум признакам: canvas ушёл из вьюпорта или вкладка
+     скрыта. Фаза offset при этом сохраняется, так что при возврате
+     дорожки продолжаются с того же места, а не прыгают. */
+  let onScreen = true
+
+  const running = () => raf !== 0
+  const play = () => {
+    if (running() || reduce || !onScreen || document.hidden) return
+    raf = requestAnimationFrame(loop)
+  }
+  const stop = () => {
+    if (!running()) return
+    cancelAnimationFrame(raf)
+    raf = 0
+  }
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(
+      (entries) => {
+        onScreen = entries[0].isIntersecting
+        onScreen ? play() : stop()
+      },
+      { threshold: 0 },
+    ).observe(canvas)
+  }
+
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()))
+
+  /* ресайз прижимаем к кадру: серия событий при перетаскивании окна
+     давала пересборку буфера canvas на каждое из них */
+  let resizeRaf = 0
+  window.addEventListener('resize', () => {
+    if (resizeRaf) return
+    resizeRaf = requestAnimationFrame(() => {
+      resizeRaf = 0
+      resize()
+      if (!running()) draw()   // на паузе перерисовываем кадр вручную
+    })
+  })
+
   resize()
-  window.addEventListener('resize', resize)
   if (reduce) draw()
-  else raf = requestAnimationFrame(loop)
+  else play()
 }

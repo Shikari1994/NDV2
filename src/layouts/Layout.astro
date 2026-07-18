@@ -43,28 +43,57 @@ const orgSchema = {
     <meta property="og:image" content={Astro.site ? new URL(logoHref, Astro.site).href : logoHref} />
     <meta name="theme-color" content="#07090d" />
 
+    <!-- Первый экран — крупная картинка прибора в hero. Браузер находит её
+         только разобрав HTML и CSS; preload запускает загрузку сразу. -->
+    <link rel="preload" as="image" href={asset('/app-drilling.webp')} fetchpriority="high" />
+
+    <!-- Шрифты.
+         Начертание Geologica 300 убрано: font-weight:300 в index.css не
+         встречается ни разу, а браузерный дефолт такой вес не даёт — файл
+         качался впустую.
+
+         Таблица подключена не блокирующе: media="print" снимает её с
+         критического пути, onload возвращает в дело. В URL стоит
+         display=swap, то есть текст в любом случае сначала рисуется
+         запасной гарнитурой и подменяется по приходу файла — приём лишь
+         убирает ожидание ответа стороннего домена до первой отрисовки,
+         конечный вид страницы тот же. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=Geologica:wght@400;500;600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all';this.onload=null"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=Geologica:wght@400;500;600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
   </head>
   <body>
     <a class="skip-link" href="#main">Перейти к содержимому</a>
-    <aside class="section-hud" aria-hidden="true">
-      <span class="shud-no"><b data-shud-no>00</b><i> / 06</i></span>
-      <span class="shud-label" data-shud-label>Обзор</span>
-      <span class="shud-bar"><i data-shud-bar></i></span>
-    </aside>
     <slot />
+    <!-- Шапка первой и отдельным файлом: бургер начинает нажиматься,
+         не дожидаясь разбора Lenis и GSAP из motion.js. -->
+    <script>
+      import '../scripts/nav.js'
+    </script>
     <script>
       import '../scripts/motion.js'
     </script>
     <script>
       import '../scripts/heroCanvas.js'
+    </script>
+    <script>
+      import '../scripts/trajectoryCanvas.js'
+    </script>
+    <script>
+      import '../scripts/globeCanvas.js'
     </script>
   </body>
 </html>

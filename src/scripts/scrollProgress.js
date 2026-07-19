@@ -1,0 +1,39 @@
+/* ─── Прогресс прокрутки сквозь прибитую сцену ───
+   0 — сцена только прилипла к верхней кромке, 1 — обёртка кончилась
+   и сцена уходит вверх.
+
+   Модуль отдельный, потому что счётчиков два: карточки с ночью ведёт
+   aboutScene.js, земной шар — globeCanvas.js. Оба обязаны считать ОДНО
+   число: разойдись они на пару процентов — и карточка начнёт уходить
+   не там, где шар доворачивается.
+
+   Вычитается высота САМОЙ сцены, а не окна. Сцена стоит в 100svh, то
+   есть в «малом» вьюпорте — высоте при показанной адресной строке, —
+   а window.innerHeight на мобильном гуляет вместе с этой строкой. На
+   десктопе числа совпадают, на телефоне расходились на её высоту, и
+   прогресс приходил к единице раньше или позже конца обёртки. */
+export const clamp01 = (v) => Math.min(1, Math.max(0, v))
+
+/* линейный ремап: доля пути между from и to, с обрезкой по краям.
+   Им нарезаны все фазы сцены — листание, ночь, набор строки, уход. */
+export const span = (p, from, to) => clamp01((p - from) / (to - from))
+
+export const smooth = (t) => t * t * (3 - 2 * t)
+
+export function makeProgress(wrap, stage) {
+  return () => {
+    const r = wrap.getBoundingClientRect()
+    const len = r.height - (stage?.offsetHeight || window.innerHeight)
+    return len > 0 ? clamp01(-r.top / len) : 0
+  }
+}
+
+/* Позиция документа, в которой прогресс сцены равен p — обратная функция
+   к makeProgress. Нужна стрелкам карточек: они не переключают факт сами,
+   а увозят страницу в точку, где его показывает сам скролл. */
+export function offsetFor(wrap, stage, p) {
+  const r = wrap.getBoundingClientRect()
+  const top = r.top + window.scrollY
+  const len = r.height - (stage?.offsetHeight || window.innerHeight)
+  return top + Math.max(0, len) * p
+}

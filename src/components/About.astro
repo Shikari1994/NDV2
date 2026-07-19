@@ -1,22 +1,27 @@
 ---
 import { asset } from '../lib/asset.js'
-import Globe from './Globe.astro'
 
-/* Разворот «ключевые цифры»: слева прибитая колонка — рубрика и
-   карточка-изображение, справа лента цифр, по экрану на пункт.
+/* ─── «О компании» — одна сцена, всё движется вместе ───
 
-   Наложение здесь — приём, а не дефект: следующий пункт наезжает
-   на предыдущий, и кромка наезда видна. Кромок две, и они
-   сознательно рассинхронизированы — слева едет картинка, справа
-   панель с числом, и левая уходит вперёд правой. Из-за этого в
-   переходе видно оба шва на разной высоте.
+   Раньше здесь стояли два раздела подряд: штабель «Ключевых цифр» и вслед
+   отдельная сцена с земным шаром. Теперь это одна прибитая сцена, и —
+   главное — акты не идут друг за другом, а разворачиваются одновременно
+   по одному прогрессу прокрутки:
 
-   Панели правой колонки складываются штабелем на чистом sticky,
-   картинки слева двигает motion.js. Каждая цифра поэтому — свой
-   слой: article для числа, .spread-shot для картинки.
+     • стеклянная карточка листает три факта;
+     • снизу выходит и подрастает земной шар, доворачиваясь Россией;
+     • светлая заливка постепенно уходит в синюю ночь.
 
-   Финал раздела — глобус: четвёртый пункт того же счётчика. */
-const CARDS = [
+   Всё это concurrent: к финалу шар заполнил кадр, фон синий, показан
+   последний факт. Карточка и заголовок не уходят — они лежат стеклом
+   поверх наливающейся сцены, ровно как в референсе белая карточка над
+   глобусом. Стекло здесь оправдано тем и оправдано: под карточкой фон
+   меняется, а стекло просто берёт то, что под ним.
+
+   Разметка только раскладывает слои. Прогресс, листание, ночь и смену
+   цвета текста ведёт scripts/aboutScene.js; земной шар — globeCanvas.js.
+   Оба берут прогресс из одного модуля, поэтому не разъезжаются.  */
+const FACTS = [
   {
     big: '15', unit: 'лет', kicker: 'На рынке телеметрии',
     text: 'Разрабатываем и производим системы MWD/LWD с 2010 года. Оборудование работает на объектах ведущих добывающих компаний России и СНГ.',
@@ -34,51 +39,74 @@ const CARDS = [
   },
 ]
 
-const TOTAL = String(CARDS.length + 1).padStart(2, '0')
+const total = String(FACTS.length).padStart(2, '0')
 ---
 
 <section id="about" data-theme="light">
-  <div class="spread" data-spread>
-    <div class="spread-aside">
-      <div class="spread-head">
-        <div class="eyebrow"><span class="ey-no">01<span class="ey-den"> / 07</span></span>О компании</div>
-        <h2 class="spread-title">Ключевые цифры</h2>
-        <p class="lead">
-          ГЕОТЕХНАВИГАЦИЯ — российский разработчик и производитель
-          телеметрического оборудования и ПО для контроля траектории бурения.
-        </p>
-        <a class="pill" href="#contact">связаться</a>
+  <div class="atlas" data-atlas>
+    <div class="atlas-stage" data-atlas-stage>
+      {/* Ночь. Отдельным слоем над заливкой и под шаром: прозрачность
+          этого слоя наливает скролл покадрово, а не переключает классом. */}
+      <div class="atlas-night" aria-hidden="true"></div>
+      <canvas class="atlas-canvas" data-globe-canvas aria-hidden="true"></canvas>
+
+      {/* Заголовок раздела — на месте всю сцену. Тёмный на светлом старте,
+          к финалу перекрашивается в светлый под синей ночью (.is-night). */}
+      <div class="atlas-copy">
+        <div class="atlas-head">
+          <div class="eyebrow"><span class="ey-no">01<span class="ey-den"> / 07</span></span>О компании</div>
+          <h2 class="atlas-title">Ключевые цифры</h2>
+          <p class="lead">
+            Реализуем проекты по всей России — от Западной Сибири до
+            шельфовых месторождений, с телеметрией и геонавигацией
+            собственной разработки.
+          </p>
+          <a class="pill" href="#contact">связаться</a>
+        </div>
       </div>
 
-      <div class="spread-media" aria-hidden="true">
-        {CARDS.map((c, i) => (
-          <div class="spread-shot" data-spread-shot={i}>
-            <img src={asset(c.img)} alt="" loading="lazy" draggable="false" />
+      <div class="atlas-deck">
+        {/* Слот — grid в одну ячейку: карточки лежат друг на друге, высота
+            слота равна самой высокой. Видима ровно одна — её ведёт скролл. */}
+        <div class="atlas-slot">
+          {FACTS.map((f, i) => (
+            <article class="atlas-card" data-atlas-card={i} aria-hidden={i !== 0} inert={i !== 0}>
+              <div class="ac-shot">
+                <img src={asset(f.img)} alt="" loading="lazy" draggable="false" />
+              </div>
+
+              <div class="ac-body">
+                <span class="ac-big">
+                  {f.big}
+                  {f.unit && <span class="ac-unit">{f.unit}</span>}
+                </span>
+                <span class="ac-kicker">{f.kicker}</span>
+                <p class="ac-text">{f.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div class="atlas-bar">
+          <span class="atlas-count mono" aria-hidden="true">
+            <b data-atlas-count>01</b><i>/{total}</i>
+          </span>
+
+          {/* Стрелки не переключают карточку сами — они увозят страницу
+              к нужной точке той же прокрутки (aboutScene.js). Иначе на
+              странице оказалось бы два источника правды о текущем факте. */}
+          <div class="atlas-nav">
+            <button type="button" class="atlas-arrow" data-atlas-prev aria-label="Предыдущий факт">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="atlas-arrow" data-atlas-next aria-label="Следующий факт">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
 
-    <div class="spread-main">
-      <span class="spread-count mono" aria-hidden="true">
-        <b data-spread-count>01</b>
-        <i>/{TOTAL}</i>
-      </span>
-
-      {CARDS.map((c, i) => (
-        <article class="spread-item" data-spread-item={i} style={`--sc-shot: url(${asset(c.img)})`}>
-          <div class="sc-body">
-            <span class="sc-big">
-              {c.big}
-              {c.unit && <span class="sc-unit">{c.unit}</span>}
-            </span>
-            <span class="sc-kicker">{c.kicker}</span>
-            <p class="sc-text">{c.text}</p>
-          </div>
-        </article>
-      ))}
+      <span class="atlas-label mono" aria-hidden="true">География деятельности</span>
     </div>
   </div>
-
-  <Globe index={TOTAL} total={TOTAL} />
 </section>

@@ -701,6 +701,7 @@ nav.nav.scrolled,
 .bento-tile.is-sm .tag,
 .bento-tile.is-wide .tag,
 .deck-cta,
+.atlas-deck,
 .glass {
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
@@ -740,6 +741,7 @@ nav.nav.scrolled,
   .bento-tile.is-sm .tag,
   .bento-tile.is-wide .tag,
   .deck-cta,
+  .atlas-deck,
   .glass { background: var(--glass-solid); }
 }
 
@@ -755,6 +757,7 @@ nav.nav.scrolled,
   .bento-tile.is-sm .tag,
   .bento-tile.is-wide .tag,
   .deck-cta,
+  .atlas-deck,
   .glass {
     background: var(--glass-solid);
     -webkit-backdrop-filter: none;
@@ -887,250 +890,200 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .nav-mobile a:hover { opacity: 1; }
 
 /* ════════════════════════════════════════════════
-   РАЗВОРОТ «КЛЮЧЕВЫЕ ЦИФРЫ» · О компании
+   «О КОМПАНИИ» · одна прибитая сцена на два акта
    ────────────────────────────────────────────────
-   Две колонки одной grid-сетки: левая прибита sticky
-   (рубрика + карточка-изображение), правая — штабель
-   панелей с числами, по экрану на пункт.
+   Акт I  — стеклянная карточка листает факты на светлой заливке.
+   Акт II — фон уходит в ночь, снизу выходит земной шар и доворачивается
+            Россией к зрителю, строка слева набирается по словам.
 
-   Наложение — приём: следующий пункт наезжает на
-   предыдущий, кромка наезда видна. Справа штабель
-   собирается на чистом sticky — панели непрозрачны
-   и липнут к одной кромке, поэтому каждая следующая
-   закрывает предыдущую сама, без скрипта. Слева тот
-   же наезд отыгрывают слои картинок (motion.js),
-   и идут они с опережением — швы не совпадают.
+   Раньше это были два раздела подряд — штабель «Ключевых цифр» и вслед
+   отдельная сцена с шаром. Оба прибивали экран, оба считали свой скролл,
+   и стык читался как «раздел кончился, начался похожий». Теперь сцена
+   одна: карточка и шар живут на общем прогрессе прокрутки.
 
-   Пин-сцены здесь нет намеренно: прошлая версия
-   уводила ленту абсолютным позиционированием и на
-   реальных высотах экрана ломала левую колонку.
+   Раскладка абсолютная, а не сеточная: три слоя во весь экран (ночь,
+   canvas шара, хрома) обязаны лежать точно друг над другом, а карточка
+   и подпись — вставать в заданные точки кадра. Всё движение ведёт
+   scripts/aboutScene.js по одному прогрессу; шар рисует
+   scripts/globeCanvas.js по тому же прогрессу — акты не разъезжаются.
+
+   Карточка стеклянная не для вида: она стоит на светлой заливке в акте I
+   и над тёмной сценой в акте II. Плотную плашку пришлось бы перекрашивать
+   под фон, стекло просто берёт то, что под ним (см. рецепт стекла выше).
+   К моменту полной ночи карточка уже уходит из кадра, поэтому тёмного
+   варианта ей не нужно — она остаётся светлой всё время, пока видна.
    ════════════════════════════════════════════════ */
-.spread {
-  display: grid;
-  grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
-  padding: 0 var(--gut);
+.atlas { position: relative; height: 420svh; }
+.atlas-stage {
+  position: sticky; top: 0; height: 100svh; overflow: hidden;
+  background: var(--surface);
 }
 
-/* левая колонка — стоит на месте всю ленту цифр */
-.spread-aside {
-  position: sticky; top: 0; align-self: start;
-  height: 100svh;
-  display: flex; flex-direction: column; justify-content: center;
-  gap: clamp(24px, 4vh, 52px);
-  padding: clamp(72px, 10vh, 120px) clamp(24px, 3vw, 56px) clamp(40px, 6vh, 80px) 0;
+/* Ночь — отдельный слой над заливкой и под шаром. Тот же тёмно-синий
+   градиент, что раньше заливал всю сцену глобуса; прозрачность ведёт
+   скролл, поэтому фон не переключается классом, а проявляется. */
+.atlas-night {
+  position: absolute; inset: 0; z-index: 1; opacity: 0;
+  background:
+    radial-gradient(130% 95% at 50% 118%, #0f57a8 0%, #0a3d7d 34%, #061f45 64%, #04122a 100%);
 }
-.spread-title {
+.atlas-canvas { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; display: block; }
+
+/* вертикальная кромка с подписью — как на прежней сцене шара. Цвет
+   тёмный на светлой заливке, светлый — когда пришла ночь (.is-night). */
+.atlas-stage::after {
+  content: ''; position: absolute; top: 0; bottom: 0; z-index: 3;
+  right: clamp(56px, 6vw, 100px); width: 1px;
+  background: var(--line);
+  transition: background 0.6s var(--ease);
+}
+.atlas-label {
+  position: absolute; z-index: 3; top: 50%; right: clamp(20px, 3vw, 46px);
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-size: 0.62rem; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--ink-faint);
+  transition: color 0.6s var(--ease);
+}
+.atlas-stage.is-night::after { background: rgba(255, 255, 255, 0.16); }
+.atlas-stage.is-night .atlas-label { color: rgba(255, 255, 255, 0.42); }
+
+/* Левая колонка держит два состояния в одной точке кадра: рубрику раздела
+   (акт I) и строку про Россию (акт II). Место одно, потому что смысл один —
+   это заголовок сцены; состояния перекрёстно гаснут по классу .is-night. */
+.atlas-copy {
+  position: absolute; z-index: 3;
+  left: var(--gut); top: clamp(56px, 11vh, 130px);
+  right: 48%;
+}
+.atlas-title {
   font-weight: 700;
   font-size: var(--fs-7); line-height: 1.04;
   letter-spacing: -0.035em; text-transform: uppercase;
   color: var(--ink); margin-top: 4px;
+  transition: color 0.5s var(--ease);
 }
-.spread-aside .lead { margin-top: clamp(14px, 1.6vw, 22px); max-width: none; font-size: var(--fs-2); }
-.spread-aside .pill { align-self: flex-start; margin-top: clamp(18px, 2.2vw, 28px); }
+.atlas-head .eyebrow,
+.atlas-head .lead { transition: color 0.5s var(--ease); }
+.atlas-head .lead { margin-top: clamp(14px, 1.6vw, 22px); max-width: 30ch; font-size: var(--fs-2); }
+.atlas-head .pill { display: inline-flex; margin-top: clamp(18px, 2.2vw, 28px); transition: color 0.5s var(--ease), border-color 0.5s var(--ease); }
 
-/* карточка-изображение: слои наезжают снизу, как панели справа.
-   Слой, ещё не вступивший в дело, отведён вниз за кромку рамки —
-   это же и статичный фолбэк: без скрипта видна только первая
-   картинка, а не все три разом. */
-.spread-media {
-  position: relative; aspect-ratio: 16 / 10; overflow: hidden;
-  border-radius: var(--r); background: var(--panel);
-  border: 1px solid var(--line);
-}
-.spread-shot {
-  position: absolute; inset: 0;
-  transform: translateY(100%); will-change: transform;
-}
-.spread-shot:first-child { transform: none; }
-.spread-shot img {
-  display: block; width: 100%; height: 100%; object-fit: cover;
-}
-/* шов наезда — верхняя кромка приходящего слоя. Цвет от темы, а не
-   константой: на белой заливке светлый шов исчезал бы вовсе */
-.spread-shot + .spread-shot::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 1;
-  background: var(--line-strong);
+/* ── Перекраска заголовка под синюю ночь ──
+   Тёмный текст на светлом старте к финалу оказывается на синей заливке
+   и там исчезает. Класс .is-night ставит aboutScene.js, когда ночь
+   набрала силу; переход плавный, поэтому шов смены не читается.
+   Номер рубрики светлеет в лазурь, как на всех тёмных секциях сайта. */
+.atlas-stage.is-night .atlas-title { color: #eef2f7; }
+.atlas-stage.is-night .atlas-head .eyebrow { color: rgba(238, 242, 247, 0.66); }
+.atlas-stage.is-night .atlas-head .ey-no { color: #4db4e8; }
+.atlas-stage.is-night .atlas-head .ey-no .ey-den { color: rgba(238, 242, 247, 0.46); }
+.atlas-stage.is-night .atlas-head .lead { color: rgba(238, 242, 247, 0.72); }
+.atlas-stage.is-night .atlas-head .pill { color: #eef2f7; border-color: rgba(238, 242, 247, 0.28); }
+
+/* ── Стеклянная карточка-факт ──
+   Одна панель на все три факта: они лежат друг на друге в grid-слоте
+   (высота слота = самая высокая карточка), видима ровно одна — её ведёт
+   скролл. Панель НЕ уходит: она остаётся светлым стеклом над синеющей
+   сценой, как белая карточка над глобусом в референсе. Дальше держится
+   на том, что стекло само берёт фон под собой (общий рецепт выше). */
+.atlas-deck {
+  position: absolute; z-index: 3;
+  right: var(--gut); top: 50%; transform: translateY(-50%);
+  width: min(40vw, 460px);
+  padding: clamp(20px, 2vw, 30px);
 }
 
-/* правая колонка — штабель панелей с числами */
-.spread-main {
-  position: relative; min-width: 0;
-  border-left: 1px solid var(--line);
+.atlas-slot { display: grid; }
+.atlas-card {
+  grid-area: 1 / 1;
+  display: grid; grid-template-columns: auto 1fr; gap: clamp(16px, 1.6vw, 26px);
+  align-items: start;
+  opacity: 0; transition: opacity 0.45s var(--ease);
 }
-/* счётчик висит у верхней кромки экрана и не занимает высоты в потоке;
-   он над штабелем, иначе панели наедут и на него */
-.spread-count {
-  position: sticky; top: clamp(84px, 12vh, 130px); z-index: 5;
-  display: block; height: 0; text-align: right;
-  font-size: var(--fs-1); letter-spacing: 0.06em;
+.atlas-card.is-on { opacity: 1; }
+.ac-shot {
+  width: clamp(84px, 7vw, 120px); aspect-ratio: 1;
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--line); background: var(--panel-2);
 }
-.spread-count b { font-weight: 500; color: var(--ink); }
-.spread-count i { font-style: normal; color: var(--ink-faint); }
-
-/* панель липнет к верхней кромке и остаётся там, пока следующая
-   не проедет поверх. Заливка обязательна — на ней держится наезд.
-   Отступ слева живёт здесь, а не на колонке: иначе заливка не
-   достаёт до разделительной линии и в шов видно нижний слой. */
-.spread-item {
-  position: sticky; top: 0;
-  min-height: 100svh;
-  display: flex; flex-direction: column; justify-content: center;
-  align-items: flex-start;
-  padding: clamp(40px, 8vh, 96px) 0 clamp(40px, 8vh, 96px) clamp(24px, 4vw, 80px);
-  background: var(--surface);
-}
-.spread-item + .spread-item { border-top: 1px solid var(--line); }
-/* обёртка подписи. На десктопе повторяет раскладку самой панели и
-   потому невидима; на мобильном становится плашкой поверх фото */
-.sc-body { display: flex; flex-direction: column; align-items: flex-start; }
-/* Крупная цифра факта. Гарнитура текстовая, но фигуры табличные:
-   счётчик набирает значение по прокрутке, и с пропорциональными
-   цифрами строка дёргалась бы по ширине на каждом шаге. */
-.sc-big {
+.ac-shot img { width: 100%; height: 100%; object-fit: cover; }
+.ac-big {
   font-weight: 700; font-variant-numeric: tabular-nums;
-  font-size: clamp(2.6rem, 7vw, 6.5rem); line-height: 0.94; letter-spacing: -0.04em;
-  color: var(--brand); display: inline-flex; align-items: baseline; gap: 0.18em;
+  font-size: clamp(2rem, 3.4vw, 3rem); line-height: 0.94; letter-spacing: -0.035em;
+  color: var(--brand); display: inline-flex; align-items: baseline; gap: 0.16em;
 }
-.sc-unit { font-size: 0.28em; font-weight: 500; letter-spacing: 0.04em; color: var(--ink-dim); text-transform: uppercase; }
-.sc-kicker {
-  font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--ink-faint); margin-top: 18px;
+.ac-unit { font-size: 0.3em; font-weight: 500; letter-spacing: 0.04em; color: var(--ink-dim); text-transform: uppercase; }
+.ac-kicker {
+  display: block; font-family: var(--font-mono);
+  font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-faint); margin-top: 12px;
 }
-.sc-text { max-width: 46ch; color: var(--ink-dim); line-height: 1.7; margin-top: var(--s-2); font-size: var(--fs-2); }
+.ac-text { color: var(--ink-dim); line-height: 1.6; margin-top: 12px; font-size: var(--fs-1); }
+
+/* нижняя строка панели: счётчик и стрелки листания */
+.atlas-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: clamp(18px, 2vw, 26px); gap: var(--s-2);
+}
+.atlas-count { font-size: var(--fs-1); letter-spacing: 0.06em; }
+.atlas-count b { font-weight: 500; color: var(--ink); }
+.atlas-count i { font-style: normal; color: var(--ink-faint); }
+.atlas-nav { display: flex; gap: 8px; }
+.atlas-arrow {
+  width: 38px; height: 34px; display: grid; place-items: center;
+  border: 1px solid var(--line-strong); border-radius: 6px;
+  background: transparent; color: var(--ink); cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s, opacity 0.2s;
+}
+.atlas-arrow svg { width: 18px; height: 18px; }
+.atlas-arrow:hover { background: var(--brand-soft); border-color: var(--brand-line); }
+.atlas-arrow:active { transform: scale(0.94); }
+.atlas-arrow[disabled] { opacity: 0.3; cursor: default; }
+
+/* ── Фолбэк: без WebGL, при reduced-motion или экономии трафика ──
+   Прибивать сцену нечем и незачем — шар не рисуется. Обёртка схлопывается
+   в обычный поток: заголовок раздела и три факта списком, без синевы.
+   Класс ставит aboutScene.js. */
+.atlas.is-static { height: auto; }
+.atlas.is-static .atlas-stage {
+  position: static; height: auto; overflow: visible;
+  padding: 0 var(--gut) var(--section-y);
+}
+.atlas.is-static .atlas-night,
+.atlas.is-static .atlas-canvas,
+.atlas.is-static .atlas-stage::after,
+.atlas.is-static .atlas-label,
+.atlas.is-static .atlas-bar { display: none; }
+.atlas.is-static .atlas-copy {
+  position: static; right: auto; top: auto;
+}
+.atlas.is-static .atlas-deck {
+  position: static; transform: none; width: auto;
+  margin-top: clamp(28px, 5vh, 56px);
+}
+.atlas.is-static .atlas-slot { display: block; }
+.atlas.is-static .atlas-card { opacity: 1; }
+.atlas.is-static .atlas-card + .atlas-card {
+  margin-top: clamp(20px, 3vh, 32px);
+  padding-top: clamp(20px, 3vh, 32px); border-top: 1px solid var(--line);
+}
 
 @media (max-width: 900px) {
-  /* колонки складываются: картинка идёт шапкой раздела, цифры — списком */
-  .spread { grid-template-columns: 1fr; }
-  .spread-aside {
-    position: static; height: auto; padding: 0 0 clamp(32px, 6vh, 56px);
+  .atlas { height: 320svh; }
+  /* колонка уводится во всю ширину, карточка ложится на низ кадра */
+  .atlas-copy { right: var(--gut); }
+  .atlas-deck {
+    top: auto; bottom: clamp(24px, 6vh, 64px);
+    left: var(--gut); right: var(--gut); width: auto;
+    transform: none;
   }
-
-  /* ── Кадры уходят к своим цифрам ──
-     Наезд слоёв ведёт скрипт, и только от 901px (motion.js): колонок
-     здесь нет, наезжать нечему. Отдельной галереей сверху кадры стояли
-     без связи с числами — теперь каждый уходит фоном своей карточки,
-     а подпись ложится поверх на полупрозрачной плашке. Общая рамка
-     под слои поэтому не нужна: картинку карточка берёт из --sc-shot,
-     и лениво грузятся ровно те же три файла из кеша. */
-  .spread-media { display: none; }
-  .spread-main { border-left: 0; }
-  .spread-count { position: static; height: auto; text-align: left; margin-bottom: 24px; }
-  /* штабель распускается в список карточек-кадров: липнуть некуда,
-     наезжать нечем — колонка одна */
-  .spread-item {
-    position: static; min-height: 0;
-    padding: 0; border-top: 0;
-    justify-content: flex-end;
-    overflow: hidden; border-radius: var(--r);
-    border: 1px solid var(--line);
-    background: var(--sc-shot) top center / 100% auto no-repeat, var(--panel);
-  }
-  .spread-item + .spread-item { border-top: 0; margin-top: clamp(16px, 3vh, 28px); }
-  /* Распорка держит кадр. Кадры сняты 16:10, и в вертикальной карточке
-     cover резал их по бокам — поэтому фон кладём по ширине целиком
-     (100% auto), а распорку меряем той же пропорцией, чуть срезав:
-     плашка тогда заезжает только на нижнюю кромку кадра. */
-  .spread-item::before { content: ''; display: block; padding-top: 56%; }
-  /* Плашка подписи поверх кадра — плавающая хрома, и здесь стекло было
-     раньше всего остального: этот блок и подсказал форму общего рецепта.
-     Теперь он на общих токенах, но со своей геометрией — плашка прижата
-     к трём кромкам карточки, скруглять её нечего, а разделяет её с
-     кадром только верхняя линия.
-
-     Плотность выше рецептной (0.78 против 0.55): под этой плашкой не
-     размытая страница, а конкретный светлый снимок буровой, и на общей
-     плотности тёмный текст на нём терял контраст.
-
-     Порядок объявлений значим: непрозрачная заливка идёт первой и
-     остаётся единственной там, где backdrop-filter не поддержан. */
-  .sc-body {
-    align-self: stretch;
-    padding: clamp(18px, 4.5vw, 26px);
-    background: var(--glass-solid);
-    border-top: 1px solid var(--glass-line);
-  }
-  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-    .sc-body {
-      background: color-mix(in srgb, var(--glass-solid) 78%, transparent);
-      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-              backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-      box-shadow: inset 0 1px 0 var(--glass-hl);
-    }
-  }
-  @media (prefers-reduced-transparency: reduce) {
-    .sc-body {
-      background: var(--glass-solid);
-      -webkit-backdrop-filter: none;
-              backdrop-filter: none;
-    }
-  }
-  .sc-text { max-width: none; }
+  /* на узкой панели остаются число, кикер и превью — абзац снимаем */
+  .ac-text { display: none; }
 }
 
-/* ════════════════════════════════════════════════
-   ГЛОБУС · финал раздела «О компании»
-   ────────────────────────────────────────────────
-   Прибитая сцена внутри длинной обёртки: один прогресс
-   скролла набирает строку по словам и одновременно
-   выводит снизу земной шар, доворачивая его Россией
-   к зрителю (scripts/globeCanvas.js, earth_orbit1.glb).
-   ════════════════════════════════════════════════ */
-.globe { position: relative; height: 320svh; margin-top: clamp(60px, 10vh, 140px); }
-.globe-stage {
-  position: sticky; top: 0; height: 100svh; overflow: hidden;
-  background:
-    radial-gradient(130% 95% at 50% 118%, #0f57a8 0%, #0a3d7d 34%, #061f45 64%, #04122a 100%);
-}
-.globe-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-
-/* вертикальная кромка с вертикальной подписью — как на развороте */
-.globe-stage::after {
-  content: ''; position: absolute; top: 0; bottom: 0;
-  right: clamp(56px, 6vw, 100px); width: 1px;
-  background: rgba(255, 255, 255, 0.16);
-}
-.globe-label {
-  position: absolute; z-index: 2; top: 50%; right: clamp(20px, 3vw, 46px);
-  transform: translateY(-50%);
-  writing-mode: vertical-rl;
-  font-size: 0.62rem; letter-spacing: 0.24em; text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.42);
-}
-.globe-count {
-  position: absolute; z-index: 2;
-  left: var(--gut); bottom: clamp(24px, 4vh, 44px);
-  font-size: var(--fs-1); letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.5);
-}
-.globe-count b { font-weight: 500; color: #fff; }
-
-.globe-headline {
-  position: absolute; z-index: 2;
-  left: var(--gut); top: clamp(56px, 11vh, 130px);
-  right: clamp(96px, 12vw, 220px);
-  max-width: 22ch;
-  font-weight: 400;
-  /* Собственный clamp, а не ступень шкалы: строку набирают по словам
-     прокруткой, и ей нужен диапазон шире одной ступени. Оба конца при
-     этом стоят на шкале — от --fs-4 до потолка --fs-7, — поэтому в покое
-     на любой ширине строка совпадает с одной из ступеней. */
-  font-size: clamp(1.66rem, 3.4vw, 3.24rem); line-height: 1.18;
-  letter-spacing: -0.02em;
-}
-/* слово гаснет до тех пор, пока прокрутка до него не дошла */
-.globe-word { color: rgba(255, 255, 255, 0.26); transition: color 0.45s var(--ease); }
-.globe-word.is-on { color: #fff; }
-
-/* без WebGL и при reduced-motion сцена сжимается в обычный экран:
-   набирать строку прокруткой нечем, поэтому она сразу читаемая */
-.globe.is-static { height: auto; }
-.globe.is-static .globe-stage { position: static; height: clamp(360px, 62svh, 640px); }
-.globe.is-static .globe-word { color: #fff; }
-
-@media (max-width: 900px) {
-  .globe { height: 260svh; }
-  .globe-headline { right: clamp(64px, 14vw, 110px); }
-}
+/* Блок ГЛОБУС отдельным разделом больше не стоит: земной шар — это
+   часть сцены «О компании» (см. .atlas выше). Стили сцены глобуса,
+   подписи и синей ночи переехали туда. */
 
 /* ════════════════════════════════════════════════
    КОЛОДА ЭКРАНОВ · накат заливок

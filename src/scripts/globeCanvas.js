@@ -20,25 +20,31 @@
 
    three.js и .glb (2 МБ) грузятся динамически и только когда секция
    подходит к экрану: на первый экран страницы этот вес не ложится.
-   Без WebGL и при reduced-motion сцена сворачивается в статичный экран
-   (.is-static) — строка там сразу читаемая.
+
+   Шар — часть сцены «О компании» (см. About.astro, index.css .atlas), и
+   выходит он НЕ после карточек, а вместе с ними: с самого начала прокрутки
+   из-за нижней кромки выглядывает шапка шара, и по мере скролла он
+   поднимается, подрастает и доворачивается Россией — одновременно с тем,
+   как листаются факты и наливается синева. Это и есть «одна сцена, из
+   которой выходит глобус». Разворот заканчивается на 90% прокрутки,
+   последние 10% — выдержка на России.
+
+   Решение «поднимать ли three.js» принимает aboutScene.js: он вешает на
+   обёртку класс .is-static в тех же случаях (нет WebGL, reduced-motion,
+   экономный трафик). Здесь мы просто уважаем этот класс — своей проверки
+   больше не держим, чтобы вердикт был один на оба модуля.
    ───────────────────────────────────────────── */
 import { asset } from '../lib/asset.js'
+import { makeProgress, span, clamp01, smooth } from './scrollProgress.js'
 
-const wrap = document.querySelector('[data-globe]')
+const wrap = document.querySelector('[data-atlas]')
 const canvas = wrap?.querySelector('[data-globe-canvas]')
-const words = wrap ? [...wrap.querySelectorAll('[data-globe-word]')] : []
+const stage = wrap?.querySelector('[data-atlas-stage]')
 
-const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-const hasWebGL = () => {
-  try {
-    const c = document.createElement('canvas')
-    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')))
-  } catch {
-    return false
-  }
-}
+/* Шар отрабатывает почти всю прокрутку; последние 10% — выдержка на России,
+   поэтому ремап идёт к 0.9, а не к 1. Выход из-за кромки виден с самого
+   старта (при gp=0 шар уже приподнят на сливер, см. rise ниже). */
+const GLOBE_END = 0.9
 
 /* Разворот и завал полюса, в радианах.
 
@@ -56,25 +62,11 @@ const SPIN_TO = -0.75
 const TILT_FROM = 0.28
 const TILT_TO = 0.55
 
-const clamp01 = (v) => Math.min(1, Math.max(0, v))
-const smooth = (t) => t * t * (3 - 2 * t)
-
-/* прогресс прокрутки сквозь обёртку: 0 — сцена только прилипла,
-   1 — обёртка кончилась и сцена уходит вверх.
-
-   Вычитаем высоту САМОЙ сцены, а не окна. Сцена стоит в 100svh, то есть
-   в «малом» вьюпорте — высоте при показанной адресной строке, — а
-   window.innerHeight на мобильном гуляет вместе с этой строкой. На
-   десктопе числа совпадают, на телефоне расходились на её высоту, и
-   прогресс приходил к единице раньше или позже конца обёртки: строка
-   дописывалась не в такт с разворотом шара. */
-const stage = wrap?.querySelector('.globe-stage')
-
-function progress() {
-  const r = wrap.getBoundingClientRect()
-  const span = r.height - (stage?.offsetHeight || window.innerHeight)
-  return span > 0 ? clamp01(-r.top / span) : 0
-}
+/* Прогресс всей сцены (0…1) считает общий модуль. gp — тот же прогресс,
+   поджатый к диапазону выхода шара [0 … GLOBE_END]; по нему идут выход,
+   рост и разворот. */
+const progress = wrap ? makeProgress(wrap, stage) : () => 0
+const globeProgress = () => span(progress(), 0, GLOBE_END)
 
 /* Карта окружения. Материалы шара зеркальные (у сетки clearcoat
    с шероховатостью 0.07), а зеркалу нечего отражать, если сцена пуста —
@@ -107,12 +99,6 @@ function makeEnv(THREE, renderer) {
   pmrem.dispose()
   tex.dispose()
   return env
-}
-
-function paintWords(p) {
-  // строка набирается за первые 45% прокрутки
-  const lit = clamp01(p / 0.45) * words.length
-  words.forEach((w, i) => w.classList.toggle('is-on', i < lit))
 }
 
 async function start() {
@@ -245,24 +231,24 @@ async function start() {
     raf = requestAnimationFrame(frame)
     const dt = clock.getDelta()
 
-    const p = progress()
-    paintWords(p)
+    // gp — прогресс акта с шаром (0 на GLOBE_START, 1 в конце сцены)
+    const gp = globeProgress()
 
-    /* Выезд снизу: за первые 60% прокрутки шар поднимается и подрастает.
+    /* Выезд снизу: за первые 60% акта шар поднимается и подрастает.
        Всё — и масштаб, и высота — умножается на fit: на узком вертикальном
        экране шар радиуса 1 не влезает в кадр по ширине и превращается
        в безориентирную заливку, поэтому там он мельче. */
     const fit = Math.min(1, Math.max(0.42, camera.aspect / 1.6))
-    const rise = smooth(clamp01(p / 0.6))
+    const rise = smooth(clamp01(gp / 0.6))
     /* Конечная высота подобрана по России: на меньшем подъёме её южная
        граница уходила под нижнюю кромку экрана — страна упиралась в край
        кадра вместо того, чтобы поместиться целиком. */
     holder.position.y = fit * (-2.9 + rise * 1.85)
     holder.scale.setScalar(fit * (0.9 + rise * 0.22))
 
-    /* Разворот заканчивается на 90% прокрутки, последние 10% — выдержка
+    /* Разворот заканчивается на 90% акта, последние 10% — выдержка
        на России: иначе кадр, ради которого всё затевалось, проскакивает. */
-    const turn = smooth(clamp01(p / 0.9))
+    const turn = smooth(clamp01(gp / 0.9))
     globe.rotation.y = SPIN_FROM + (SPIN_TO - SPIN_FROM) * turn
     globe.rotation.x = TILT_FROM + (TILT_TO - TILT_FROM) * turn
     globe.rotation.z = 0.14
@@ -278,27 +264,23 @@ async function start() {
   play()
 }
 
-/* Экономия трафика — то же правило, что у видео в motion.js: сцена стоит
-   three.js плюс 2 МБ модели, и на мобильном тарифе с Data Saver или на 2G
-   это несоразмерная плата за один разворот. В таком режиме секция
-   сворачивается в статичный экран — строка там читается сама по себе,
-   ради неё раздел и существует. */
-const conn = navigator.connection
-const frugal = !!conn && (conn.saveData === true || /(^|-)2g$/.test(conn.effectiveType || ''))
+/* Поднимать ли three.js — решено в aboutScene.js: он вешает .is-static в
+   тех же случаях (нет WebGL, reduced-motion, экономный трафик), и делает
+   это синхронно на загрузке модуля. Здесь просто сверяемся с классом,
+   вердикт один на оба модуля.
 
-if (wrap && canvas) {
-  if (reduce || frugal || !hasWebGL()) {
-    wrap.classList.add('is-static')
-  } else {
-    // подгружаем three и модель только на подходе к секции
-    const io = new IntersectionObserver(
-      (entries, obs) => {
-        if (!entries.some((e) => e.isIntersecting)) return
-        obs.disconnect()
-        start().catch(() => wrap.classList.add('is-static'))
-      },
-      { rootMargin: '600px' },
-    )
-    io.observe(wrap)
-  }
+   Если модель не загрузится на живой сети — оставляем сцену как есть:
+   ночь и строку ведёт aboutScene, шара просто не будет. Ронять всю
+   сцену в статику посреди прокрутки хуже, чем показать её без планеты. */
+if (wrap && canvas && !wrap.classList.contains('is-static')) {
+  // подгружаем three и модель только на подходе к секции
+  const io = new IntersectionObserver(
+    (entries, obs) => {
+      if (!entries.some((e) => e.isIntersecting)) return
+      obs.disconnect()
+      start().catch((e) => console.warn('[globe] сцена шара не поднялась:', e))
+    },
+    { rootMargin: '600px' },
+  )
+  io.observe(wrap)
 }

@@ -13,12 +13,20 @@ const canonical = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).href
   : Astro.url.pathname
 
+// Один источник правды на оба тега ниже: <link> и его <noscript>-дубль
+// обязаны запрашивать ровно тот же URL, иначе без JS приедет другой набор
+// начертаний.
+const fontsHref =
+  'https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=Geologica:wght@400;500;600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap'
+
+const ogImage = Astro.site ? new URL(logoHref, Astro.site).href : logoHref
+
 const orgSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'ГЕОТЕХНАВИГАЦИЯ',
   url: canonical,
-  logo: Astro.site ? new URL(logoHref, Astro.site).href : logoHref,
+  logo: ogImage,
   description,
   areaServed: ['RU', 'СНГ'],
   knowsAbout: ['Телеметрия MWD/LWD', 'Геонавигация бурения', 'Программный комплекс Drill Monitor'],
@@ -29,7 +37,10 @@ const orgSchema = {
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover обязателен: без него env(safe-area-inset-*) на iOS
+         всегда ноль, и вся разметка полей под вырез — в --gut, в подвале
+         экрана колоды, в футере — не действует. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" type="image/webp" href={logoHref} />
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -40,7 +51,7 @@ const orgSchema = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={Astro.site ? new URL(logoHref, Astro.site).href : logoHref} />
+    <meta property="og:image" content={ogImage} />
     <meta name="theme-color" content="#07090d" />
 
     <!-- Preload картинки прибора снят: первый экран стал типографическим,
@@ -61,16 +72,13 @@ const orgSchema = {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=Geologica:wght@400;500;600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href={fontsHref}
       rel="stylesheet"
       media="print"
       onload="this.media='all';this.onload=null"
     />
     <noscript>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=Geologica:wght@400;500;600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-        rel="stylesheet"
-      />
+      <link href={fontsHref} rel="stylesheet" />
     </noscript>
 
     <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
@@ -83,13 +91,14 @@ const orgSchema = {
     <script>
       import '../scripts/nav.js'
     </script>
+    <!-- Остальное — одним тегом: раньше три отдельных <script> давали три
+         бандла и три запроса, хотя модули независимы и нужны одновременно.
+         Тяжёлое внутри по-прежнему грузится лениво: three.js и .glb
+         подтягивает динамический import в globeCanvas.js. -->
     <script>
       import '../scripts/motion.js'
-    </script>
-    <script>
       import '../scripts/heroCanvas.js'
-    </script>
-    <script>
+      import '../scripts/deckReadout.js'
       import '../scripts/globeCanvas.js'
     </script>
   </body>

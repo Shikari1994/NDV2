@@ -1,5 +1,6 @@
+---
 import { asset } from '../lib/asset.js'
-import Globe from './Globe.jsx'
+import Globe from './Globe.astro'
 
 /* Разворот «ключевые цифры»: слева прибитая колонка — рубрика и
    карточка-изображение, справа лента цифр, по экрану на пункт.
@@ -19,66 +20,65 @@ const CARDS = [
   {
     big: '15', unit: 'лет', kicker: 'На рынке телеметрии',
     text: 'Разрабатываем и производим системы MWD/LWD с 2010 года. Оборудование работает на объектах ведущих добывающих компаний России и СНГ.',
-    img: '/direct.webp',
+    img: '/t1.png',
   },
   {
     big: '200+', kicker: 'Скважин с MWD/LWD',
     text: 'Пробурено с нашими телесистемами — от наклонно-направленных до горизонтальных стволов сложного профиля.',
-    img: '/app-survey.webp',
+    img: '/t2.png',
   },
   {
     big: '24/7', kicker: 'Инженерная поддержка',
     text: 'Дежурная смена инженеров на связи круглосуточно, с удалённым доступом к данным буровой в реальном времени.',
-    img: '/app-drilling.webp',
+    img: '/t3.png',
   },
 ]
 
 const TOTAL = String(CARDS.length + 1).padStart(2, '0')
+---
 
-export default function About() {
-  return (
-    <section id="about" data-theme="white">
-      <div className="spread" data-spread>
-        <div className="spread-aside">
-          <div className="spread-head">
-            <div className="eyebrow"><span className="ey-no">01<span className="ey-den"> / 07</span></span>О компании</div>
-            <h2 className="spread-title">Ключевые цифры</h2>
-            <p className="lead">
-              ГЕОТЕХНАВИГАЦИЯ — российский разработчик и производитель
-              телеметрического оборудования и ПО для контроля траектории бурения.
-            </p>
-            <a className="pill" href="#contact">связаться</a>
-          </div>
-
-          <div className="spread-media" aria-hidden="true">
-            {CARDS.map((c, i) => (
-              <div className="spread-shot" data-spread-shot={i} key={c.kicker}>
-                <img src={asset(c.img)} alt="" loading="lazy" draggable="false" />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="spread-main">
-          <span className="spread-count mono" aria-hidden="true">
-            <b data-spread-count>01</b>
-            <i>/{TOTAL}</i>
-          </span>
-
-          {CARDS.map((c, i) => (
-            <article className="spread-item" data-spread-item={i} key={c.kicker}>
-              <span className="sc-big">
-                {c.big}
-                {c.unit && <span className="sc-unit">{c.unit}</span>}
-              </span>
-              <span className="sc-kicker">{c.kicker}</span>
-              <p className="sc-text">{c.text}</p>
-            </article>
-          ))}
-        </div>
+<section id="about" data-theme="white">
+  <div class="spread" data-spread>
+    <div class="spread-aside">
+      <div class="spread-head">
+        <div class="eyebrow"><span class="ey-no">01<span class="ey-den"> / 07</span></span>О компании</div>
+        <h2 class="spread-title">Ключевые цифры</h2>
+        <p class="lead">
+          ГЕОТЕХНАВИГАЦИЯ — российский разработчик и производитель
+          телеметрического оборудования и ПО для контроля траектории бурения.
+        </p>
+        <a class="pill" href="#contact">связаться</a>
       </div>
 
-      <Globe index={TOTAL} total={TOTAL} />
-    </section>
-  )
-}
+      <div class="spread-media" aria-hidden="true">
+        {CARDS.map((c, i) => (
+          <div class="spread-shot" data-spread-shot={i}>
+            <img src={asset(c.img)} alt="" loading="lazy" draggable="false" />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="spread-main">
+      <span class="spread-count mono" aria-hidden="true">
+        <b data-spread-count>01</b>
+        <i>/{TOTAL}</i>
+      </span>
+
+      {CARDS.map((c, i) => (
+        <article class="spread-item" data-spread-item={i} style={`--sc-shot: url(${asset(c.img)})`}>
+          <div class="sc-body">
+            <span class="sc-big">
+              {c.big}
+              {c.unit && <span class="sc-unit">{c.unit}</span>}
+            </span>
+            <span class="sc-kicker">{c.kicker}</span>
+            <p class="sc-text">{c.text}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  <Globe index={TOTAL} total={TOTAL} />
+</section>

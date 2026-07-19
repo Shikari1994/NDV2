@@ -60,10 +60,19 @@ const clamp01 = (v) => Math.min(1, Math.max(0, v))
 const smooth = (t) => t * t * (3 - 2 * t)
 
 /* прогресс прокрутки сквозь обёртку: 0 — сцена только прилипла,
-   1 — обёртка кончилась и сцена уходит вверх */
+   1 — обёртка кончилась и сцена уходит вверх.
+
+   Вычитаем высоту САМОЙ сцены, а не окна. Сцена стоит в 100svh, то есть
+   в «малом» вьюпорте — высоте при показанной адресной строке, — а
+   window.innerHeight на мобильном гуляет вместе с этой строкой. На
+   десктопе числа совпадают, на телефоне расходились на её высоту, и
+   прогресс приходил к единице раньше или позже конца обёртки: строка
+   дописывалась не в такт с разворотом шара. */
+const stage = wrap?.querySelector('.globe-stage')
+
 function progress() {
   const r = wrap.getBoundingClientRect()
-  const span = r.height - window.innerHeight
+  const span = r.height - (stage?.offsetHeight || window.innerHeight)
   return span > 0 ? clamp01(-r.top / span) : 0
 }
 
@@ -269,8 +278,16 @@ async function start() {
   play()
 }
 
+/* Экономия трафика — то же правило, что у видео в motion.js: сцена стоит
+   three.js плюс 2 МБ модели, и на мобильном тарифе с Data Saver или на 2G
+   это несоразмерная плата за один разворот. В таком режиме секция
+   сворачивается в статичный экран — строка там читается сама по себе,
+   ради неё раздел и существует. */
+const conn = navigator.connection
+const frugal = !!conn && (conn.saveData === true || /(^|-)2g$/.test(conn.effectiveType || ''))
+
 if (wrap && canvas) {
-  if (reduce || !hasWebGL()) {
+  if (reduce || frugal || !hasWebGL()) {
     wrap.classList.add('is-static')
   } else {
     // подгружаем three и модель только на подходе к секции

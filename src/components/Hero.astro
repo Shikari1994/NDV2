@@ -1,0 +1,201 @@
+---
+import { asset } from '../lib/asset.js'
+
+/* ── КОЛОДА ЭКРАНОВ 01–02 ──────────────────────────────────────────
+   Приём первоисточника (ZITAR® METALWARE → ZITAR® ABRASIVES): первая
+   строка ОДНА И ТА ЖЕ на всех экранах колоды и стоит на одной и той же
+   высоте вьюпорта. Наезжающая заливка режет её по горизонтали: сверху
+   она ещё в тоне уходящего экрана, снизу — уже в тоне пришедшего.
+   Меняется только слово под ней и цвет фона.
+
+   Чтобы разрез сошёлся, обязаны совпадать три вещи:
+     · высота строки на экране — держится одинаковой вёрсткой экранов;
+     · кегль — общий для всей колоды, считается по самой длинной строке
+       (--deck-len ниже), иначе на разных экранах буквы разного размера;
+     · неподвижность — содержимое пришедшего экрана не едет вместе с
+       заливкой, его компенсирует motion.js.
+
+   Ряд показателей и окно прибора с первого экрана убраны: интерфейс
+   Drill Monitor подробно разобран в Software и About, а здесь он мешал
+   разрезу — первый экран был плотнее остальных, и приём не читался.
+   Экран про ЗИП из колоды тоже убран: сервис и комплектующие живут
+   в Showcase и Store, в колоде он был третьим повтором того же приёма.
+   ────────────────────────────────────────────────────────────────── */
+const BRAND = 'ГЕОТЕХНАВИГАЦИЯ'
+
+const SCREENS = [
+  {
+    theme: 'black',
+    no: '01',
+    kicker: 'Телеметрия и геонавигация бурения',
+    word: ['Производство', 'телесистем'],
+    descr: [
+      'системы MWD / LWD и наземные станции декодирования —',
+      'полный цикл от забойного датчика до отчёта заказчику',
+    ],
+    // каротажный canvas вместо видео — своя фактура у входного экрана
+    canvas: true,
+    // компоновка в сборе: канвас замаскирован в левую половину, снаряд идёт справа
+    rig: '/mwd-rig.webp',
+    cta: { href: '#products', label: 'Оборудование' },
+  },
+  {
+    theme: 'graphite',
+    no: '02',
+    kicker: 'Программный комплекс',
+    word: ['Разработка', 'ПО'],
+    descr: ['Drill Monitor: рабочее место инженера и мобильный клиент —', 'один промысел на всех экранах'],
+    /* Рабочее место вместо видео-фактуры: у экрана про ПО иллюстрация —
+       сам интерфейс, а не абстрактный кадр. Телефон здесь один и стоит
+       на кромке ноутбука: ряд из трёх дробил экран, а читались всё
+       равно не они. */
+    stage: { note: '/note1.webp', phone: '/mob2.webp' },
+    /* Левая половина экрана оставалась гладкой заливкой: у входного
+       экрана верх держат канвас и снаряд, здесь не держало ничего.
+       Фактура тут не абстрактная, а та же, что и предмет справа, —
+       readout Drill Monitor: те же величины, что видны на скриншоте
+       ноутбука, только идущие вживую. Разрезу константы блок не
+       мешает — она внизу, а полоса под шапкой свободна.
+
+       Величины совпадают со скриншотом намеренно: слева и справа
+       один и тот же промысел, иначе сцена распадается на картинку
+       и не связанный с ней виджет. Дрейф и шаг ведёт deckReadout.js,
+       разметка несёт покой — он же вид без скрипта и при
+       reduced-motion. */
+    readout: {
+      title: 'Drill Monitor · демо-поток',
+      rows: [
+        { label: 'Глубина',   value: '1500.5', unit: 'м',      fix: 1, rate: 0.08 },
+        { label: 'Зенит',     value: '2.70',   unit: '°',      fix: 2, drift: 0.05 },
+        { label: 'Азимут',    value: '39.56',  unit: '°',      fix: 2, drift: 0.14 },
+        { label: 'Обороты',   value: '135',    unit: 'об/мин', fix: 0, drift: 2.2 },
+        { label: 'Нагрузка',  value: '118.6',  unit: 'кН',     fix: 1, drift: 1.4 },
+        { label: 'Давление',  value: '19.11',  unit: 'МПа',    fix: 2, drift: 0.16 },
+      ],
+    },
+    cta: { href: '#software', label: 'Смотреть Drill Monitor' },
+  },
+]
+
+/* Кегль колоды считается по самой длинной строке — и константе, и словам.
+   Один кегль на все экраны: если он прыгает, разрез константы не сходится.
+   Поэтому же слово разбито на строки руками: автоперенос дал бы разным
+   экранам разную высоту заголовка и увёл бы константу с общей высоты. */
+const LONGEST = Math.max(BRAND.length, ...SCREENS.flatMap((s) => s.word.map((w) => w.length)))
+const TOTAL = String(SCREENS.length).padStart(2, '0')
+---
+
+<div class="deck" style={`--deck-len:${LONGEST}`}>
+  {SCREENS.map((s, i) => {
+    const Heading = i === 0 ? 'h1' : 'h2'
+    return (
+      <section
+        class="deck-screen"
+        id={i === 0 ? 'hero' : undefined}
+        data-theme={s.theme}
+        data-rails="on"
+      >
+        <div class="deck-inner">
+          {s.canvas && <canvas class="hero-bg-canvas" aria-hidden="true"></canvas>}
+
+          {/* data-lift-x — ход выхода в процентах собственной ширины.
+              Величины здесь, а не в CSS: transform целиком отдан GSAP,
+              иначе он разберёт готовый transform в пиксельную базу и
+              смещение перестанет пересчитываться на ресайзе. Телефону
+              ход втрое длиннее — он и стартует из-под ноутбука.
+
+              Узла у телефона два: место в сцене держит CSS (.deck-phone),
+              ход везёт вложенный .deck-phone-move. На одном узле
+              позиционирование и твин дрались бы за transform. */}
+          {s.stage && (
+            <div class="deck-devices" aria-hidden="true">
+              <div class="deck-stage">
+                <div class="deck-note" data-device data-lift-x="46">
+                  <img src={asset(s.stage.note)} alt="" loading="lazy" draggable="false" />
+                </div>
+                <div class="deck-phone">
+                  <div class="deck-phone-move" data-device data-lift-x="235">
+                    <img src={asset(s.stage.phone)} alt="" loading="lazy" draggable="false" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* aria-hidden: величины демонстрационные и дублируют кадр
+              справа — в озвучке это был бы поток чисел без смысла */}
+          {s.readout && (
+            <div class="deck-readout mono" data-readout aria-hidden="true">
+              <div class="deck-readout-head">
+                <span class="deck-readout-live"></span>
+                <span>{s.readout.title}</span>
+              </div>
+              <dl class="deck-readout-rows">
+                {s.readout.rows.map((r) => (
+                  <div class="deck-readout-row">
+                    <dt>{r.label}</dt>
+                    <dd>
+                      <span
+                        class="deck-readout-val"
+                        data-val
+                        data-base={r.value}
+                        data-fix={r.fix}
+                        data-drift={r.drift ?? 0}
+                        data-rate={r.rate ?? 0}
+                      >{r.value}</span>
+                      <span class="deck-readout-unit">{r.unit}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          {/* три узла, и это не лишняя вложенность: поворот кадра,
+              выход на загрузке и параллакс — три трансформа, а на
+              одном узле они затирают друг друга */}
+          {s.rig && (
+            <div class="deck-rig" aria-hidden="true">
+              <div class="deck-rig-move">
+                <img src={asset(s.rig)} alt="" data-rig fetchpriority="high" draggable="false" />
+              </div>
+            </div>
+          )}
+
+          <div class="deck-body container">
+            <span class="deck-kicker mono">{s.kicker}</span>
+            <Heading class="mega deck-heading">
+              <span class="deck-heading-line deck-brand">{BRAND}</span>
+              <span class="deck-word">
+                {s.word.map((w) => (
+                  <span class="deck-heading-line">{w}</span>
+                ))}
+              </span>
+            </Heading>
+            <div class="deck-foot">
+              <p class="deck-descr">
+                {s.descr.map((line, k) => (
+                  <span>
+                    {line}
+                    {k < s.descr.length - 1 && <br />}
+                  </span>
+                ))}
+              </p>
+
+              {s.cta && (
+                <a class="btn btn-ghost deck-cta" href={s.cta.href}>
+                  {s.cta.label}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </a>
+              )}
+
+              <div class="deck-count mono" aria-hidden="true">
+                <span>{s.no}</span><span class="deck-count-den">/</span><span class="deck-count-den">{TOTAL}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  })}
+</div>

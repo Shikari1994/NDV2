@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config'
-import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 
 // site/base управляются env, чтобы один репозиторий собирался и под реальный
@@ -8,6 +7,6 @@ import sitemap from '@astrojs/sitemap'
 export default defineConfig({
   site: process.env.SITE || 'https://geotehnavigatsiya.ru',
   base: process.env.BASE_PATH || '/',
-  integrations: [react(), sitemap()],
+  integrations: [sitemap()],
   server: { host: true, port: 5173 },
 })

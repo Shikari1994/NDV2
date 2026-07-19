@@ -1,3 +1,4 @@
+---
 /* Финальный разворот раздела «О компании»: пока идёт прокрутка, строка
    сверху набирается по словам, а снизу выезжает земной шар
    (earth_orbit1.glb) и доворачивается Россией к зрителю. Сцена прибита
@@ -9,27 +10,25 @@
    остаётся статичная строка — она читается сама по себе. */
 const HEADLINE = 'Реализуем проекты по всей России'
 
-export default function Globe({ index = '04', total = '04' }) {
-  const words = HEADLINE.split(' ')
+const { index = '04', total = '04' } = Astro.props
+const words = HEADLINE.split(' ')
+---
 
-  return (
-    <div className="globe" data-globe>
-      <div className="globe-stage">
-        <canvas className="globe-canvas" data-globe-canvas aria-hidden="true" />
+<div class="globe" data-globe>
+  <div class="globe-stage">
+    <canvas class="globe-canvas" data-globe-canvas aria-hidden="true"></canvas>
 
-        <h3 className="globe-headline">
-          {words.map((w, i) => (
-            <span className="globe-word" data-globe-word={i} key={`${w}-${i}`}>
-              {w}{' '}
-            </span>
-          ))}
-        </h3>
-
-        <span className="globe-label mono" aria-hidden="true">География деятельности</span>
-        <span className="globe-count mono" aria-hidden="true">
-          <b>{index}</b><i>/{total}</i>
+    <h3 class="globe-headline">
+      {words.map((w, i) => (
+        <span class="globe-word" data-globe-word={i}>
+          {w}{' '}
         </span>
-      </div>
-    </div>
-  )
-}
+      ))}
+    </h3>
+
+    <span class="globe-label mono" aria-hidden="true">География деятельности</span>
+    <span class="globe-count mono" aria-hidden="true">
+      <b>{index}</b><i>/{total}</i>
+    </span>
+  </div>
+</div>

@@ -1,3 +1,4 @@
+---
 import { asset } from '../lib/asset.js'
 
 /* TODO: подписи описывают железо, а изображения — скриншоты приложения.
@@ -38,39 +39,37 @@ const PRODUCTS = [
    Тот же эффект работает с клавиатуры (:focus-within), а на тач и при
    reduced-motion ряд превращается в обычную сетку плиток — раскрывать
    там нечего, наведения нет. */
-export default function Showcase() {
-  return (
-    <section id="products" data-theme="gray">
-      <div className="container">
-        <div className="car-head">
-          <div>
-            <div className="eyebrow reveal"><span className="ey-no">04<span className="ey-den"> / 07</span></span>Линейка оборудования</div>
-            <h2 className="h-title reveal">Оборудование <br />и сервис</h2>
-            <p className="lead reveal">
-              Полная линейка телеметрии MWD/LWD собственной разработки —
-              от забойных датчиков до наземных станций декодирования и сервиса.
-            </p>
+---
+
+<section id="products" data-theme="gray">
+  <div class="container">
+    <div class="car-head">
+      <div>
+        <div class="eyebrow reveal"><span class="ey-no">04<span class="ey-den"> / 07</span></span>Линейка оборудования</div>
+        <h2 class="h-title reveal">Оборудование <br />и сервис</h2>
+        <p class="lead reveal">
+          Полная линейка телеметрии MWD/LWD собственной разработки —
+          от забойных датчиков до наземных станций декодирования и сервиса.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-row reveal">
+    {PRODUCTS.map((p) => (
+      <article class="exp-card" tabindex="0">
+        <img class="exp-img" src={asset(p.img)} alt={p.title} loading="lazy" draggable="false" />
+
+        <div class="exp-body">
+          <h3 class="exp-title">{p.title}</h3>
+          <div class="exp-more">
+            <p class="exp-text">{p.text}</p>
+            <span class="exp-tags mono">{p.tags.join(' · ')}</span>
           </div>
         </div>
-      </div>
 
-      <div className="exp-row reveal">
-        {PRODUCTS.map((p) => (
-          <article className="exp-card" key={p.n} tabIndex={0}>
-            <img className="exp-img" src={asset(p.img)} alt={p.title} loading="lazy" draggable="false" />
-
-            <div className="exp-body">
-              <h3 className="exp-title">{p.title}</h3>
-              <div className="exp-more">
-                <p className="exp-text">{p.text}</p>
-                <span className="exp-tags mono">{p.tags.join(' · ')}</span>
-              </div>
-            </div>
-
-            <span className="exp-num mono" aria-hidden="true">{p.n}</span>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
+        <span class="exp-num mono" aria-hidden="true">{p.n}</span>
+      </article>
+    ))}
+  </div>
+</section>

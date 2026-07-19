@@ -1,3 +1,4 @@
+---
 import { asset } from '../lib/asset.js'
 
 /* ── МОБИЛЬНЫЙ КЛИЕНТ ──────────────────────────────────────────────
@@ -20,41 +21,37 @@ const PHONES = [
 ]
 
 const TAGS = ['iOS / Android', 'Live-данные', 'Офлайн-режим']
+---
 
-export default function Mobile() {
-  return (
-    <section id="mobile" data-theme="black">
-      <div className="container mob-head">
-        <div>
-          <div className="eyebrow reveal"><span className="ey-no">03<span className="ey-den"> / 07</span></span>Программный комплекс · мобильная версия</div>
-          <h2 className="h-title reveal">
-            Промысел в кармане —<br />тот же Drill&nbsp;Monitor
-          </h2>
-        </div>
-        <div className="mob-head-side reveal">
-          <p className="lead">
-            Ключевые показатели скважины, механика бурения и парк оборудования
-            на смартфоне: супервайзер видит буровую с площадки, офис — из города.
-            Данные те же, что на настольной версии, без задержки.
-          </p>
-          <div className="tag-row">
-            {TAGS.map((t) => <span className="tag" key={t}>{t}</span>)}
-          </div>
-        </div>
+<section id="mobile" data-theme="black">
+  <div class="container mob-head">
+    <div>
+      <div class="eyebrow reveal"><span class="ey-no">03<span class="ey-den"> / 07</span></span>Программный комплекс · мобильная версия</div>
+      <h2 class="h-title reveal">
+        Промысел в кармане —<br />тот же Drill&nbsp;Monitor
+      </h2>
+    </div>
+    <div class="mob-head-side reveal">
+      <p class="lead">
+        Ключевые показатели скважины, механика бурения и парк оборудования
+        на смартфоне: супервайзер видит буровую с площадки, офис — из города.
+        Данные те же, что на настольной версии, без задержки.
+      </p>
+      <div class="tag-row">
+        {TAGS.map((t) => <span class="tag">{t}</span>)}
       </div>
+    </div>
+  </div>
 
-      <div className="mob-stage" data-mob-stage>
-        {PHONES.map((p, i) => (
-          <figure
-            className={'mob-phone' + (i === 1 ? ' is-mid' : '')}
-            data-mob-phone
-            data-depth={i === 1 ? 0 : 1}
-            key={p.src}
-          >
-            <img src={asset(p.src)} alt={p.label} loading="lazy" draggable="false" />
-          </figure>
-        ))}
-      </div>
-    </section>
-  )
-}
+  <div class="mob-stage" data-mob-stage>
+    {PHONES.map((p, i) => (
+      <figure
+        class={'mob-phone' + (i === 1 ? ' is-mid' : '')}
+        data-mob-phone
+        data-depth={i === 1 ? 0 : 1}
+      >
+        <img src={asset(p.src)} alt={p.label} loading="lazy" draggable="false" />
+      </figure>
+    ))}
+  </div>
+</section>

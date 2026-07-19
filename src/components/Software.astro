@@ -1,0 +1,109 @@
+---
+import { asset } from '../lib/asset.js'
+
+/* Плитки только настольной версии: мобильный клиент вынесен в отдельную
+   секцию (Mobile.astro) и показан там во всю ширину. Плиткой он оставался
+   бы одним скриншотом среди пяти, а это отдельный продукт. */
+const MODULES = [
+  {
+    key: 'drilling',
+    n: '01',
+    tab: 'Бурение',
+    // единственный настоящий real-time монитор — только он носит бейдж LIVE
+    live: true,
+    img: '/app-drilling.webp',
+    size: 'lg',
+    title: 'Мониторинг бурения в реальном времени',
+    text: 'Единый пульт бурильщика: проходка, нагрузка на долото, момент, обороты, давление и вибрация — десятки каналов телеметрии с обновлением в реальном времени. Компас азимута и автоматическая SCC-коррекция.',
+    tags: ['Real-time', 'Телеметрия MWD', 'Коррекция азимута'],
+  },
+  {
+    key: 'survey',
+    n: '02',
+    tab: 'Инклинометрия',
+    img: '/app-survey.webp',
+    video: '/app-survey.mp4',
+    size: 'sm',
+    title: 'Инклинометрия и 3D-траектория',
+    tags: ['3D-ствол', 'План / факт'],
+  },
+  {
+    key: 'bha',
+    n: '04',
+    tab: 'Оборудование',
+    img: '/app-bha.webp',
+    size: 'sm',
+    title: 'Компоновка КНБК и ресурс',
+    tags: ['КНБК / BHA', 'Ресурс до ТО'],
+  },
+  {
+    key: 'logging',
+    n: '03',
+    tab: 'Каротаж',
+    img: '/app-logging.webp',
+    video: '/app-logging.mp4',
+    size: 'wide',
+    title: 'Каротажный планшет LWD',
+    tags: ['Гамма-каротаж', 'Экспорт LAS / PDF'],
+  },
+]
+---
+
+<section id="software" data-theme="black">
+  <div class="container">
+    <div class="sw-head">
+      <div>
+        <div class="eyebrow reveal"><span class="ey-no">02<span class="ey-den"> / 07</span></span>Программный комплекс · настольная версия</div>
+        <h2 class="h-title reveal">
+          Drill&nbsp;Monitor — мониторинг <br />бурения в реальном времени
+        </h2>
+      </div>
+      <div class="sw-head-side reveal">
+        <p class="lead">
+          Единая платформа для геонавигации: телеметрия MWD/LWD, инклинометрия,
+          каротаж и контроль оборудования в одном интерфейсе — на буровой,
+          в офисе и на мобильном.
+        </p>
+        <div class="sw-actions">
+          <a class="btn btn-primary" href="#contact">
+            Запросить демо
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+          <a class="btn btn-ghost" href="#contact">Войти в систему</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="sw-bento">
+      {MODULES.map((m) => (
+        <article class={`bento-tile instr-frame is-${m.size} bt-${m.key} reveal`}>
+          {m.video ? (
+            <video
+              class="bento-shot"
+              poster={asset(m.img)}
+              data-lazy-video={asset(m.video)}
+              muted
+              loop
+              playsinline
+              preload="none"
+              aria-label={m.title}
+            />
+          ) : (
+            <img class="bento-shot" src={asset(m.img)} alt={m.title} loading="lazy" />
+          )}
+          <div class="bento-bar">
+            <span class="bento-kicker mono">{m.n} · {m.tab}</span>
+            {m.live && <span class="bento-live"><span class="bento-live-dot" />LIVE</span>}
+          </div>
+          <div class="bento-body">
+            <h3>{m.title}</h3>
+            {m.text && <p>{m.text}</p>}
+            <div class="tag-row">
+              {m.tags.map((t) => <span class="tag">{t}</span>)}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

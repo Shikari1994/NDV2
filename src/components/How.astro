@@ -1,3 +1,4 @@
+---
 const STEPS = [
   {
     n: '01', depth: '3 842 м · ЗАБОЙ', title: 'Измерение на забое',
@@ -21,45 +22,43 @@ const STEPS = [
    линия проходки доходит до устья, снизу разворачивается правило во всю
    колонку и под ним встаёт крупная строка. Момент завершения читается
    как событие, а не как подпись мелким шрифтом. */
-export default function How() {
-  return (
-    <section id="how" data-theme="black">
-      <div className="split">
-        <div className="split-aside">
-          <div className="eyebrow reveal"><span className="ey-no">05<span className="ey-den"> / 07</span></span>Принцип работы</div>
-          <h2 className="split-title reveal">От забоя до диспетчерской — в реальном времени</h2>
-          <p className="lead reveal">
-            Данные о пространственном положении инструмента поступают на поверхность
-            непрерывно, без остановки бурения.
-          </p>
-        </div>
+---
 
-        <div className="split-main">
-          <div className="steps">
-            <div className="how-line" />
-            <div className="how-line-fill" />
-            {STEPS.map((s) => (
-              <div className="step reveal" key={s.n}>
-                <div className="step-node">{s.n}</div>
-                <div className="step-content">
-                  <span className="step-depth">{s.depth}</span>
-                  <h3>{s.title}</h3>
-                  <p>{s.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+<section id="how" data-theme="black">
+  <div class="split">
+    <div class="split-aside">
+      <div class="eyebrow reveal"><span class="ey-no">05<span class="ey-den"> / 07</span></span>Принцип работы</div>
+      <h2 class="split-title reveal">От забоя до диспетчерской — в реальном времени</h2>
+      <p class="lead reveal">
+        Данные о пространственном положении инструмента поступают на поверхность
+        непрерывно, без остановки бурения.
+      </p>
+    </div>
 
-          <div className="how-done" aria-hidden="true">
-            <span className="how-done-rule" />
-            <span className="how-done-label mono">Сигнал принят · пакет декодирован</span>
-            <span className="how-done-title">Данные в диспетчерской</span>
-            <span className="how-done-meta mono">
-              <b>0,9 с</b> от забоя до экрана · <b>1 Гц</b> частота опроса · <b>24/7</b> дежурная смена
-            </span>
+    <div class="split-main">
+      <div class="steps">
+        <div class="how-line"></div>
+        <div class="how-line-fill"></div>
+        {STEPS.map((s) => (
+          <div class="step reveal">
+            <div class="step-node">{s.n}</div>
+            <div class="step-content">
+              <span class="step-depth">{s.depth}</span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
-    </section>
-  )
-}
+
+      <div class="how-done" aria-hidden="true">
+        <span class="how-done-rule"></span>
+        <span class="how-done-label mono">Сигнал принят · пакет декодирован</span>
+        <span class="how-done-title">Данные в диспетчерской</span>
+        <span class="how-done-meta mono">
+          <b>0,9 с</b> от забоя до экрана · <b>1 Гц</b> частота опроса · <b>24/7</b> дежурная смена
+        </span>
+      </div>
+    </div>
+  </div>
+</section>

@@ -16,8 +16,13 @@ const canonical = Astro.site
 // Один источник правды на оба тега ниже: <link> и его <noscript>-дубль
 // обязаны запрашивать ровно тот же URL, иначе без JS приедет другой набор
 // начертаний.
+// Три гарнитуры вместо четырёх. Geologica и Golos Text заменены одним
+// нейтральным гротеском (Inter) — швейцарский канон требует одной-двух
+// гарнитур, а не набора близких по рисунку. Unbounded остался, но сжат
+// до единственного начертания: после сужения его области до мега-заголовка
+// колоды из пяти весов используется ровно один — 800.
 const fontsHref =
-  'https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=Geologica:wght@400;500;600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap'
+  'https://fonts.googleapis.com/css2?family=Unbounded:wght@800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap'
 
 const ogImage = Astro.site ? new URL(logoHref, Astro.site).href : logoHref
 

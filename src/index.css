@@ -8,11 +8,20 @@
    точек, ни свечений.
 
    Приборные сигналы — live (зелёный) и gamma (янтарь) —
-   живут ТОЛЬКО внутри реальных экранов продукта: readout
-   под окном Drill Monitor, бейдж LIVE на плитке real-time
-   монитора, каротажный планшет в фоне hero. Там они
-   повторяют настоящий UI прибора; как украшение сайта
-   не применяются.
+   работают в одном значении: «здесь говорит прибор».
+   Отсюда два законных места. Первое — реальные экраны
+   продукта: readout под окном Drill Monitor, бейдж LIVE
+   на плитке real-time монитора, каротажный планшет в фоне
+   hero; там они буквально повторяют UI прибора. Второе —
+   служебные mono-маркеры двух секций про Drill Monitor
+   (#software, #mobile): номер секции, индексы плиток,
+   кикер. Это тот же язык приборного регистра, которым
+   набран сам интерфейс, и он даёт преемственность сайта
+   и продукта.
+
+   Дальше зелёный не идёт: ни на текст, ни на заголовки,
+   ни на плашки, ни на секции о железе. Как украшение —
+   не применяется нигде.
    ════════════════════════════════════════════════ */
 :root {
   /* ─── SURFACES ─── */
@@ -42,23 +51,95 @@
   --live:      #46c98a;             /* terminal-green: real-time / OK */
   --live-soft: rgba(70,201,138,0.12);
 
-  /* ─── TYPOGRAPHY ─── */
-  /* Unbounded — сверхширокий гротеск с кириллицей: замена Monument Extended
-     из референса. Живёт только на крупных заголовках; ниже h3 он нечитаем,
-     там работает Geologica. */
-  --font-display: 'Unbounded', 'Geologica', 'Golos Text', system-ui, sans-serif;
-  --font-sub:     'Geologica', 'Golos Text', system-ui, sans-serif;
-  --font-text:    'Golos Text', system-ui, -apple-system, sans-serif;
+  /* ─── TYPOGRAPHY ───
+     Две рабочие гарнитуры плюс одна подпись — швейцарский канон против
+     прежнего набора из четырёх, где Geologica и Golos Text различались
+     только на просвет и вместе давали не иерархию, а рябь.
+
+     Inter несёт всё: текст, заголовки секций, подписи. Нейтральный
+     гротеск — ровно то, чего требует International Typographic Style:
+     иерархия строится кеглем и весом, а не сменой рисунка шрифта.
+     Из доступных с полной кириллицей он ближе всех к Helvetica/Univers.
+
+     Unbounded остался единственным исключением и живёт ровно на одном
+     элементе — мега-заголовке колоды (.mega). Это подпись бренда, а не
+     ступень иерархии: сверхширокий гротеск на заголовке секции спорил
+     бы с нейтральностью всего остального, а ниже h3 он попросту нечитаем.
+
+     --font-sub больше не отдельная гарнитура, а алиас: правила, которые
+     на неё ссылались, остаются на месте и переезжают на Inter вместе
+     со всеми. */
+  --font-display: 'Unbounded', 'Inter', system-ui, sans-serif;
+  --font-text:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-sub:     var(--font-text);
   --font-mono:    'JetBrains Mono', ui-monospace, monospace;
 
-  /* модульная шкала — широкий динамический диапазон.
-     Кегли ниже мега-заголовка живут в самих компонентах: промежуточные
-     токены (--fs-hero/h2/h3/lead/sm/xs) не пережили перевод секций на
-     clamp() по месту и ни разу не читались. */
-  --fs-mega: clamp(2.2rem, 11vw, 11rem);   /* заголовок в пол-экрана */
-  --fs-body: 1.0625rem;   /* 17px */
+  /* ─── МОДУЛЬНАЯ ШКАЛА КЕГЛЕЙ ───
+     Прежде кегли жили ad-hoc clamp()-ами по месту, и соседние секции
+     набирались близкими, но не равными величинами — глазу это читается
+     как неряшливость, хотя каждая величина по отдельности выглядит
+     осмысленной. Швейцарский канон требует обратного: конечный набор
+     ступеней, между которыми ничего нет.
+
+     Отсчёт идёт от --fs-2 (кегль текста, 17px). Отношение НЕ одно на всю
+     шкалу, и это осознанно: вниз шаг 1.2, вверх 1.25.
+
+     Причина физиологическая. На мелких кеглях разница в один-два пикселя
+     различима и осмысленна — 12px и 14px это разные роли; шаг 1.25 увёл
+     бы служебную подпись к 11px, где она перестаёт читаться, и оставил
+     бы весь вторичный текст сайта в дыре между ступенями. На крупных,
+     наоборот, шаг 1.2 даёт соседние ступени, неотличимые друг от друга,
+     и иерархия заголовков размывается. Единое отношение красивее на
+     бумаге, но обслуживает только одну половину диапазона.
+
+     Мелкие ступени фиксированные: подпись и тег не обязаны расти вместе
+     с экраном, им нужен один кегль на всех ширинах. Крупные — текучие:
+     каждая идёт от ступени ниже к своему потолку, поэтому на любой
+     ширине страница остаётся внутри шкалы, а не съезжает в промежутки. */
+  --fs-0: 0.74rem;      /* 11.8px — мелкая служебная подпись, eyebrow */
+  --fs-1: 0.885rem;     /* 14.2px — подписи, теги, кнопки, вторичный текст */
+  --fs-2: 1.0625rem;    /* 17px   — текст */
+  --fs-3: 1.33rem;      /* 21.3px — lead */
+  --fs-4: clamp(1.33rem, 1.10rem + 1.0vw, 1.66rem);   /* 26.6px — h4/h3 */
+  --fs-5: clamp(1.66rem, 1.30rem + 1.6vw, 2.08rem);   /* 33.2px */
+  --fs-6: clamp(2.08rem, 1.50rem + 2.6vw, 2.60rem);   /* 41.5px */
+  --fs-7: clamp(2.30rem, 1.60rem + 3.4vw, 3.24rem);   /* 51.9px */
+  --fs-8: clamp(2.30rem, 1.40rem + 5.0vw, 4.05rem);   /* 64.8px — h-title */
+
+  /* Мега-заголовок вне шкалы намеренно: это не ступень иерархии, а
+     отдельный типографический жест в пол-экрана, и его кегль считается
+     от длины самой длинной строки колоды, а не от кегля текста. */
+  --fs-mega: clamp(2.2rem, 11vw, 11rem);
+  --fs-body: var(--fs-2);
+
+  /* ── Приборный микро-регистр: 0.52–0.72rem, тоже вне шкалы ──
+     Мелкие mono-подписи в верхнем регистре с разрядкой — readout под
+     окном Drill Monitor, бейдж LIVE, теги, единицы измерения, номера
+     кадров — на шкалу НЕ переводятся и остаются там, где стоят.
+
+     Это не забытые величины. Они цитируют настоящий UI прибора, где
+     подпись физически мельче любого интерфейсного текста, и в этом их
+     работа: разрядка и кегль сразу сообщают «здесь показания, а не
+     текст сайта». Подняв их до --fs-0, мы уравняли бы служебную
+     подпись сайта с показанием прибора и потеряли бы эту границу.
+     Читаемость держит не кегль, а разрядка и верхний регистр. */
 
   /* ─── SPACING / LAYOUT ─── */
+  /* ─── МОДУЛЬ 8pt ───
+     Единица, которой меряется весь вертикальный и горизонтальный воздух.
+     Ступени идут 1·2·3·4·6·8·12·16 единиц, а не подряд: у линейной
+     последовательности соседние ступени неразличимы, и выбор между
+     40 и 48 становится делом вкуса вместо решения. */
+  --u: 8px;
+  --s-1: calc(1 * var(--u));    /* 8   */
+  --s-2: calc(2 * var(--u));    /* 16  */
+  --s-3: calc(3 * var(--u));    /* 24  */
+  --s-4: calc(4 * var(--u));    /* 32  */
+  --s-5: calc(6 * var(--u));    /* 48  */
+  --s-6: calc(8 * var(--u));    /* 64  */
+  --s-7: calc(12 * var(--u));   /* 96  */
+  --s-8: calc(16 * var(--u));   /* 128 */
+
   /* Контента-«островка» по центру нет: полоса набора — весь экран,
      поля фиксированные. На широком мониторе это главное отличие
      первоисточника — типографика идёт от края до края, а пустоту
@@ -70,22 +151,90 @@
      На устройствах без вырезов env(...) равен нулю — величина та же. */
   --gut: calc(clamp(20px, 2.4vw, 44px) + max(env(safe-area-inset-left), env(safe-area-inset-right)));
 
-  /* ─── КОЛОНКИ · вертикальные линии сетки ───
-     Шесть направляющих. Между ними живут пункты меню, к ним же
-     привязаны раскладки секций. Крайние поля намеренно шире
-     внутренних колонок — так композиция читается как разворот. */
-  --rail-1: 22%;
-  --rail-2: 34%;
-  --rail-3: 46%;
-  --rail-4: 58%;
-  --rail-5: 70%;
-  --rail-6: 82%;
-  /* один вертикальный ритм на все ширины: от 80px на телефоне
-     до 168px на большом экране, без брейкпоинт-исключений */
-  --section-y: clamp(80px, 12vw, 168px);
+  /* ─── КОЛОНКИ ───
+     Здесь работают ДВЕ разные системы, и это осознанно, а не наследие.
 
-  /* ─── RADII · приборные: строже ─── */
+     1. СЕТКА РАСКЛАДКИ — двенадцать колонок внутри полей секции.
+        Канон International Typographic Style: 12 делится на 2, 3, 4 и 6,
+        поэтому одна сетка обслуживает и разворот пополам, и триптих,
+        и ленту карточек, не требуя второй. По ней раскладываются
+        внутренности секций (см. утилиту .grid).
+
+     2. НАПРАВЛЯЮЩИЕ --rail-* — шесть вертикальных линий, видимых на
+        экранах колоды, и одновременно опора для шапки и для .split.
+        Шаг равномерный, 12% ширины ВЬЮПОРТА, от 22% до 82%.
+
+     Направляющие НЕ совпадают с границами колонок, и специально.
+     Граница колонки из двенадцати — это 8.33%, то есть двенадцать
+     линий на экран; столько направляющих превращаются в штриховку и
+     перестают что-либо структурировать (по той же причине на телефоне
+     из шести остаются две). Направляющие — более крупный регистр той
+     же композиции: они размечают развороты и держат крайние поля
+     заметно шире внутренних колонок, отчего страница читается как
+     разворот, а не как таблица.
+
+     Связывает две системы общее поле --gut, а не совпадение линий.
+     Величина 22% у первой направляющей вдобавок несущая: от неё
+     считается порог ухода меню в бургер (см. блок «МОБИЛЬНАЯ ОГРАНКА»),
+     поэтому менять её нельзя, не пересчитав порог. */
+  --cols: 12;
+  --col-gap: var(--s-3);
+  --rail-step: 12%;
+  --rail-1: 22%;
+  --rail-2: calc(var(--rail-1) + 1 * var(--rail-step));   /* 34% */
+  --rail-3: calc(var(--rail-1) + 2 * var(--rail-step));   /* 46% */
+  --rail-4: calc(var(--rail-1) + 3 * var(--rail-step));   /* 58% */
+  --rail-5: calc(var(--rail-1) + 4 * var(--rail-step));   /* 70% */
+  --rail-6: calc(var(--rail-1) + 5 * var(--rail-step));   /* 82% */
+  /* один вертикальный ритм на все ширины, кратный модулю:
+     10 единиц на телефоне → 21 на большом экране */
+  --section-y: clamp(calc(10 * var(--u)), 12vw, calc(21 * var(--u)));
+
+  /* ─── RADII ───
+     Два радиуса с разными ролями. --r приборный: им скруглены окна
+     интерфейса, рамки со засечками, карточки — всё, что изображает
+     аппаратуру, и там строгость важнее мягкости. --r-glass принадлежит
+     только плавающему слою: у стекла крупный радиус читается как
+     физическая толщина кромки, у прибора — как размытая штамповка. */
   --r: 8px;
+  --r-glass: 16px;
+
+  /* ════════════════════════════════════════════════
+     СТЕКЛО · плавающий слой
+     ────────────────────────────────────────────────
+     Дорогое стекло — не блюр. Блюр даёт мутную плашку; предметом её
+     делают четыре сложенных признака, и убрать можно любой, кроме
+     второго:
+
+       1. backdrop-filter: blur() saturate() — сама фактура. saturate
+          обязателен: без него подложка под стеклом выцветает и панель
+          читается грязным пятном, а не прозрачной средой.
+       2. АСИММЕТРИЧНАЯ КРОМКА — светлая сверху (--glass-hl), тёмная
+          снизу (--glass-lo). Именно она читается как физический край,
+          поймавший свет сверху. Симметричная рамка мгновенно
+          возвращает панель в плоскость.
+       3. Тонкая контурная линия (--glass-line) — отделяет панель от
+          подложки там, где блюра не хватило.
+       4. Двухуровневая тень: плотная контактная в 1px и широкая
+          мягкая. Одна широкая даёт «наклейку», одна плотная — рамку.
+
+     Полноценный Liquid Glass с преломлением через feDisplacementMap
+     сюда не берётся сознательно: как вход для backdrop-filter SVG-фильтры
+     поддерживает только Chromium, а на элементах размером с шапку
+     разница между этим набором и настоящей рефракцией не читается —
+     цена в GPU и во второй ветке кода не окупается.
+
+     Величины ниже — для тёмных заливок; светлые темы переопределяют
+     группу целиком, иначе на белом фоне светлое стекло исчезает.
+     ════════════════════════════════════════════════ */
+  --glass-bg:     rgba(14,18,25,0.55);
+  --glass-solid:  #10151d;              /* непрозрачный запасной фон */
+  --glass-blur:   20px;
+  --glass-sat:    180%;
+  --glass-line:   rgba(255,255,255,0.14);
+  --glass-hl:     rgba(255,255,255,0.30);   /* верхняя кромка — блик */
+  --glass-lo:     rgba(0,0,0,0.22);         /* нижняя кромка — тень */
+  --glass-shadow: 0 1px 2px rgba(0,0,0,0.30), 0 16px 48px -12px rgba(0,0,0,0.55);
 
   /* ─── MOTION ─── */
   --ease:     cubic-bezier(0.22, 1, 0.36, 1);
@@ -128,7 +277,31 @@
    явно. Убрать дублирование можно будет только после
    того, как компоненты перейдут на --ink/--line.
    ════════════════════════════════════════════════ */
-[data-theme] { background: var(--surface); color: var(--ink); }
+/* ── СВЕТ ЗА СТЕКЛОМ ──
+   Заливка темы — не один тон, а тон плюс необязательный слой света.
+
+   Свет живёт ЗДЕСЬ, а не в .bg-fx, и это не мелочь размещения. Секции
+   заливаются непрозрачным --surface во весь экран, то есть .bg-fx под
+   ними не виден никогда: подсветка, положенная туда, не дошла бы ни до
+   глаза, ни до backdrop-filter. Стекло размывает то, что лежит под ним
+   в том же контексте наложения, — значит источник обязан быть внутри
+   секции, над заливкой и под контентом.
+
+   Назначение у слоя служебное, а не декоративное. На идеально плоском
+   near-black стеклу нечего преломлять: размытие однородного пятна даёт
+   то же однородное пятно, и панель читается матовой плашкой, а не
+   стеклом. Свет даёт градиент, по которому кромка панели и становится
+   видимой. Отсюда и величины — 0.10 по альфе на самой яркой точке:
+   заметить пятно нельзя, а работать стеклу оно уже позволяет.
+
+   Светлые темы слоя не получают: на белом кромка стекла читается за
+   счёт собственной тени, и подсветка там была бы именно украшением. */
+[data-theme] {
+  background-color: var(--surface);
+  background-image: var(--surface-glow, none);
+  background-repeat: no-repeat;
+  color: var(--ink);
+}
 
 [data-theme="black"] {
   --surface:     #07090d;
@@ -142,6 +315,18 @@
   --panel-2:     #141a23;  --bg-raised-2: #141a23;
   /* на чёрном константа — брендовая лазурь */
   --deck-brand-ink: #0e8fd4;
+  /* группа стекла в :root настроена ровно на эту заливку — не дублируем */
+  /* Источник смещён влево и к верхней кромке: слева на экранах колоды
+     стоят панель показаний и CTA, сверху проходит шапка — то есть
+     ровно там, где живёт стекло. Пятно шире секции (140%), чтобы в
+     кадр попадал его склон, а не центр: ровная середина градиента
+     размывается в такую же ровную заливку и стеклу опять нечего
+     преломлять — работает именно перепад. */
+  --surface-glow:
+    radial-gradient(140% 90% at 14% -10%,
+      rgba(14,143,212,0.10) 0%,
+      rgba(14,143,212,0.035) 34%,
+      transparent 66%);
 }
 
 /* Графит — экран колоды про ПО. Заливка тёмная не для настроения:
@@ -168,6 +353,20 @@
      под ней и на переходе black → graphite даёт линию реза (яркая
      лазурь сверху, сталь снизу). */
   --deck-brand-ink: #93a1b5;
+  /* Заливка светлее чёрной на заметный шаг — стекло идёт следом,
+     иначе панель на графите читается тёмным провалом, а не средой. */
+  --glass-bg:    rgba(30,37,47,0.55);
+  --glass-solid: #232a35;
+  --glass-line:  rgba(255,255,255,0.16);
+  /* Тон холоднее и нейтральнее, чем на чёрном: на графите лазурь
+     сама по себе видна и читалась бы цветным пятном, а нужен перепад
+     светлоты, а не цвета. Экран колоды про ПО — как раз тот, где на
+     стекле стоят и панель показаний, и CTA. */
+  --surface-glow:
+    radial-gradient(140% 90% at 14% -10%,
+      rgba(190,214,238,0.09) 0%,
+      rgba(190,214,238,0.03) 34%,
+      transparent 66%);
 }
 
 [data-theme="gray"] {
@@ -216,6 +415,25 @@
 /* Тема "blue" убрана вместе с последней синей заливкой во весь экран:
    экран 02 колоды ушёл в графит, и ни одна секция тему больше не просила. */
 
+/* ── Стекло на светлых заливках ──
+   Обе светлые темы делят одну группу, поэтому она вынесена в общий
+   селектор, а не продублирована: у стекла нет legacy-алиасов, из-за
+   которых --brand и --ink приходится задавать в каждой теме отдельно.
+
+   На светлом стекло переворачивается целиком: подложка белая, блик
+   по верхней кромке — почти чистый белый, а роль тени берёт на себя
+   не чёрный, а притемнённый тон чернил. Тёмное стекло на белом фоне
+   читалось бы дырой, а не средой. */
+[data-theme="gray"],
+[data-theme="white"] {
+  --glass-bg:     rgba(255,255,255,0.62);
+  --glass-solid:  #f7f8fa;
+  --glass-line:   rgba(20,24,31,0.10);
+  --glass-hl:     rgba(255,255,255,0.85);
+  --glass-lo:     rgba(20,24,31,0.08);
+  --glass-shadow: 0 1px 2px rgba(20,24,31,0.06), 0 16px 48px -12px rgba(20,24,31,0.18);
+}
+
 /* Плоскость темы — правило референса: никаких теней и градиентов
    на цветных заливках. Тени остаются только на окнах интерфейса
    внутри тёмных секций, где они несут глубину, а не декор. */
@@ -249,21 +467,32 @@ img { display: block; max-width: 100%; }
 /* единицы и числа — табличные везде */
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
-/* ─── ТИПОГРАФИКА: display-гарнитура на крупных заголовках ───
-   Geologica — «чертёжный» гротеск, уводит от дефолтного Manrope.
-   Карточные h4 остаются в текстовой гарнитуре ради читаемости. */
-.h-title, h1, h2 {
-  font-family: var(--font-display);
-  font-optical-sizing: auto;
-  /* Unbounded широкий по рисунку — на крупных кеглях его надо
-     поджимать трекингом, иначе строка рассыпается */
-  letter-spacing: -0.03em;
-  line-height: 1.02;
-}
-/* ниже h2 сверхширокий гротеск нечитаем — там «чертёжная» Geologica */
-h3, h4 { font-family: var(--font-sub); }
+/* ─── ТИПОГРАФИКА ───
+   Все заголовки набраны той же гарнитурой, что и текст. Это и есть
+   швейцарский приём: разницу между заголовком и абзацем несут кегль,
+   вес и воздух, а не второй шрифт. Смена рисунка на заголовке — приём
+   рекламный, он сообщает «посмотрите сюда»; модульная шкала сообщает
+   «это уровень выше», и второе точнее.
 
-/* заголовок в пол-экрана — главный типографический жест референса */
+   Трекинг отрицательный и растёт с кеглем: у нейтрального гротеска
+   на крупном кегле межбуквенные просветы визуально раскрываются,
+   и без поджатия строка рассыпается на отдельные буквы. */
+.h-title, h1, h2, h3, h4 {
+  font-family: var(--font-text);
+  font-optical-sizing: auto;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
+}
+
+/* ── Заголовок в пол-экрана — единственное место Unbounded на сайте ──
+   Главный типографический жест страницы и одновременно подпись бренда.
+   Сверхширокий гротеск здесь работает именно потому, что больше нигде
+   не встречается: будь он и на заголовках секций, страница читалась бы
+   набранной «фирменным шрифтом», а так — нейтральной, с одним акцентом.
+
+   Кегль общий на все экраны колоды и считается от длины самой длинной
+   строки (--deck-len из Hero.astro). Трогать его нельзя: на нём держится
+   разрез константы «ГЕОТЕХНАВИГАЦИЯ» при смене заливок. */
 .mega {
   font-family: var(--font-display);
   font-size: var(--fs-mega);
@@ -274,9 +503,11 @@ h3, h4 { font-family: var(--font-sub); }
   text-wrap: balance;
 }
 
-/* спокойная глубина фона — очень тонкая, без неона и сетки */
-/* плоская near-black основа — без клише-свечения сверху;
-   глубину дают каротажный canvas в hero и разделители секций */
+/* Подложка всей страницы — плоская, и остаётся плоской. Свет, который
+   преломляет стекло, живёт не здесь, а в заливках тем (--surface-glow):
+   секции непрозрачны, и этот слой из-под них не виден ни глазу, ни
+   backdrop-filter. Здесь он был бы чистым украшением — тем самым
+   «свечением сверху», от которого страница отказалась с самого начала. */
 .bg-fx {
   position: fixed; inset: 0; z-index: -2; pointer-events: none;
   background: var(--bg);
@@ -284,6 +515,24 @@ h3, h4 { font-family: var(--font-sub); }
 
 /* ─── КОНТЕЙНЕР И СЕКЦИИ ─── */
 .container { max-width: var(--maxw); margin: 0; padding: 0 var(--gut); }
+
+/* ─── .grid · двенадцатиколоночная сетка раскладки ───
+   Раньше каждая шапка секции придумывала себе пропорции сама: 1fr 1fr
+   у платформы, 1.05fr 1fr у мобильной версии, 1.6fr 1fr 1fr в подвале.
+   Величины разные, а задача одна — развернуть заголовок и приписку по
+   ширине страницы, — и от этого границы блоков в соседних секциях не
+   совпадали на 10–20px. Глаз такое замечает, даже не понимая, что видит.
+
+   Теперь пропорции задаются в колонках, и они общие для всей страницы.
+   minmax(0, 1fr) вместо 1fr обязателен: у grid минимальная ширина
+   колонки по умолчанию auto, и длинное неразрывное слово (а их тут
+   хватает — «ГЕОТЕХНАВИГАЦИЯ», адреса, e-mail) раздувает колонку
+   сверх её доли вместо переноса. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--col-gap);
+}
 /* Длинные абзацы ширину экрана не наследуют — им меру задаёт
    собственный max-width (.lead, .sc-text и т.п.). Полную ширину
    забирает только типографика и сетка. */
@@ -348,8 +597,7 @@ section[id]:not(.deck-screen) { scroll-margin-top: calc(88px + env(safe-area-ins
 }
 .marquee-list li {
   display: inline-flex; align-items: center;
-  font-family: var(--font-display);
-  font-size: clamp(1.1rem, 2.4vw, 2.1rem);
+  font-size: var(--fs-5);
   font-weight: 600; letter-spacing: -0.02em;
   text-transform: uppercase; color: var(--ink);
 }
@@ -361,19 +609,19 @@ section[id]:not(.deck-screen) { scroll-margin-top: calc(88px + env(safe-area-ins
 }
 
 .eyebrow {
-  display: inline-flex; align-items: center; gap: 12px;
-  font-size: 0.72rem; letter-spacing: 0.26em; text-transform: uppercase;
-  color: var(--ink-dim); font-weight: 600; margin-bottom: 30px;
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  font-size: var(--fs-0); letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--ink-dim); font-weight: 600; margin-bottom: var(--s-4);
   font-family: var(--font-mono);
 }
-.eyebrow::before { content: ''; width: 28px; height: 1px; background: linear-gradient(90deg, var(--brand-line), transparent); }
+.eyebrow::before { content: ''; width: var(--s-4); height: 1px; background: linear-gradient(90deg, var(--brand-line), transparent); }
 
 /* ── индекс секции «01 / 06» — единственный цветовой акцент в шапке,
    мотив инструкции-вкладыша Control: номер ведёт, лейбл уходит в серый ── */
 .eyebrow .ey-no {
   order: -1;
   font-family: var(--font-mono);
-  font-size: 0.86rem; letter-spacing: 0.04em; font-weight: 500;
+  font-size: var(--fs-1); letter-spacing: 0.04em; font-weight: 500;
   color: var(--brand);
 }
 .eyebrow .ey-no .ey-den { color: var(--ink-faint); }
@@ -382,17 +630,22 @@ section[id]:not(.deck-screen) { scroll-margin-top: calc(88px + env(safe-area-ins
    перезаписывала первую (кегль, интерлиньяж, трекинг). Собраны в одно —
    значения ровно те, что побеждали в каскаде. */
 .h-title {
-  font-size: clamp(2.3rem, 5vw, 4.4rem); font-weight: 700;
-  line-height: 1.04; letter-spacing: -0.038em; text-wrap: balance;
+  font-size: var(--fs-8); font-weight: 700;
+  line-height: 1.04; letter-spacing: -0.035em; text-wrap: balance;
 }
-.lead { font-size: 1.12rem; color: var(--text-dim); line-height: 1.8; max-width: 560px; }
+/* Мера абзаца задана в знаках, а не в пикселях: 54ch держится внутри
+   канонических 45–75 знаков в строке на любом кегле, тогда как прежние
+   560px означали разную меру, стоило кеглю измениться. Кегль поднялся
+   на ступень (--fs-3): лид — уровень над текстом, и в модульной шкале
+   между ними нет промежуточного значения. */
+.lead { font-size: var(--fs-3); color: var(--text-dim); line-height: 1.7; max-width: 54ch; }
 
 /* ─── КНОПКИ ─── */
 .btn {
-  display: inline-flex; align-items: center; gap: 10px;
-  font-family: inherit; font-size: 0.86rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: var(--s-1);
+  font-family: inherit; font-size: var(--fs-1); font-weight: 600;
   letter-spacing: 0.01em; cursor: pointer; text-decoration: none;
-  padding: 14px 28px; border-radius: 4px; border: 1px solid transparent;
+  padding: var(--s-2) var(--s-4); border-radius: 4px; border: 1px solid transparent;
   transition: transform 0.2s var(--ease), background 0.25s, border-color 0.25s, color 0.25s;
 }
 .btn svg { width: 16px; height: 16px; transition: transform 0.25s var(--ease); }
@@ -405,6 +658,103 @@ section[id]:not(.deck-screen) { scroll-margin-top: calc(88px + env(safe-area-ins
 .btn-ghost:hover { border-color: var(--line-strong); background: var(--brand-soft); }
 .btn-ghost:hover svg { transform: translateX(3px); }
 .btn-ghost:active { transform: scale(0.97); border-color: var(--line-strong); background: var(--accent-soft); }
+
+/* ════════════════════════════════════════════════
+   СТЕКЛО · рецепт и его носители
+   ────────────────────────────────────────────────
+   Рецепт живёт в ОДНОМ месте и раздаётся списком селекторов, а не
+   классом в разметке. Причина простая: стеклянными становятся
+   поверхности, которые уже описаны в этом файле, и класс в шаблоне
+   означал бы правку девяти компонентов ради того, что каскад делает
+   сам. Заодно список работает описью — видно разом, где на сайте
+   есть стекло, и видно, что оно не расползлось по контенту.
+
+   ГРАНИЦА, которую нельзя переступать: стекло — только плавающая
+   хрома. Шапка, меню, панель показаний, бары поверх скриншотов,
+   подписи поверх фотографий. Ни одна поверхность, НЕСУЩАЯ основной
+   текст, стеклянной не становится: .bento-body, .step-node,
+   .contact-card, .iframe-wrap и подвал остаются плоскими.
+
+   Это не вкусовщина. Сайт показывает плотные тёмные дашборды с
+   мелкими цифрами, а для такого материала прозрачные подложки —
+   прямая рекомендация «не надо»: контраст под ними плавает вместе
+   с картинкой, и текст перестаёт держать WCAG в худших местах кадра.
+   Плавающая хрома тем и отличается, что её площадь мала, а фон под
+   ней либо известен, либо сильно размыт.
+
+   ОТДЕЛЬНО: .skip-link в список НЕ входит, хотя формально подходит
+   под определение плавающей хромы. Это ссылка для клавиатуры и
+   скринридеров, она всплывает поверх произвольного места страницы,
+   и её единственная задача — быть безусловно различимой. Прозрачность
+   там ухудшила бы ровно то, ради чего элемент существует.
+   ════════════════════════════════════════════════ */
+nav.nav.scrolled,
+.nav-mobile,
+.deck-readout,
+.bento-bar,
+.bento-tile.is-sm .tag,
+.bento-tile.is-wide .tag,
+.deck-cta,
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+          backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-glass);
+  /* Три тени в одном свойстве, и порядок значим — первая рисуется
+     поверх последующих.
+
+     Внутренние кромки идут первыми: светлая сверху, тёмная снизу.
+     Это и есть главный признак предмета — асимметрия говорит, что
+     свет падает сверху, а панель имеет толщину. Симметричная рамка
+     мгновенно возвращает её в плоскость, сколько блюра ни добавь.
+
+     Внешняя тень двойная (см. --glass-shadow): плотная в 1px даёт
+     касание с фоном, широкая — отрыв от него. Одна только широкая
+     читается наклейкой, одна только плотная — рамкой. */
+  box-shadow:
+    inset 0 1px 0 var(--glass-hl),
+    inset 0 -1px 0 var(--glass-lo),
+    var(--glass-shadow);
+}
+
+/* ── Запасной вид без backdrop-filter ──
+   Старый Safari и Firefox с выключенным флагом. Прозрачная подложка
+   без размытия — это просто полупрозрачная плашка, сквозь которую
+   виден резкий фон, и текст на ней не читается. Поэтому фоллбэк не
+   «то же самое, но без блюра», а честная непрозрачная панель.
+
+   Проверка вывернута через `not`: положительная форма потребовала бы
+   продублировать весь список селекторов ещё раз. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  nav.nav.scrolled,
+  .nav-mobile,
+  .deck-readout,
+  .bento-bar,
+  .bento-tile.is-sm .tag,
+  .bento-tile.is-wide .tag,
+  .deck-cta,
+  .glass { background: var(--glass-solid); }
+}
+
+/* ── Пользователь попросил меньше прозрачности ──
+   Системная настройка macOS/iOS «Reduce transparency» и её аналоги.
+   Просьба буквальная, и выполняется буквально: панели становятся
+   непрозрачными, размытие снимается совсем. */
+@media (prefers-reduced-transparency: reduce) {
+  nav.nav.scrolled,
+  .nav-mobile,
+  .deck-readout,
+  .bento-bar,
+  .bento-tile.is-sm .tag,
+  .bento-tile.is-wide .tag,
+  .deck-cta,
+  .glass {
+    background: var(--glass-solid);
+    -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+  }
+}
 
 /* ════════════════════════════════════════════════
    НАВИГАЦИЯ
@@ -422,30 +772,46 @@ nav.nav {
   padding: 22px 0; border-bottom: 1px solid transparent;
   transition: padding 0.4s var(--ease), background 0.4s, border-color 0.4s;
 }
+/* Заливку, размытие и кромки шапка берёт из общего рецепта стекла
+   выше — здесь только геометрия полосы во всю ширину. */
 nav.nav.scrolled {
-  padding: 14px 0; background: var(--bg-glass);
-  backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border-bottom-color: var(--line);
+  padding: 14px 0;
+  /* Скруглять и обводить полосу от края до края нечего: у неё есть
+     только одна собственная кромка — нижняя. */
+  border-radius: 0;
+  border-top: 0; border-left: 0; border-right: 0;
+  border-bottom-color: var(--glass-line);
+  /* Из трёх теней рецепта у полосы работают две: блик по верхней
+     кромке и мягкая тень вниз, на контент. Нижняя внутренняя кромка
+     снята — её роль здесь уже исполняет border-bottom, и вдвоём они
+     давали двойную линию под шапкой. */
+  box-shadow:
+    inset 0 1px 0 var(--glass-hl),
+    0 12px 32px -16px rgba(0,0,0,0.5);
 }
 
 /* ── Шапка перекрашивается под тему секции, проходящей под ней ──
-   data-theme проставляет motion.js. Токены темы наследуются
-   от блока выше; здесь снимаем только заливку — шапка поверх
-   секции должна оставаться прозрачной, пока не проскроллена. */
-nav.nav[data-theme] { background: transparent; color: var(--ink); }
-nav.nav.scrolled[data-theme] {
-  background: var(--surface);
-  /* на плоской заливке блюр даёт грязь — референс держит шапку плоской */
-  backdrop-filter: none; -webkit-backdrop-filter: none;
-}
+   data-theme проставляет motion.js: токены темы наследуются, и вместе
+   с --ink шапка получает соответствующую заливке группу стекла.
+
+   :not(.scrolled) здесь несущий. Раньше правило снимало заливку у
+   ЛЮБОЙ шапки с темой, а следом отдельное правило возвращало ей
+   плотную заливку темы и глушило размытие — с обоснованием «на плоской
+   заливке блюр даёт грязь». Обоснование было верным: размывать
+   однотонный фон действительно бессмысленно. Теперь под шапкой есть
+   что размывать — свет в .bg-fx и кромки скриншотов, — поэтому оба
+   правила заменены одним: прозрачная, пока не проскроллена;
+   стеклянная, как только проскроллена. */
+nav.nav:not(.scrolled)[data-theme] { background: transparent; color: var(--ink); }
+nav.nav[data-theme] { color: var(--ink); }
 nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; padding-left: var(--gut); }
 .nav-logo img { height: 34px; width: auto; }
-.nav-logo-text { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+.nav-logo-text { font-size: var(--fs-1); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
 /* ul растворяется, чтобы каждый li стал ячейкой сетки шапки */
 .nav-links { display: contents; list-style: none; }
 .nav-links li { min-width: 0; padding-left: clamp(10px, 1vw, 18px); }
-.nav-links a { position: relative; color: var(--text-dim); text-decoration: none; font-size: 0.83rem; letter-spacing: 0.04em; font-weight: 500; transition: color 0.25s; white-space: nowrap; }
+.nav-links a { position: relative; color: var(--text-dim); text-decoration: none; font-size: var(--fs-1); letter-spacing: 0.04em; font-weight: 500; transition: color 0.25s; white-space: nowrap; }
 .nav-links a::after { content: ''; position: absolute; left: 0; bottom: -6px; width: 100%; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease); }
 .nav-links a:hover { color: var(--text); }
 .nav-links a:hover::after { transform: scaleX(1); }
@@ -458,7 +824,7 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   display: inline-flex; align-items: center; gap: 8px;
   padding: 9px 18px 10px; border-radius: 999px;
   border: 1px solid var(--line-strong);
-  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.01em;
+  font-size: var(--fs-1); font-weight: 500; letter-spacing: 0.01em;
   color: var(--ink); text-decoration: none; white-space: nowrap;
   transition: background 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease);
 }
@@ -486,9 +852,22 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
    возможности до них добраться. */
 .nav-mobile {
   display: none; position: fixed; inset: 0;
-  background: rgba(7,13,23,0.97); backdrop-filter: blur(20px);
+  /* Заливка и размытие — из общего рецепта стекла. Здесь только
+     геометрия панели во весь экран: скруглять и обводить нечего,
+     кромок у неё нет. Прежняя заливка была почти непрозрачной (0.97),
+     то есть размытие под ней всё равно не работало; теперь меню и
+     правда стеклянное, а читаемость держит --glass-solid в фоллбэках. */
+  border: 0; border-radius: 0; box-shadow: none;
+  /* Плотность своя, выше панельной. Панель рецепта размером с плашку,
+     и под ней небольшой кусок фона; здесь под стеклом ВСЯ страница —
+     на 0.55 сквозь меню читался бы текст секции, и пункты пришлось бы
+     выискивать. Взамен размытие сильнее: чем плотнее материал, тем
+     дальше от него должен быть виден фон. */
+  background: color-mix(in srgb, var(--glass-solid) 86%, transparent);
+  -webkit-backdrop-filter: blur(28px) saturate(var(--glass-sat));
+          backdrop-filter: blur(28px) saturate(var(--glass-sat));
   z-index: 99; flex-direction: column; align-items: center; justify-content: center;
-  gap: 36px;
+  gap: var(--s-5);
   overflow-y: auto; overscroll-behavior: contain;
   padding:
     calc(84px + env(safe-area-inset-top)) env(safe-area-inset-right)
@@ -498,7 +877,7 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .nav-mobile ul { list-style: none; display: flex; flex-direction: column; align-items: center; gap: 26px; }
 /* область нажатия по всей ширине панели, а не по буквам */
 .nav-mobile li { display: flex; }
-.nav-mobile a { color: var(--text); text-decoration: none; font-size: 1.25rem; font-weight: 600; letter-spacing: 0.04em; opacity: 0.85; transition: opacity 0.2s; padding: 6px 24px; }
+.nav-mobile a { color: var(--text); text-decoration: none; font-size: var(--fs-3); font-weight: 600; letter-spacing: 0.04em; opacity: 0.85; transition: opacity 0.2s; padding: var(--s-1) var(--s-3); }
 .nav-mobile a:hover { opacity: 1; }
 
 /* ════════════════════════════════════════════════
@@ -535,12 +914,12 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   padding: clamp(72px, 10vh, 120px) clamp(24px, 3vw, 56px) clamp(40px, 6vh, 80px) 0;
 }
 .spread-title {
-  font-family: var(--font-display); font-weight: 800;
-  font-size: clamp(1.8rem, 3.4vw, 3.4rem); line-height: 1.02;
-  letter-spacing: -0.04em; text-transform: uppercase;
+  font-weight: 700;
+  font-size: var(--fs-7); line-height: 1.04;
+  letter-spacing: -0.035em; text-transform: uppercase;
   color: var(--ink); margin-top: 4px;
 }
-.spread-aside .lead { margin-top: clamp(14px, 1.6vw, 22px); max-width: none; font-size: 0.95rem; }
+.spread-aside .lead { margin-top: clamp(14px, 1.6vw, 22px); max-width: none; font-size: var(--fs-2); }
 .spread-aside .pill { align-self: flex-start; margin-top: clamp(18px, 2.2vw, 28px); }
 
 /* карточка-изображение: слои наезжают снизу, как панели справа.
@@ -578,7 +957,7 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .spread-count {
   position: sticky; top: clamp(84px, 12vh, 130px); z-index: 5;
   display: block; height: 0; text-align: right;
-  font-size: 0.8rem; letter-spacing: 0.06em;
+  font-size: var(--fs-1); letter-spacing: 0.06em;
 }
 .spread-count b { font-weight: 500; color: var(--ink); }
 .spread-count i { font-style: normal; color: var(--ink-faint); }
@@ -599,8 +978,11 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 /* обёртка подписи. На десктопе повторяет раскладку самой панели и
    потому невидима; на мобильном становится плашкой поверх фото */
 .sc-body { display: flex; flex-direction: column; align-items: flex-start; }
+/* Крупная цифра факта. Гарнитура текстовая, но фигуры табличные:
+   счётчик набирает значение по прокрутке, и с пропорциональными
+   цифрами строка дёргалась бы по ширине на каждом шаге. */
 .sc-big {
-  font-family: var(--font-display); font-weight: 700;
+  font-weight: 700; font-variant-numeric: tabular-nums;
   font-size: clamp(2.6rem, 7vw, 6.5rem); line-height: 0.94; letter-spacing: -0.04em;
   color: var(--brand); display: inline-flex; align-items: baseline; gap: 0.18em;
 }
@@ -609,7 +991,7 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.2em;
   text-transform: uppercase; color: var(--ink-faint); margin-top: 18px;
 }
-.sc-text { max-width: 46ch; color: var(--ink-dim); line-height: 1.7; margin-top: 16px; font-size: 0.95rem; }
+.sc-text { max-width: 46ch; color: var(--ink-dim); line-height: 1.7; margin-top: var(--s-2); font-size: var(--fs-2); }
 
 @media (max-width: 900px) {
   /* колонки складываются: картинка идёт шапкой раздела, цифры — списком */
@@ -644,20 +1026,37 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
      (100% auto), а распорку меряем той же пропорцией, чуть срезав:
      плашка тогда заезжает только на нижнюю кромку кадра. */
   .spread-item::before { content: ''; display: block; padding-top: 56%; }
-  /* плашка подписи: заливка темы полупрозрачно + размытие кадра под ней.
-     Без backdrop-filter (старый Safari, Firefox с выключённым флагом)
-     остаётся та же заливка плотнее — текст читается в обоих случаях */
+  /* Плашка подписи поверх кадра — плавающая хрома, и здесь стекло было
+     раньше всего остального: этот блок и подсказал форму общего рецепта.
+     Теперь он на общих токенах, но со своей геометрией — плашка прижата
+     к трём кромкам карточки, скруглять её нечего, а разделяет её с
+     кадром только верхняя линия.
+
+     Плотность выше рецептной (0.78 против 0.55): под этой плашкой не
+     размытая страница, а конкретный светлый снимок буровой, и на общей
+     плотности тёмный текст на нём терял контраст.
+
+     Порядок объявлений значим: непрозрачная заливка идёт первой и
+     остаётся единственной там, где backdrop-filter не поддержан. */
   .sc-body {
     align-self: stretch;
     padding: clamp(18px, 4.5vw, 26px);
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
-    border-top: 1px solid var(--line);
+    background: var(--glass-solid);
+    border-top: 1px solid var(--glass-line);
   }
   @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
     .sc-body {
-      background: color-mix(in srgb, var(--surface) 66%, transparent);
-      -webkit-backdrop-filter: blur(16px) saturate(1.2);
-      backdrop-filter: blur(16px) saturate(1.2);
+      background: color-mix(in srgb, var(--glass-solid) 78%, transparent);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+              backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+      box-shadow: inset 0 1px 0 var(--glass-hl);
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .sc-body {
+      background: var(--glass-solid);
+      -webkit-backdrop-filter: none;
+              backdrop-filter: none;
     }
   }
   .sc-text { max-width: none; }
@@ -695,7 +1094,7 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .globe-count {
   position: absolute; z-index: 2;
   left: var(--gut); bottom: clamp(24px, 4vh, 44px);
-  font-size: 0.8rem; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.5);
+  font-size: var(--fs-1); letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.5);
 }
 .globe-count b { font-weight: 500; color: #fff; }
 
@@ -704,8 +1103,12 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   left: var(--gut); top: clamp(56px, 11vh, 130px);
   right: clamp(96px, 12vw, 220px);
   max-width: 22ch;
-  font-family: var(--font-sub); font-weight: 400;
-  font-size: clamp(1.5rem, 3.4vw, 3.1rem); line-height: 1.18;
+  font-weight: 400;
+  /* Собственный clamp, а не ступень шкалы: строку набирают по словам
+     прокруткой, и ей нужен диапазон шире одной ступени. Оба конца при
+     этом стоят на шкале — от --fs-4 до потолка --fs-7, — поэтому в покое
+     на любой ширине строка совпадает с одной из ступеней. */
+  font-size: clamp(1.66rem, 3.4vw, 3.24rem); line-height: 1.18;
   letter-spacing: -0.02em;
 }
 /* слово гаснет до тех пор, пока прокрутка до него не дошла */
@@ -821,11 +1224,21 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   height: calc(1px + var(--deck-foot-pad) + 3.2 * var(--deck-descr-fs));
   border-top: 1px solid var(--line); padding-top: var(--deck-foot-pad);
 }
+/* CTA колоды — стеклянная: она лежит поверх сцены с прибором и
+   каротажного фона, то есть ровно поверх того, что стоит преломлять.
+   На наведении заливку .btn-ghost перебиваем обратно: его brand-soft
+   непрозрачный и погасил бы стекло в единственный момент, когда на
+   кнопку смотрят. Реакцию несёт кромка. */
 .deck-cta { flex: 0 0 auto; padding: 12px 22px; }
+.deck-cta:hover,
+.deck-cta:active {
+  background: var(--glass-bg);
+  border-color: var(--glass-hl);
+}
 .deck-descr { font-size: var(--deck-descr-fs); color: var(--ink-dim); line-height: 1.6; }
 
 /* счётчик «01 / 03» — знаменатель приглушён, как в первоисточнике */
-.deck-count { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; color: var(--ink); }
+.deck-count { display: flex; align-items: center; gap: 6px; font-size: var(--fs-1); color: var(--ink); }
 .deck-count-den { opacity: 0.3; }
 #hero .deck-count { margin-top: 32px; }
 
@@ -1041,6 +1454,13 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   position: absolute; z-index: 1; pointer-events: none;
   left: var(--gut); top: clamp(96px, 14svh, 150px);
   width: min(288px, calc(var(--rail-1) - var(--gut) - 8px));
+  /* Панель обзавелась заливкой и кромками — значит нужны и поля:
+     раньше строки лежали прямо на заливке секции и полей не просили. */
+  padding: var(--s-2);
+  /* Растеризация ограничена рамками блока. Здесь это безопасно:
+     блок aria-hidden и не содержит ничего фокусируемого, чьё кольцо
+     фокуса могло бы обрезаться. */
+  contain: paint;
 }
 .deck-readout-head {
   display: flex; align-items: center; gap: 9px;
@@ -1070,7 +1490,7 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   color: var(--ink-faint);
 }
 .deck-readout-row dd { display: flex; align-items: baseline; gap: 4px; }
-.deck-readout-val { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
+.deck-readout-val { font-size: var(--fs-1); font-weight: 500; color: var(--ink); }
 .deck-readout-unit { font-size: 0.6rem; color: var(--ink-faint); }
 
 /* ── Readout ниже 1100px: полоса, а не колонка ──
@@ -1167,22 +1587,22 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   position: sticky; top: clamp(120px, 18vh, 220px); align-self: start;
 }
 .split-title {
-  font-family: var(--font-display); font-weight: 800; text-transform: uppercase;
-  font-size: clamp(1.6rem, 2.6vw, 2.6rem); line-height: 1.04; letter-spacing: -0.04em;
+  font-weight: 700; text-transform: uppercase;
+  font-size: var(--fs-6); line-height: 1.06; letter-spacing: -0.03em;
   margin-top: 18px;
 }
-.split-aside .lead { margin-top: 20px; max-width: none; font-size: 0.95rem; }
+.split-aside .lead { margin-top: var(--s-3); max-width: none; font-size: var(--fs-2); }
 .split-aside .pill { margin-top: clamp(20px, 2.4vw, 30px); }
 .split-main { padding-left: clamp(16px, 2vw, 36px); padding-right: var(--gut); min-width: 0; }
 .steps { position: relative; display: flex; flex-direction: column; gap: 2px; }
 .how-line { position: absolute; left: 27px; top: 18px; bottom: 18px; width: 1px; background: var(--line); }
 .how-line-fill { position: absolute; left: 27px; top: 18px; width: 1px; height: 0; background: var(--accent); }
-.step { position: relative; display: grid; grid-template-columns: 56px 1fr; gap: 28px; padding: 26px 0; }
-.step-node { width: 56px; height: 56px; border-radius: 12px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; background: var(--bg-raised); border: 1px solid var(--line); font-family: var(--font-mono); font-size: 1.05rem; font-weight: 500; color: var(--accent); transition: border-color 0.3s, box-shadow 0.3s; }
+.step { position: relative; display: grid; grid-template-columns: 56px 1fr; gap: var(--s-4); padding: var(--s-3) 0; }
+.step-node { width: 56px; height: 56px; border-radius: 12px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; background: var(--bg-raised); border: 1px solid var(--line); font-family: var(--font-mono); font-size: var(--fs-2); font-weight: 500; color: var(--accent); transition: border-color 0.3s, box-shadow 0.3s; }
 .step.is-visible .step-node { border-color: var(--accent-line); }
 .step-content { padding-top: 6px; }
-.step h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
-.step p { font-size: 0.92rem; color: var(--text-dim); line-height: 1.7; max-width: 620px; }
+.step h3 { font-size: var(--fs-3); font-weight: 700; margin-bottom: var(--s-1); }
+.step p { font-size: var(--fs-1); color: var(--text-dim); line-height: 1.7; max-width: 62ch; }
 
 /* ════════════════════════════════════════════════
    МАГАЗИН
@@ -1252,24 +1672,39 @@ a.contact-card:hover .ci-text span { color: var(--brand); }
    ФУТЕР
    ════════════════════════════════════════════════ */
 footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
-.footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 48px; padding-bottom: 56px; }
-.footer-brand { max-width: 360px; }
+/* Подвал на той же сетке: марка занимает пять колонок, два списка —
+   по три, начиная с седьмой и десятой. Пустая шестая колонка отделяет
+   описание компании от навигации — тем же приёмом, что в шапках секций. */
+.footer-top { row-gap: var(--s-5); padding-bottom: var(--s-6); }
+.footer-brand { grid-column: 1 / span 5; }
+/* nth-child, а не nth-of-type: .footer-brand — тоже div, и счёт по типу
+   сдвинулся бы на единицу, оставив первый список без правила. */
+.footer-top > *:nth-child(2) { grid-column: 7 / span 3; }
+.footer-top > *:nth-child(3) { grid-column: 10 / span 3; }
 .footer-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .footer-logo img { height: 30px; width: auto; }
-.footer-logo-text { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-.footer-desc { font-size: 0.88rem; color: var(--text-dim); line-height: 1.7; }
-.footer-col h4 { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); font-weight: 600; margin-bottom: 20px; font-family: var(--font-mono); }
-.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 13px; }
-.footer-col a { font-size: 0.9rem; color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
+.footer-logo-text { font-size: var(--fs-1); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+.footer-desc { font-size: var(--fs-1); color: var(--text-dim); line-height: 1.7; }
+.footer-col h4 { font-size: var(--fs-0); letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); font-weight: 600; margin-bottom: var(--s-3); font-family: var(--font-mono); }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: var(--s-2); }
+.footer-col a { font-size: var(--fs-1); color: var(--text-dim); text-decoration: none; transition: color 0.2s; }
 .footer-col a:hover { color: var(--text); }
 .footer-muted { color: var(--text-faint); }
-.footer-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 26px 0; border-top: 1px solid var(--line-soft); }
-.footer-copy { font-size: 0.78rem; color: var(--text-faint); }
+/* padding-block, а не padding: нижняя строка подвала несёт класс
+   .container, и сокращённая запись затирала его боковые поля — обе
+   подписи вставали вплотную к кромкам экрана, тогда как весь остальной
+   подвал стоит по --gut. Свойство разделено, и поля контейнера живут. */
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--s-2); padding-block: var(--s-3); border-top: 1px solid var(--line-soft); }
+.footer-copy { font-size: var(--fs-0); color: var(--text-faint); }
 
 @media (max-width: 760px) {
   footer { padding-top: 56px; }
   .footer-bottom { padding-bottom: calc(26px + env(safe-area-inset-bottom)); }
-  .footer-top { grid-template-columns: 1fr; gap: 36px; padding-bottom: 40px; }
+  /* Спаны снимаются вместе с колонками: на сетке из одной колонки
+     «grid-column: 7» создало бы шесть неявных колонок и растянуло подвал
+     далеко за экран. */
+  .footer-top { grid-template-columns: 1fr; gap: var(--s-5); padding-bottom: var(--s-5); }
+  .footer-top > * { grid-column: auto; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
 }
 
@@ -1285,88 +1720,119 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
    ЛИНЕЙКА ОБОРУДОВАНИЯ · ряд-«аккордеон»
    ────────────────────────────────────────────────
    Карточки делят ряд поровну; под курсором нужная
-   забирает бо́льшую долю, соседние сжимаются и уходят
-   в затемнение. Ширина текстового блока фиксирована,
-   поэтому подпись не переверстывается на раскрытии —
-   двигается только кадр.
+   забирает бо́льшую долю, соседние сжимаются и гаснут.
+   Ширина текстового блока фиксирована, поэтому подпись
+   не переверстывается на раскрытии — двигается только кадр.
+
+   Карточка светлая, и это не смена настроения. Рендеры
+   продукции сняты на белом фоне; прежняя вёрстка клала
+   их на всю площадь плитки, гасила до 0.82 и накрывала
+   градиентом до rgba(6,10,16,.97) — ради белого текста
+   поверх кадра. Белый фон рендера уходил в серую муть,
+   предмет тонул, а секция (заливка gray) получала внутри
+   пять чёрных плиток вместо цельного блока.
+
+   Разводим слои: кадр остаётся на своей белой подложке
+   в верхней зоне, текст живёт на панели под ним. Тёмная
+   подложка не нужна — текст на изображение не заходит.
    ════════════════════════════════════════════════ */
 .car-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; margin-bottom: 48px; }
 
 .exp-row {
-  display: flex; gap: 8px;
+  display: flex; gap: 10px;
   padding: 0 var(--gut);
-  height: clamp(420px, 68svh, 720px);
+  height: clamp(440px, 68svh, 720px);
 }
 .exp-card {
   position: relative; flex: 1 1 0; min-width: 0; overflow: hidden;
-  border-radius: var(--r); background: #0b0f15;
-  cursor: pointer; isolation: isolate;
-  transition: flex-grow 0.6s var(--ease), filter 0.45s var(--ease);
+  display: flex; flex-direction: column;
+  border-radius: var(--r);
+  background: var(--panel); border: 1px solid var(--line);
+  cursor: pointer;
+  transition: flex-grow 0.6s var(--ease), border-color 0.45s var(--ease),
+              box-shadow 0.45s var(--ease);
 }
 .exp-card:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
+/* Кадр. cover, а не contain: у рендеров широкие собственные поля,
+   и обрезается именно они — предмет стоит в центре кадра. */
+.exp-frame { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .exp-img {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; z-index: -2;
-  opacity: 0.82; transform: scale(1.02);
+  object-fit: cover; object-position: center;
+  transform: scale(1.02);
   transition: transform 0.8s var(--ease), opacity 0.45s var(--ease);
   -webkit-user-drag: none; user-select: none;
 }
-/* кадр читается только с затемнением: на нём лежит белый текст */
-.exp-card::after {
-  content: ''; position: absolute; inset: 0; z-index: -1;
-  background: linear-gradient(
-    180deg,
-    rgba(6, 10, 16, 0.78) 0%,
-    rgba(6, 10, 16, 0.24) 46%,
-    rgba(6, 10, 16, 0.76) 100%
-  );
-}
+/* приборные засечки зажигаются только на раскрытой карточке:
+   на всех пяти сразу они читались бы рябью, а не прицелом */
+.exp-frame.instr-frame::after { opacity: 0; transition: opacity 0.4s var(--ease); }
 
 .exp-body {
-  position: absolute; z-index: 2; top: 0; left: 0;
-  padding: clamp(16px, 1.7vw, 26px);
-  /* фиксированная мера подписи — иначе заголовок перебирается на раскрытии;
-     она же задаёт нижнюю границу сжатия карточки (см. flex-grow ниже) */
-  width: clamp(120px, 10vw, 190px);
+  position: relative; z-index: 2; flex: none;
+  padding: clamp(14px, 1.5vw, 22px);
+  border-top: 1px solid var(--line-soft);
+  background: var(--panel);
 }
-.exp-title { font-size: 0.95rem; font-weight: 500; line-height: 1.3; color: #fff; }
+/* фиксированная мера подписи — иначе заголовок перебирается на раскрытии;
+   она же задаёт нижнюю границу сжатия карточки (см. flex-grow ниже) */
+.exp-head { width: clamp(130px, 11vw, 200px); }
+.exp-num {
+  display: block; margin-bottom: 8px;
+  font-size: 0.68rem; letter-spacing: 0.14em; color: var(--brand);
+}
+.exp-title {
+  font-size: var(--fs-1); font-weight: 500; line-height: 1.3; color: var(--ink);
+  transition: color 0.45s var(--ease);
+}
+/* 0fr → 1fr: высота раскрытия анимируется, не зная объёма текста;
+   max-height потребовал бы подобранной «на глаз» константы */
 .exp-more {
-  width: clamp(230px, 26vw, 420px); margin-top: 14px;
-  opacity: 0; transform: translateY(8px); pointer-events: none;
-  transition: opacity 0.35s var(--ease), transform 0.5s var(--ease);
+  display: grid; grid-template-rows: 0fr; opacity: 0;
+  width: clamp(230px, 26vw, 420px);
+  transition: grid-template-rows 0.5s var(--ease), opacity 0.3s var(--ease);
 }
-.exp-text { font-size: 0.88rem; line-height: 1.65; color: rgba(255, 255, 255, 0.76); }
+.exp-more-in { overflow: hidden; }
+.exp-text { margin-top: 12px; font-size: var(--fs-1); line-height: 1.65; color: var(--ink-dim); }
 .exp-tags {
   display: block; margin-top: 12px;
   font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-}
-.exp-num {
-  position: absolute; z-index: 2;
-  left: clamp(16px, 1.7vw, 26px); bottom: clamp(14px, 1.4vw, 22px);
-  font-size: 0.72rem; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.55);
+  color: var(--ink-faint);
 }
 
 /* раскрытие — только там, где есть настоящее наведение */
 @media (hover: hover) and (pointer: fine) {
-  /* сжатие мягкое: карточка не должна становиться уже своей подписи,
-     иначе заголовок обрезается вместо переноса */
+  /* Сжатие мягкое: карточка не должна становиться уже своей подписи,
+     иначе заголовок обрезается вместо переноса. Соседи гаснут кадром
+     и заголовком, а не brightness(): на светлой панели фильтр даёт
+     грязный серый прямоугольник вместо отступления на второй план. */
   .exp-row:hover .exp-card,
-  .exp-row:focus-within .exp-card { flex-grow: 0.78; filter: brightness(0.5) saturate(0.5); }
+  .exp-row:focus-within .exp-card { flex-grow: 0.78; }
+  .exp-row:hover .exp-card .exp-img,
+  .exp-row:focus-within .exp-card .exp-img { opacity: 0.3; }
+  .exp-row:hover .exp-card .exp-title,
+  .exp-row:focus-within .exp-card .exp-title { color: var(--ink-faint); }
 
   .exp-row:hover .exp-card:hover,
-  .exp-row:focus-within .exp-card:focus-within { flex-grow: 2.4; filter: none; }
-
-  .exp-card:hover .exp-img,
-  .exp-card:focus-within .exp-img { opacity: 1; transform: scale(1.06); }
+  .exp-row:focus-within .exp-card:focus-within {
+    flex-grow: 2.4;
+    border-color: var(--brand-line);
+    box-shadow: var(--glass-shadow);
+  }
+  /* тот же вес селектора, что у гашения выше, но правило идёт следом */
+  .exp-row:hover .exp-card:hover .exp-img,
+  .exp-row:focus-within .exp-card:focus-within .exp-img { opacity: 1; transform: scale(1.06); }
+  .exp-row:hover .exp-card:hover .exp-title,
+  .exp-row:focus-within .exp-card:focus-within .exp-title { color: var(--ink); }
 
   .exp-card:hover .exp-more,
-  .exp-card:focus-within .exp-more { opacity: 1; transform: none; pointer-events: auto; }
+  .exp-card:focus-within .exp-more { grid-template-rows: 1fr; opacity: 1; }
+  .exp-card:hover .exp-frame.instr-frame::after,
+  .exp-card:focus-within .exp-frame.instr-frame::after { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .exp-card, .exp-img, .exp-more { transition: none; }
+  .exp-card, .exp-img, .exp-more, .exp-title { transition: none; }
 }
 
 /* ════════════════════════════════════════════════
@@ -1375,8 +1841,9 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 @media (max-width: 1024px) {
   /* пять карточек в ряд перестают читаться — раскладываем сеткой 2×N */
   .exp-row { flex-wrap: wrap; height: auto; gap: 10px; }
-  .exp-card { flex: 1 1 calc(50% - 5px); height: clamp(240px, 42svh, 380px); }
-  .exp-body { width: auto; right: 0; }
+  .exp-card { flex: 1 1 calc(50% - 5px); height: clamp(300px, 48svh, 420px); }
+  /* мера подписи держала сжатие в ряду; в сетке сжимать нечего */
+  .exp-head, .exp-more { width: auto; }
 }
 
 /* ── Описание оборудования на тач-устройствах ──
@@ -1384,42 +1851,28 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
    .exp-more просто скрывался, и с планшета и телефона пропадали разом
    описание и теги — то есть весь смысл карточки, кроме названия.
    Возвращаем их на место статично: карточка перестаёт быть «аккордеоном»
-   и становится обычной плиткой, где подпись видна сразу. Кадр под
-   текстом притемняем сильнее — иначе светлый снимок съедает строки. */
+   и становится обычной плиткой, где подпись видна сразу.
+
+   Прежняя тач-версия боролась с текстом поверх кадра — плотный градиент,
+   притемнённый до 0.62 снимок. Разведённые слои сняли и эту задачу:
+   текст стоит на панели, кадру гасить себя больше не нужно. */
 @media (hover: none), (pointer: coarse) {
   /* ряд-«аккордеон» без наведения раскрываться не может, поэтому он и на
      широком тач-экране становится обычной сеткой плиток */
   .exp-row { flex-wrap: wrap; height: auto; gap: 10px; }
-  .exp-card { flex: 1 1 clamp(260px, 30%, 380px); height: auto; min-height: clamp(300px, 46svh, 420px); }
-  .exp-body {
-    top: auto; bottom: 0; width: auto; right: 0;
-    padding: clamp(38px, 6vw, 56px) clamp(16px, 4vw, 22px) clamp(16px, 3vw, 20px);
-    /* Подложка плотнее и набирает вес раньше. Прежняя (0 → 0.62 на 34%)
-       рассчитывалась на одну строку заголовка, а здесь под ней целый
-       абзац с тегами: верхние строки приходились на прозрачный участок
-       и ложились прямо на кадр. У светлых снимков — «Гамма-модуль»,
-       «Блок декодирования» — текст там переставал читаться. */
-    background: linear-gradient(180deg,
-      rgba(6, 10, 16, 0) 0%, rgba(6, 10, 16, 0.72) 26%,
-      rgba(6, 10, 16, 0.92) 52%, rgba(6, 10, 16, 0.97) 100%);
-  }
-  /* Кадр под подписью притемняем и в самой карточке: градиент выше
-     держит текст, но у ярких снимков середина всё равно спорила с ним. */
-  .exp-img { opacity: 0.62; }
-  .exp-title { font-size: 1.02rem; }
-  .exp-more {
-    display: block; width: auto; margin-top: 10px;
-    opacity: 1; transform: none; pointer-events: auto;
-  }
-  .exp-text { font-size: 0.85rem; line-height: 1.6; }
-  /* номер уводим наверх: внизу теперь текст */
-  .exp-num { bottom: auto; top: clamp(14px, 3vw, 20px); }
+  .exp-card { flex: 1 1 clamp(260px, 30%, 380px); height: auto; }
+  /* кадр перестаёт тянуться: высоту карточки задаёт текст под ним */
+  .exp-frame { flex: none; height: clamp(190px, 28svh, 280px); }
+  .exp-head, .exp-more { width: auto; }
+  .exp-title { font-size: var(--fs-2); }
+  .exp-more { grid-template-rows: 1fr; opacity: 1; }
+  .exp-text { font-size: var(--fs-1); line-height: 1.6; }
 }
 @media (max-width: 700px) {
   /* (шапка уходит в бургер ниже 1200 — см. блок «МОБИЛЬНАЯ ОГРАНКА») */
   .car-head { flex-direction: column; align-items: flex-start; gap: 24px; }
   .car-head .h-title { font-size: clamp(1.7rem, 7vw, 2.2rem); }
-  .exp-card { flex: 1 1 100%; height: clamp(220px, 38svh, 320px); }
+  .exp-card { flex: 1 1 100%; height: auto; }
   .step { grid-template-columns: 44px 1fr; gap: 18px; }
   .step-node { width: 44px; height: 44px; }
   .how-line, .how-line-fill { left: 21px; }
@@ -1430,10 +1883,16 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 /* ════════════════════════════════════════════════
    ПРОГРАММНЫЙ КОМПЛЕКС · DRILL MONITOR
    ════════════════════════════════════════════════ */
+/* Шапка раздела на общей сетке: заголовок держит левую половину,
+   приписка встаёт с восьмой колонки. Разрыв в одну колонку между ними
+   намеренный — в швейцарской раскладке пустая колонка работает как
+   разделитель, и он читается лучше вертикальной черты. */
 .sw-head {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
-  align-items: end; margin-bottom: 56px;
+  align-items: end; margin-bottom: var(--s-6);
+  row-gap: var(--s-4);
 }
+.sw-head > *:first-child { grid-column: 1 / span 6; }
+.sw-head > *:last-child  { grid-column: 8 / span 5; }
 .sw-head-side { display: flex; flex-direction: column; gap: 26px; }
 .sw-head-side .lead { max-width: 480px; }
 .sw-actions { display: flex; gap: 14px; flex-wrap: wrap; }
@@ -1467,25 +1926,33 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
    каждая. Отдельного правила ширины у КНБК поэтому больше нет: is-sm
    даёт ровно те 4 колонки, что нужны. */
 
-/* скриншот занимает всё место над подвалом */
+/* Скриншот занимает всё место над подвалом и всегда показан целиком.
+   Плитки бенто меняют пропорцию вместе с шириной вьюпорта, а кадры
+   приложения — от 1.72:1 (пульт бурения) до 2.7:1 (таблица КНБК), и
+   cover при любом раскладе срезал у кого-то существенное: боковые
+   колонки телеметрии, 3D-ствол, крайние столбцы таблицы. Поля добирает
+   фон #05080f — он совпадает с фоном самих скриншотов, стык не читается.
+   Исключений по модулям здесь больше нет: правило одно на все кадры. */
 .bento-shot {
   flex: 1 1 auto; min-height: 0; z-index: 0;
-  width: 100%; height: 100%; object-fit: cover; object-position: center;
+  width: 100%; height: 100%; object-fit: contain; object-position: center;
   background: #05080f;
 }
-.bento-tile.is-sm .bento-shot { object-position: top center; }
-/* инклинометрия: видео 1.71:1 в узком окне — вписываем целиком,
-   чтобы 3D-ствол не срезался по бокам */
-.bento-tile.bt-survey .bento-shot { object-fit: contain; object-position: center; }
-/* КНБК: широкая таблица — баннер во всю ширину */
-.bento-tile.bt-bha .bento-shot { object-position: center; }
 
 /* верхний readout-бар — тонкий оверлей поверх скриншота */
+/* Бар поверх скриншота. Стеклянный, а не градиентный: градиент вниз
+   притемнял верх кадра и на светлых снимках всё равно не спасал подпись,
+   а стекло размывает ровно то, что под ним, и подпись читается на любом
+   кадре. Кромки только нижняя — бар прижат к трём краям плитки. */
 .bento-bar {
   position: absolute; top: 0; left: 0; right: 0; z-index: 3;
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: var(--s-1);
   padding: 12px 16px;
-  background: linear-gradient(180deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0) 100%);
+  border-radius: 0;
+  border-top: 0; border-left: 0; border-right: 0;
+  border-bottom-color: var(--glass-line);
+  box-shadow: inset 0 1px 0 var(--glass-hl);
+  contain: paint;
 }
 .bento-kicker {
   margin-left: 12px; font-size: 0.68rem; letter-spacing: 0.16em;
@@ -1508,32 +1975,99 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 }
 .bento-body h3 {
   font-weight: 700; letter-spacing: -0.02em; line-height: 1.16;
-  font-size: 1.12rem; margin-bottom: 0;
+  font-size: var(--fs-3); margin-bottom: 0;
 }
 .bento-tile.is-lg .bento-body h3 { font-size: clamp(1.5rem, 2.2vw, 1.95rem); }
 .bento-body p {
-  font-size: 0.92rem; color: var(--text-dim); line-height: 1.6;
-  max-width: 540px; margin-top: 10px;
+  font-size: var(--fs-1); color: var(--text-dim); line-height: 1.6;
+  max-width: 56ch; margin-top: var(--s-1);
 }
 .bento-body .tag-row { margin-top: 16px; }
 
 /* мелкие плитки — скриншот во всю высоту, подпись поверх лёгким градиентом */
+/* Подпись поверх кадра держится затемнением, и затемнение здесь
+   рассчитано на ХУДШИЙ кадр, а не на средний. Худший — инклинометрия:
+   3D-ствол нарисован на белом планшете, и белый заголовок ложится
+   ровно на него. Прежние стопы (0 → 0.55 на 38%) на тёмных скриншотах
+   выглядели аккуратнее, но на этом одном кадре заголовок пропадал.
+
+   Стопы сдвинуты так, чтобы к высоте заголовка подложка уже набрала
+   вес: 0.72 к четверти высоты вместо 0.55 к трети. Верх остаётся
+   прозрачным — кадр не должен выглядеть залитым. */
 .bento-tile.is-sm .bento-body,
 .bento-tile.is-wide .bento-body {
   position: absolute; left: 0; right: 0; bottom: 0;
   border-top: none;
   padding: 40px 16px 15px;
   background: linear-gradient(180deg,
-    rgba(5,8,15,0) 0%, rgba(5,8,15,0.55) 38%, rgba(5,8,15,0.9) 100%);
+    rgba(5,8,15,0) 0%, rgba(5,8,15,0.72) 26%,
+    rgba(5,8,15,0.90) 52%, rgba(5,8,15,0.96) 100%);
 }
 .bento-tile.is-sm .bento-body h3,
 .bento-tile.is-wide .bento-body h3 { text-shadow: 0 1px 10px rgba(0,0,0,0.7); }
 .bento-tile.is-sm .bento-body .tag-row,
 .bento-tile.is-wide .bento-body .tag-row { margin-top: 12px; }
+/* Теги на этих плитках лежат прямо на скриншоте, поэтому они —
+   плавающая хрома и берут общий рецепт стекла. Заливку и размытие
+   он уже дал; здесь возвращается только форма таблетки, которую
+   рецепт перебил своим радиусом, и снимается лишняя тень: чип
+   размером в строку от неё выглядит наклейкой. */
 .bento-tile.is-sm .tag,
 .bento-tile.is-wide .tag {
-  background: rgba(5,8,15,0.5);
-  backdrop-filter: blur(4px);
+  border-radius: 20px;
+  box-shadow: inset 0 1px 0 var(--glass-hl);
+}
+
+/* ── Жизненный цикл оборудования ──
+   Продолжение раздела, а не новая секция: тот же чёрный фон, отбивка
+   сверху отделяет его от мозаики. Набран колонками с волосяной чертой —
+   тем же приёмом, что контакты и линейка оборудования; плашек нет,
+   иначе блок спорил бы с плитками бенто за внимание. */
+.sw-life {
+  margin-top: clamp(48px, 5.5vw, 84px);
+  padding-top: clamp(32px, 3.5vw, 52px);
+  border-top: 1px solid var(--line);
+}
+.sw-life-head { margin-bottom: clamp(28px, 3vw, 44px); }
+.sw-life-kicker {
+  display: block; margin-bottom: 14px;
+  font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent);
+}
+.sw-life-title {
+  font-size: clamp(1.35rem, 2.1vw, 1.9rem);
+  font-weight: 700; letter-spacing: -0.02em; line-height: 1.2;
+  max-width: 22ch;
+}
+.sw-life-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.sw-life-item {
+  padding: 0 clamp(18px, 2vw, 32px);
+  border-left: 1px solid var(--line);
+}
+.sw-life-item:first-child { border-left: 0; padding-left: 0; }
+.sw-life-n {
+  display: block; margin-bottom: 16px;
+  font-size: 0.72rem; letter-spacing: 0.16em; color: var(--text-faint);
+}
+.sw-life-item h4 {
+  font-size: var(--fs-2); font-weight: 600;
+  letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 12px;
+}
+.sw-life-item p {
+  font-size: var(--fs-1); color: var(--text-dim); line-height: 1.7;
+}
+
+/* Три колонки текста по 40 слов на планшете дают полосу в 20 символов —
+   читать нечем. Ниже 1180px блок переходит в столбик с горизонтальной
+   отбивкой, как контакты. */
+@media (max-width: 1180px) {
+  .sw-life-grid { grid-template-columns: 1fr; }
+  .sw-life-item {
+    padding: clamp(20px, 2.4vw, 28px) 0;
+    border-left: 0; border-top: 1px solid var(--line);
+  }
+  .sw-life-item:first-child { padding-top: 0; border-top: 0; }
+  .sw-life-title { max-width: none; }
 }
 
 /* ── Планшет: мозаика в две колонки ──
@@ -1550,23 +2084,74 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 }
 
 @media (max-width: 900px) {
-  .sw-head { grid-template-columns: 1fr; gap: 26px; align-items: start; }
+  /* Колонок нет — раскладывать нечего: сетка распускается в поток,
+     и спаны обязаны сняться вместе с ней, иначе блок с «grid-column: 8»
+     уедет в несуществующую восьмую колонку. */
+  .sw-head { grid-template-columns: 1fr; gap: var(--s-3); align-items: start; }
+  .sw-head > *:first-child,
+  .sw-head > *:last-child { grid-column: auto; }
   .sw-bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
   .bento-tile { grid-column: auto !important; grid-row: auto !important; min-height: 340px; }
   .bento-tile.is-lg { min-height: 400px; }
   .bento-body p { max-width: none; }
 
-  /* широкие кадры (видео-каротаж 3.76:1, таблица КНБК 2.68:1) на узком
-     экране показываем целиком: задаём пропорцию окна и contain, иначе
-     cover в почти квадратной плитке срезал бы боковые дорожки/столбцы.
-     Оверлей-подпись ложится на тёмные поля снизу и контент не перекрывает. */
+  /* Широкие кадры (видео-каротаж 3.76:1, таблица КНБК 2.68:1) на узком
+     экране распускать в поток нечем: подпись у них короткая, и без
+     заданной пропорции плитка сжалась бы до высоты подписи. Держим окно
+     3:2 — вписанный кадр получает максимум ширины, а оверлей-подпись
+     ложится на тёмные поля снизу и контент не перекрывает. */
   .bento-tile.bt-logging,
   .bento-tile.bt-bha,
   .bento-tile.bt-survey { min-height: 0; aspect-ratio: 3 / 2; }
-  .bento-tile.bt-logging .bento-shot,
-  .bento-tile.bt-bha .bento-shot,
-  .bento-tile.bt-survey .bento-shot { object-fit: contain; object-position: center; }
+
+  /* у «Бурения» подвал с абзацем и тремя тегами — задать пропорцию всей
+     плитке нельзя, кадру осталась бы полоска. Пропорцию держит сам
+     скриншот, а плитка растёт под него плюс подпись. */
+  .bento-tile.bt-drilling { min-height: 0; }
+  .bento-tile.bt-drilling .bento-shot {
+    flex: 0 0 auto; height: auto; aspect-ratio: 1600 / 928;
+  }
 }
+
+/* ════════════════════════════════════════════════
+   СИГНАТУРА DRILL MONITOR · зелёный в двух секциях о ПО
+   ────────────────────────────────────────────────
+   Преемственность с самим приложением: в его интерфейсе
+   служебный регистр — время, индексы каналов, статусы —
+   идёт terminal-green. Те же по роли элементы на сайте
+   красятся так же, поэтому раздел о ПО читается частью
+   продукта, а не рассказом о нём со стороны.
+
+   Красится ТОЛЬКО mono-мелочь: номер секции, индекс
+   плитки, кикер, номера колонок. Заголовки, текст, лиды
+   и кнопки остаются меловыми с синим интерактивом —
+   иначе зелёного станет столько, что бейдж LIVE на
+   плитке real-time перестанет что-либо значить.
+
+   Обе секции всегда data-theme="black", светлых тем
+   здесь не бывает: #46c98a рассчитан на near-black и в
+   светлой колоде не поехал бы.
+   ════════════════════════════════════════════════ */
+#software .eyebrow .ey-no,
+#mobile   .eyebrow .ey-no { color: var(--live); }
+#software .eyebrow::before,
+#mobile   .eyebrow::before {
+  background: linear-gradient(90deg, rgba(70,201,138,0.34), transparent);
+}
+
+/* индекс плитки — только цифра; название вкладки остаётся серым,
+   так пара «01 · Бурение» читается как строка приборного списка */
+.bento-n { color: var(--live); }
+
+/* кикер жизненного цикла: был синим — синий на сайте занят
+   интерактивом, а это подпись, а не ссылка */
+.sw-life-kicker { color: var(--live); }
+.sw-life-n { color: var(--live); }
+
+/* Тег «Live-данные» в шапке мобильной версии зелёным НЕ красится:
+   рядом стоят «iOS / Android» и «Офлайн-режим», и один цветной чип
+   из трёх прочитался бы состоянием, которого нет. Живой статус на
+   сайте по-прежнему один — бейдж LIVE на плитке бурения. */
 
 /* ════════════════════════════════════════════════
    МОБИЛЬНЫЙ КЛИЕНТ
@@ -1587,11 +2172,15 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
    с настольной. Снизу отступа нет вовсе: ряд обрезан кромкой секции,
    поэтому любой воздух под ним читался бы недовёрстанным низом. */
 #mobile { padding-top: clamp(28px, 3.5vw, 56px); padding-bottom: 0; }
+/* Та же раскладка, что у шапки платформы: обе секции рассказывают об
+   одном продукте, и разные пропорции читались бы сбоем, а не вариацией. */
 .mob-head {
-  display: grid; grid-template-columns: 1.05fr 1fr;
-  gap: clamp(28px, 5vw, 90px); align-items: end;
+  align-items: end;
+  row-gap: var(--s-4);
   margin-bottom: clamp(20px, 2.6vw, 40px);
 }
+.mob-head > *:first-child { grid-column: 1 / span 6; }
+.mob-head > *:last-child  { grid-column: 8 / span 5; }
 .mob-head-side .tag-row { margin-top: 22px; }
 
 .mob-stage {
@@ -1614,7 +2203,9 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 }
 
 @media (max-width: 900px) {
-  .mob-head { grid-template-columns: 1fr; gap: 26px; align-items: start; }
+  .mob-head { grid-template-columns: 1fr; gap: var(--s-3); align-items: start; }
+  .mob-head > *:first-child,
+  .mob-head > *:last-child { grid-column: auto; }
   .mob-stage { height: clamp(320px, 50svh, 480px); gap: 10px; }
 }
 /* ── Ряд на телефоне: веер вместо трёх полосок ──
@@ -1720,8 +2311,8 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   color: var(--brand);
 }
 .how-done-title {
-  font-family: var(--font-display); font-weight: 800; text-transform: uppercase;
-  font-size: clamp(1.7rem, 4.4vw, 4.2rem); line-height: 1; letter-spacing: -0.045em;
+  font-weight: 700; text-transform: uppercase;
+  font-size: var(--fs-8); line-height: 1.02; letter-spacing: -0.035em;
   color: var(--ink); margin-top: 12px;
 }
 .how-done-meta {
@@ -1757,7 +2348,7 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   padding: 11px 20px; border-radius: var(--r);
   background: var(--panel-2); color: var(--ink);
   border: 1px solid var(--brand-line);
-  font-size: 0.86rem; font-weight: 600; text-decoration: none;
+  font-size: var(--fs-1); font-weight: 600; text-decoration: none;
   transition: top 0.22s var(--ease);
 }
 .skip-link:focus { top: 16px; }
@@ -1796,7 +2387,7 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
      чтобы длинные строки не вылезали за вьюпорт */
   .h-title { font-size: clamp(1.9rem, 6.4vw, 2.6rem); }
   .h-title br { display: none; }
-  .lead { font-size: 1.05rem; line-height: 1.7; }
+  .lead { font-size: var(--fs-2); line-height: 1.7; }
   .eyebrow { margin-bottom: 22px; }
 
   /* CTA первого экрана — на всю ширину, «как в приложении» */

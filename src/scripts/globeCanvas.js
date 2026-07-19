@@ -121,20 +121,13 @@ async function start() {
     import('three/examples/jsm/loaders/GLTFLoader.js'),
   ])
 
-  /* Антиалиасинг — только на десктопе. MSAA удорожает каждый пиксель
-     сцены, а пиксель здесь и без того дорогой: PBR-материалы шара с
-     clearcoat плюс карта отражений из PMREM. На телефоне шар занимает
-     нижнюю треть экрана и идёт на фоне градиента — ступенька по его
-     кромке в движении не читается, а кадры от неё проседают. */
-  const mobile = window.matchMedia('(max-width: 900px)').matches
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !mobile, alpha: true })
-  /* Плотность буфера на телефоне — ровно 1 CSS-пиксель. Прежние 1.5
-     означали вдвое больше работы на закраску ради разрешения, которого
-     на этой картинке не видно. Замер прохода по странице на Pixel 7 с
-     четырёхкратно замедленным CPU: сцена блокировала главный поток
-     9.9 с за проход и роняла 38% кадров — больше, чем все видео и всё
-     стекло страницы вместе взятые. */
-  const dprCap = mobile ? 1 : 2
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+  /* Плотность буфера на телефоне режем до 1.5: у сцены дорогой пиксель
+     (PBR-материалы шара плюс карта отражений из PMREM), и на экране с
+     dpr 3 полный ×2 означал вчетверо больше работы на закраску, чем
+     на десктопе. Разницы на глаз при такой мелкой картинке нет —
+     шар занимает нижнюю треть экрана, — а кадры перестают проседать. */
+  const dprCap = window.matchMedia('(max-width: 900px)').matches ? 1.5 : 2
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, dprCap))
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.15

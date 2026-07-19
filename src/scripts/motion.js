@@ -2,8 +2,8 @@
    Глобальная анимация страницы (вне React):
    инерционный скролл Lenis, синхронизация со
    ScrollTrigger, появление .reveal, активация
-   шагов и прогресс-линия в How, колода экранов,
-   разворот «Ключевые цифры».
+   шагов и прогресс-линия в How, разворот
+   «Ключевые цифры».
 
    ЕДИНЫЙ ЯЗЫК ДВИЖЕНИЯ (одна шкала на весь сайт):
      ease   — power3.out и только он; ничего
@@ -11,8 +11,8 @@
      0.3 c  — микро-отклик (подмена значения)
      0.6 c  — появление элемента
      1.0 c  — крупный жест
-   Скролл-приёмов на странице ровно два: колода
-   в hero и прибитая сцена «О компании».
+   Скролл-приёмов на странице ровно два: накат
+   экранов колоды и прибитая сцена «О компании».
    ───────────────────────────────────────────── */
 import Lenis from 'lenis'
 import { gsap } from 'gsap'
@@ -154,54 +154,6 @@ if (reduce) {
   }
 }
 
-/* ─── Живой hero-readout: значения слегка «дышат» (RU-формат) ─── */
-{
-  const tms = document.querySelectorAll('.hero-readout [data-tm]')
-  if (tms.length && !reduce) {
-    const fmt = (n, d = 0) =>
-      n.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })
-    const base = { depth: 3842, azimuth: 252.74, rop: 18.6, gamma: 72 }
-    const tick = (el) => {
-      const k = el.dataset.tm
-      if (k === 'depth') { base.depth += Math.random() * 0.5; el.textContent = fmt(base.depth, 1) }
-      else if (k === 'azimuth') el.textContent = fmt(base.azimuth + (Math.random() - 0.5) * 0.4, 2)
-      else if (k === 'rop') el.textContent = fmt(base.rop + (Math.random() - 0.5) * 1.2, 1)
-      else if (k === 'gamma') el.textContent = fmt(base.gamma + (Math.random() - 0.5) * 4, 0)
-    }
-    tms.forEach(tick)
-
-    /* Тикаем только пока ридаут виден и вкладка активна: значения
-       «дышат» ради первого экрана, а интервал раньше жил до конца
-       сессии — перерисовывал невидимый текст и будил фоновые вкладки.
-       Показания при возврате продолжаются с текущих, скачка нет. */
-    const readout = tms[0].closest('.hero-readout') || tms[0]
-    let timer = 0
-    let onScreen = true
-
-    const play = () => {
-      if (timer || !onScreen || document.hidden) return
-      timer = setInterval(() => tms.forEach(tick), 1400)
-    }
-    const stop = () => {
-      if (!timer) return
-      clearInterval(timer)
-      timer = 0
-    }
-
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(
-        (entries) => {
-          onScreen = entries[0].isIntersecting
-          onScreen ? play() : stop()
-        },
-        { threshold: 0 },
-      ).observe(readout)
-    }
-    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()))
-    play()
-  }
-}
-
 /* ─── scrollspy ───
    Магнитные CTA и spotlight-граница убраны: игривая микро-механика
    спорит с промышленным тоном. Отклик на нажатие остался, но чисто
@@ -219,67 +171,206 @@ if (!reduce) {
   })
 }
 
-/* Параллакс-глубина hero убрана: её роль перешла к механике колоды.
-   Оба эффекта двигали вложенные друг в друга узлы одного экрана —
-   трансформы складывались, и содержимое уезжало вдвое быстрее самого
-   экрана. Слоистость окон теперь держится на .hero-window--back. */
+/* ─── Колода экранов: компенсация наезда ───
+   Заливки накатывают друг на друга средствами CSS (sticky у .deck-screen) —
+   скролл-механики здесь нет. Задача этого блока ровно одна: пока экран
+   въезжает снизу, его содержимое должно СТОЯТЬ на месте вьюпорта, а не
+   ехать вместе с заливкой. Тогда шторка работает как маска — открывает
+   неподвижную композицию снизу вверх, и константа «ГЕОТЕХНАВИГАЦИЯ»,
+   стоящая на одной высоте у всех экранов, оказывается разрезанной цветом.
 
-/* ─── Колода экранов ───
-   Приём первоисточника: секции не пиннятся и не липнут — они обычные,
-   по 100svh, но обрезают содержимое. Уходящий экран уезжает вниз на
-   свою высоту, приходящий выезжает сверху из-за той же кромки. Оба
-   движения scrub'ятся один-в-один со скроллом (scrub: 0), поэтому
-   колода ощущается как прямое продолжение жеста, а не как анимация.
-   invalidateOnRefresh — чтобы значения пересчитались при ресайзе. */
+   Смещение экрана на входе — от 100svh до 0, поэтому компенсация ровно
+   встречная: y от -100vh к 0. Твин один на экран и висит на внешнем
+   узле .deck, а не на самой секции: у sticky-элемента замеренная позиция
+   зависит от того, где стоял скролл в момент refresh. Отсчёт по экрану
+   на секцию — чистый и переживает ресайз (invalidateOnRefresh).
+
+   Прошлая версия вешала ВТОРОЙ, встречный твин на родителя .deck-content:
+   трансформы вложенных узлов складывались, содержимое проходило двойной
+   путь за экран скролла — отсюда были рывки и «левитация». */
 if (!reduce) {
-  const contents = gsap.utils.toArray('.deck-content')
-  const inners = gsap.utils.toArray('.deck-inner')
-
-  contents.forEach((el) => {
-    gsap.to(el, {
-      y: () => window.innerHeight,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: el,
-        start: '100% 100%',            // низ экрана дошёл до низа вьюпорта
-        end: () => '+=' + window.innerHeight,
-        scrub: 0,
-        invalidateOnRefresh: true,
-      },
-    })
-  })
+  const deck = document.querySelector('.deck')
+  const inners = deck ? gsap.utils.toArray('.deck-screen .deck-inner', deck) : []
 
   // первый экран приходить неоткуда — он уже на месте
-  inners.slice(1).forEach((el) => {
-    gsap.set(el, { y: () => -window.innerHeight })
-    gsap.to(el, {
-      y: 0,
+  inners.slice(1).forEach((el, k) => {
+    const i = k + 1
+    gsap.fromTo(
+      el,
+      { y: () => -window.innerHeight },
+      {
+        y: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: deck,
+          start: () => 'top top-=' + (i - 1) * window.innerHeight,
+          end: () => '+=' + window.innerHeight,
+          scrub: 0,
+          invalidateOnRefresh: true,
+        },
+      },
+    )
+  })
+}
+
+/* ─── Сцена на экране 02: выход справа налево ───
+   Экран приходит шторкой, а его содержимое компенсацией стоит на месте —
+   значит «выехать» предметам самим неоткуда, ход им нужен собственный.
+   Окно у него ровно то же, что у наката этого экрана: пока заливка идёт
+   снизу вверх, ноутбук приходит из-за правой кромки, а телефон выползает
+   из-под его корпуса. Шторка работает проявителем — сцена собирается
+   ровно в тот момент, когда её открывают.
+
+   Ось горизонтальная, и она же зеркалит первый экран: там снаряд идёт
+   слева направо, здесь сцена справа налево. Вертикаль отдана колоде —
+   вертикальный ход слился бы с накатом шторки в одно движение.
+
+   Ход у каждого свой (data-lift-x, в процентах собственной ширины):
+   у телефона он втрое длиннее, поэтому на входе телефон спрятан за
+   корпусом ноутбука и выходит из-под него по мере наката. Разница
+   скоростей на одной оси и есть глубина сцены.
+
+   Отсчёт — по экрану на секцию от самой колоды, а не от липкой секции:
+   у sticky-элемента замеренная позиция зависит от того, где стоял скролл
+   в момент refresh. Конфиг триггера собирается заново для каждого твина:
+   ScrollTrigger дописывает в переданный объект ссылку на свою анимацию. */
+if (!reduce) {
+  const deck = document.querySelector('.deck')
+  const screens = deck ? gsap.utils.toArray('.deck-screen', deck) : []
+
+  screens.forEach((screen, i) => {
+    const devices = gsap.utils.toArray('[data-device]', screen)
+    if (!devices.length) return
+
+    devices.forEach((el) => {
+      gsap.fromTo(
+        el,
+        { xPercent: Number(el.dataset.liftX) || 0 },
+        {
+          xPercent: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: deck,
+            start: () => 'top top-=' + (i - 1) * window.innerHeight,
+            end: () => '+=' + window.innerHeight,
+            scrub: 0,
+            invalidateOnRefresh: true,
+          },
+        },
+      )
+    })
+  })
+}
+
+/* ─── Мобильный клиент: ряд аппаратов выходит снизу ───
+   Приём первоисточника: не общий сдвиг ряда, а РАЗНАЯ скорость у среднего
+   и боковых. Одна скорость на всех дала бы картинку, которая просто едет;
+   разная — сцену, которая собирается по мере подхода.
+
+   Окно — подход секции к экрану: старт, когда верх сцены входит снизу,
+   финиш, когда её низ садится на нижнюю кромку. К моменту, когда ряд
+   прочитан целиком, движение уже закончено — дальше он стоит.
+
+   scrub с задержкой, а не жёсткий: ряд идёт чуть мягче колеса, и это
+   единственное место на странице, где инерция уместна — предметы
+   тяжёлые и должны догонять скролл, а не быть приклеенными к нему. */
+if (!reduce) {
+  const stage = document.querySelector('[data-mob-stage]')
+  const phones = stage ? gsap.utils.toArray('[data-mob-phone]', stage) : []
+
+  phones.forEach((el) => {
+    // 0 — средний (ближний план, короткий ход), 1 — боковые
+    const depth = Number(el.dataset.depth) || 0
+    gsap.fromTo(
+      el,
+      { yPercent: 10 + depth * 12 },
+      {
+        yPercent: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: stage,
+          start: 'top bottom',
+          end: 'bottom bottom',
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+        },
+      },
+    )
+  })
+}
+
+/* ─── Снаряд на входном экране: выход и параллакс ───
+   Первому экрану приходить неоткуда — компенсации наезда у него нет,
+   и «выезд по скроллу» ему взять негде. Поэтому жест разложен на два,
+   и триггеры у них разные:
+
+     · выход — на загрузке. Снаряд заходит целиком из-за левой кромки,
+       и заметно позже заголовка: пауза и есть весь эффект. Придёт
+       вместе с текстом — прочитается фоном, придёт после — читается
+       как отдельный жест. Проявления по opacity здесь нет намеренно:
+       предмет въезжает из-за кадра, а не возникает в нём;
+     · параллакс — пока СЛЕДУЮЩИЙ экран накатывает шторкой. Содержимое
+       под ней стоит на месте, а снаряд продолжает идти вправо, туда же,
+       куда смотрят наконечники. Одно направление на оба жеста: вход и
+       уход складываются в непрерывный ход, а не в возврат.
+
+   Ось у обоих жестов горизонтальная, и это не произвол: колода
+   листается по вертикали, и вертикальный снаряд на вертикальном же
+   ходу сливался бы с ней в одно движение. Поперёк — читается.
+
+   Узла поэтому два: обёртка везёт параллакс, картинка внутри — выход.
+   На одном узле твины подрались бы за y. Прятать снаряд в CSS нельзя —
+   без JS и при reduced-motion он обязан просто стоять на месте. */
+if (!reduce) {
+  const rig = document.querySelector('[data-rig]')
+  const deck = document.querySelector('.deck')
+
+  if (rig) {
+    // Кадр стоит правым торцом на 92vw, поэтому -92% ставят снаряд
+    // ровно за левую кромку — дальше уводить нечего. Выход едет на
+    // обёртке: на самом кадре свой transform (центровка по оси).
+    gsap.from(rig.parentElement, { x: '-92%', duration: 1.5, ease: EASE, delay: 0.5 })
+
+    gsap.to(rig.closest('.deck-rig'), {
+      x: () => 0.11 * window.innerWidth,
       ease: 'none',
       scrollTrigger: {
-        trigger: el,
-        start: '0% 0%',
+        trigger: deck,
+        start: 'top top',
         end: () => '+=' + window.innerHeight,
         scrub: 0,
         invalidateOnRefresh: true,
       },
     })
-  })
+  }
 }
 
 /* ─── Шапка перенимает тему секции, проходящей под ней ───
    rootMargin схлопывает область наблюдения до полоски у верхней
    кромки экрана: «видимой» считается ровно та секция, что сейчас
    под шапкой. Работает и при reduced-motion — это не анимация,
-   а читаемость текста на меняющемся фоне. */
+   а читаемость текста на меняющемся фоне.
+
+   Экраны колоды липкие и накрывают друг друга, поэтому полоску
+   разом пересекают несколько секций. Верхняя из них — последняя
+   по DOM: она и рисуется поверх, её тему и берём. Реагировать на
+   каждое событие по отдельности здесь нельзя — накрытая секция
+   события не шлёт, и на обратном скролле шапка застревала бы
+   в теме уехавшей шторки. */
 {
   const nav = document.querySelector('nav.nav')
-  const themed = document.querySelectorAll('[data-theme]')
+  const themed = [...document.querySelectorAll('[data-theme]')]
   if (nav && themed.length && 'IntersectionObserver' in window) {
+    const visible = new Set()
     const io = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) nav.setAttribute('data-theme', e.target.dataset.theme)
-        })
+        entries.forEach((e) => (e.isIntersecting ? visible.add(e.target) : visible.delete(e.target)))
+        for (let i = themed.length - 1; i >= 0; i--) {
+          if (visible.has(themed[i])) {
+            nav.setAttribute('data-theme', themed[i].dataset.theme)
+            break
+          }
+        }
       },
       { rootMargin: '0px 0px -100% 0px', threshold: 0 },
     )
@@ -316,33 +407,6 @@ if (!reduce) {
       { threshold: 0 },
     ).observe(lane)
   })
-}
-
-/* ─── Факты: цифра в прибитой колонке подменяется на скролле ───
-   Превью-за-курсором убрано: оно повторяло скриншоты приложения и
-   было самым «игровым» приёмом страницы. Остался тихий эффект —
-   значение слева меняется тем пунктом, что сейчас в фокусе экрана. */
-{
-  const countEl = document.querySelector('[data-facts-count]')
-  const unitEl = document.querySelector('[data-facts-unit]')
-  const items = document.querySelectorAll('[data-facts-item]')
-
-  if (countEl && unitEl && items.length && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return
-          countEl.textContent = e.target.dataset.count
-          unitEl.textContent = e.target.dataset.unit
-          // текстовое значение («Реестр ПО») набирается мельче цифры
-          countEl.classList.toggle('is-text', e.target.dataset.textual === '1')
-        })
-      },
-      // узкая полоса на трети экрана — активен ровно один пункт
-      { rootMargin: '-30% 0px -60% 0px', threshold: 0 },
-    )
-    items.forEach((el) => io.observe(el))
-  }
 }
 
 /* ─── Разворот «Ключевые цифры»: наезд колонок со сдвигом ───

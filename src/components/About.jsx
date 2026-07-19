@@ -37,7 +37,7 @@ const TOTAL = String(CARDS.length + 1).padStart(2, '0')
 
 export default function About() {
   return (
-    <section id="about" data-theme="black">
+    <section id="about" data-theme="white">
       <div className="spread" data-spread>
         <div className="spread-aside">
           <div className="spread-head">

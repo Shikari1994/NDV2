@@ -43,9 +43,9 @@ const orgSchema = {
     <meta property="og:image" content={Astro.site ? new URL(logoHref, Astro.site).href : logoHref} />
     <meta name="theme-color" content="#07090d" />
 
-    <!-- Первый экран — крупная картинка прибора в hero. Браузер находит её
-         только разобрав HTML и CSS; preload запускает загрузку сразу. -->
-    <link rel="preload" as="image" href={asset('/app-drilling.webp')} fetchpriority="high" />
+    <!-- Preload картинки прибора снят: первый экран стал типографическим,
+         его LCP — мега-заголовок, а не изображение. Грузить сюда скриншот
+         значило бы отбирать полосу у шрифта, который LCP и рисует. -->
 
     <!-- Шрифты.
          Начертание Geologica 300 убрано: font-weight:300 в index.css не
@@ -88,9 +88,6 @@ const orgSchema = {
     </script>
     <script>
       import '../scripts/heroCanvas.js'
-    </script>
-    <script>
-      import '../scripts/trajectoryCanvas.js'
     </script>
     <script>
       import '../scripts/globeCanvas.js'

@@ -1,5 +1,8 @@
 import { asset } from '../lib/asset.js'
 
+/* Плитки только настольной версии: мобильный клиент вынесен в отдельную
+   секцию (Mobile.jsx) и показан там во всю ширину. Плиткой он оставался
+   бы одним скриншотом среди пяти, а это отдельный продукт. */
 const MODULES = [
   {
     key: 'drilling',
@@ -12,16 +15,6 @@ const MODULES = [
     title: 'Мониторинг бурения в реальном времени',
     text: 'Единый пульт бурильщика: проходка, нагрузка на долото, момент, обороты, давление и вибрация — десятки каналов телеметрии с обновлением в реальном времени. Компас азимута и автоматическая SCC-коррекция.',
     tags: ['Real-time', 'Телеметрия MWD', 'Коррекция азимута'],
-  },
-  {
-    key: 'mobile',
-    n: '05',
-    tab: 'Мобайл',
-    img: '/app-mobile.webp',
-    size: 'tall',
-    title: 'Мобильное приложение',
-    text: 'Ключевые показатели скважины и метрики бурения прямо на смартфоне — для супервайзера и офиса.',
-    tags: ['iOS / Android', 'Live-данные'],
   },
   {
     key: 'survey',
@@ -60,7 +53,7 @@ export default function Software() {
       <div className="container">
         <div className="sw-head">
           <div>
-            <div className="eyebrow reveal"><span className="ey-no">02<span className="ey-den"> / 07</span></span>Программный комплекс</div>
+            <div className="eyebrow reveal"><span className="ey-no">02<span className="ey-den"> / 07</span></span>Программный комплекс · настольная версия</div>
             <h2 className="h-title reveal">
               Drill&nbsp;Monitor — мониторинг <br />бурения в реальном времени
             </h2>

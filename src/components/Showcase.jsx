@@ -44,7 +44,7 @@ export default function Showcase() {
       <div className="container">
         <div className="car-head">
           <div>
-            <div className="eyebrow reveal"><span className="ey-no">03<span className="ey-den"> / 07</span></span>Линейка оборудования</div>
+            <div className="eyebrow reveal"><span className="ey-no">04<span className="ey-den"> / 07</span></span>Линейка оборудования</div>
             <h2 className="h-title reveal">Оборудование <br />и сервис</h2>
             <p className="lead reveal">
               Полная линейка телеметрии MWD/LWD собственной разработки —

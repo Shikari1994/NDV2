@@ -7,7 +7,7 @@
    Модель тяжёлая, поэтому three.js и .glb подгружаются динамически и
    только при подходе секции к экрану. Без WebGL и при reduced-motion
    остаётся статичная строка — она читается сама по себе. */
-const HEADLINE = 'Реализованы проекты в 55 регионах России и в 38 странах мира'
+const HEADLINE = 'Реализуем проекты по всей России'
 
 export default function Globe({ index = '04', total = '04' }) {
   const words = HEADLINE.split(' ')

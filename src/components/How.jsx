@@ -26,7 +26,7 @@ export default function How() {
     <section id="how" data-theme="black">
       <div className="split">
         <div className="split-aside">
-          <div className="eyebrow reveal"><span className="ey-no">04<span className="ey-den"> / 07</span></span>Принцип работы</div>
+          <div className="eyebrow reveal"><span className="ey-no">05<span className="ey-den"> / 07</span></span>Принцип работы</div>
           <h2 className="split-title reveal">От забоя до диспетчерской — в реальном времени</h2>
           <p className="lead reveal">
             Данные о пространственном положении инструмента поступают на поверхность

@@ -264,25 +264,24 @@
    темой. Тема переопределяет токены целиком, так что
    компоненты внутри не знают, на каком фоне лежат.
 
-   Ритм страницы — спокойное чередование ТЁМНАЯ ↔ СВЕТЛАЯ:
-   hero(black → graphite) → о компании(light) → платформа(black)
-   → мобильный(black) → лента(light) → оборудование(light)
-   → принцип(black) → магазин(light) → контакты(black).
-   Заливок во весь экран синим на странице нет: синий работает
-   акцентной линией и цифрой, а не фоном.
+   Полотно страницы единое тёмное — светлой заливки на сайте больше
+   нет. Ритм держат две тёмные темы: hero(black → graphite) → о
+   компании(black) → платформа(black) → мобильный(black) → лента(black)
+   → оборудование(black) → принцип(black) → магазин(black) →
+   контакты(black). Заливок во весь экран синим на странице нет: синий
+   работает акцентной линией и цифрой, а не фоном.
 
-   Два повтора подряд в этом ряду — не сбой, а склейка. Платформа и
-   мобильный держат одну заливку потому, что это один рассказ о ПО в
-   двух частях (см. усечённый padding-top у #mobile) и потому, что
-   зелёная сигнатура Drill Monitor живёт только на near-black. Лента
-   и оборудование — потому что бегущая строка работает швом, открывающим
-   светлый блок, а не отдельным разделом.
+   Графит — не светлая тема и не исключение из чёрного полотна, а
+   контролируемый шаг светлее внутри той же тёмной семьи: он нужен
+   ровно там, где на фоне лежат тёмные скриншоты Drill Monitor (hero
+   screen 02) — на графите их корпус получает светлый контур и
+   отделяется от подложки сам, без рамок и теней.
 
-   Заливок всего три, и глобального переключателя светлой/тёмной темы
-   нет намеренно. Тема здесь принадлежит секции, а не пользователю:
-   графит выбран под тёмные скриншоты Drill Monitor, чёрный — под
-   приборный регистр. Тумблер либо оставил бы эти секции тёмными
-   в «светлом» режиме, либо сломал бы то, ради чего они тёмные.
+   Глобального переключателя тем нет и не появилось: варианты внутри
+   тёмного полотна (black/graphite) по-прежнему решает композиция
+   секции, а не настройка пользователя — тумблер между двумя тёмными
+   заливками не добавил бы читателю выбора, только лишний орган
+   управления.
 
    ВАЖНО: legacy-алиасы (--text: var(--ink)) резолвятся
    в :root и НЕ пересчитываются при переопределении --ink
@@ -382,69 +381,11 @@
       transparent 66%);
 }
 
-/* Единственная светлая заливка страницы. Прежде их было две — «gray» и
-   «white», — и различались они на просвет: #f1f2f4 против #ffffff при
-   полностью совпадающих чернилах, линиях и брендовой группе. Настоящее
-   различие было одно: на «white» панель ложилась темнее фона, на «gray» —
-   светлее. Победил второй вариант: серый фон с белыми панелями — тот
-   случай, когда карточка приподнята над заливкой, а не утоплена в неё,
-   и это единственное прочтение, работающее и на медиа-рамке «О компании»,
-   и на плитках оборудования с магазином.
-
-   «white» держался обоснованием «финальный экран колоды, светлее gray,
-   чтобы разрез константы на переходе blue → white читался в полную силу».
-   Обоснование пережило свой предмет: темы «blue» на странице нет, колода
-   Hero идёт black → graphite, и --deck-brand-ink светлых тем не читает
-   никто. */
-[data-theme="light"] {
-  --surface:     #f1f2f4;
-  --ink:         #14181f;  --text:       #14181f;
-  --ink-dim:     rgba(20,24,31,0.68);  --text-dim:   rgba(20,24,31,0.68);
-  --ink-faint:   rgba(20,24,31,0.50);  --text-faint: rgba(20,24,31,0.50);
-  --line:        rgba(20,24,31,0.14);
-  --line-soft:   rgba(20,24,31,0.07);
-  --line-strong: rgba(20,24,31,0.26);
-  --panel:       #ffffff;  --bg-raised:   #ffffff;
-  --panel-2:     #e7e9ec;  --bg-raised-2: #e7e9ec;
-  /* на светлом лазурь логотипа теряет контраст — уводим в глубокий тон */
-  --brand:       #0a63a8;  --accent:        #0a63a8;
-  --brand-strong:#084f88;  --accent-strong: #084f88;
-  --brand-soft:  rgba(10,99,168,0.10);  --accent-soft: rgba(10,99,168,0.10);
-  --brand-line:  rgba(10,99,168,0.34);  --accent-line: rgba(10,99,168,0.34);
-  /* Заливка светлая, а константа — графит: на переходе black → light рез
-     идёт лазурью сверху и графитом снизу. Колода до светлых экранов
-     сегодня не доходит, но токен держит тему полной: любая секция может
-     попросить .deck-brand, не зная, на каком фоне лежит. */
-  --deck-brand-ink: #14181f;
-}
-
-/* Темы "blue" и "white" убраны: первая — вместе с последней синей заливкой
-   во весь экран (экран 02 колоды ушёл в графит), вторая — слившись с этой
-   светлой, от которой отличалась только на просвет. */
-
-/* ── Стекло на светлой заливке ──
-   На светлом стекло переворачивается целиком: подложка белая, блик
-   по верхней кромке — почти чистый белый, а роль тени берёт на себя
-   не чёрный, а притемнённый тон чернил. Тёмное стекло на белом фоне
-   читалось бы дырой, а не средой.
-
-   Группа стоит отдельным правилом, а не внутри темы: у стекла нет
-   legacy-алиасов, из-за которых --brand и --ink приходится задавать
-   парами, и мешать одно с другим значило бы прятать эту разницу. */
-[data-theme="light"] {
-  --glass-bg:     rgba(255,255,255,0.62);
-  --glass-solid:  #f7f8fa;
-  --glass-line:   rgba(20,24,31,0.10);
-  --glass-hl:     rgba(255,255,255,0.85);
-  --glass-lo:     rgba(20,24,31,0.08);
-  --glass-shadow: 0 1px 2px rgba(20,24,31,0.06), 0 16px 48px -12px rgba(20,24,31,0.18);
-}
-
-/* Плоскость темы — правило референса: никаких теней и градиентов
-   на цветных заливках. Тени остаются только на окнах интерфейса
-   внутри тёмных секций, где они несут глубину, а не декор. */
-[data-theme="light"] .btn-ghost:hover { background: var(--brand-soft); }
-[data-theme="light"] .btn-primary { background: var(--brand); color: #fff; }
+/* Светлой заливки на сайте больше нет: «gray»/«white»/«blue» по очереди
+   слились в «light» и затем были убраны совсем — весь сайт стоит на
+   двух тёмных темах выше (black, graphite). --brand/--accent поэтому
+   больше не переопределяются по теме: лазурь логотипа (#0e8fd4 из :root)
+   уже настроена под тёмный фон и держит контраст везде одинаково. */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -818,7 +759,14 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .nav-links a::after { content: ''; position: absolute; left: 0; bottom: -6px; width: 100%; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease); }
 .nav-links a:hover { color: var(--text); }
 .nav-links a:hover::after { transform: scaleX(1); }
-.nav-cta { justify-self: end; margin-right: var(--gut); }
+.nav-tail { justify-self: end; margin-right: var(--gut); display: flex; align-items: center; gap: clamp(16px, 1.6vw, 26px); }
+/* часы — тот же приборный микро-регистр, что у readout'ов Drill Monitor
+   в hero: mono, разрядка, приглушённый тон, табличные цифры не прыгают
+   по ширине посекундно */
+.nav-clock {
+  font-size: 0.72rem; letter-spacing: 0.08em;
+  color: var(--ink-faint); white-space: nowrap;
+}
 
 /* ─── PILL · маленькая кнопка-таблетка строчными ───
    Приём первоисточника: единственная «кнопочная» форма на сайте.
@@ -886,9 +834,10 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 /* ════════════════════════════════════════════════
    «О КОМПАНИИ» · одна прибитая сцена на два акта
    ────────────────────────────────────────────────
-   Акт I  — стеклянная карточка листает факты на светлой заливке.
-   Акт II — фон уходит в ночь, снизу выходит земной шар и доворачивается
-            Россией к зрителю, строка слева набирается по словам.
+   Акт I  — стеклянная карточка листает факты на чёрной заливке секции,
+            глобус уже растёт из-за нижней кромки на своём синем свете.
+   Акт II — фон сгущается в синюю ночь, шар доворачивается Россией
+            к зрителю, строка слева набирается по словам.
 
    Раньше это были два раздела подряд — штабель «Ключевых цифр» и вслед
    отдельная сцена с шаром. Оба прибивали экран, оба считали свой скролл,
@@ -901,11 +850,12 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
    scripts/aboutScene.js по одному прогрессу; шар рисует
    scripts/globeCanvas.js по тому же прогрессу — акты не разъезжаются.
 
-   Карточка стеклянная не для вида: она стоит на светлой заливке в акте I
-   и над тёмной сценой в акте II. Плотную плашку пришлось бы перекрашивать
-   под фон, стекло просто берёт то, что под ним (см. рецепт стекла выше).
-   К моменту полной ночи карточка уже уходит из кадра, поэтому тёмного
-   варианта ей не нужно — она остаётся светлой всё время, пока видна.
+   Карточка стеклянная не для вида: она стоит на чёрной заливке в акте I
+   и над сгущающейся синей ночью в акте II — двум разным фонам плашку
+   пришлось бы перекрашивать под каждый, стекло просто берёт то, что
+   под ним (см. рецепт стекла выше). Свой ледяной рецепт у неё только
+   на ночь (`.is-night .atlas-deck` ниже); до неё работает общий тёмный
+   рецепт из :root.
    ════════════════════════════════════════════════ */
 .atlas { position: relative; height: 420svh; }
 .atlas-stage {
@@ -913,7 +863,7 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   background: var(--surface);
   /* На мобильном адресная строка прячется по ходу скролла, и реальный
      вьюпорт вырастает за пределы «малого» 100svh — под прибитой сценой
-     открывается голая заливка секции (#about, светлая) до самого низа
+     открывается голая заливка секции (#about, чёрная) до самого низа
      экрана. 100dvh гонится за текущим вьюпортом и полосу закрывает; для
      progress()-расчёта в scrollProgress.js ничего не меняется — он
      читает offsetHeight живьём, каким бы он ни был. Строка ниже — не
@@ -931,8 +881,10 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 }
 .atlas-canvas { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; display: block; }
 
-/* вертикальная кромка с подписью — как на прежней сцене шара. Цвет
-   тёмный на светлой заливке, светлый — когда пришла ночь (.is-night). */
+/* вертикальная кромка с подписью — как на прежней сцене шара. Оба тона
+   светлые (var(--line)/var(--ink-faint) чёрной темы уже светлые сами
+   по себе); ночь лишь поднимает их яркость (.is-night) вслед за тем,
+   как под ними густеет синева. */
 .atlas-stage::after {
   content: ''; position: absolute; top: 0; bottom: 0; z-index: 3;
   right: clamp(56px, 6vw, 100px); width: 1px;
@@ -958,24 +910,40 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   left: var(--gut); top: clamp(56px, 11vh, 130px);
   right: 48%;
 }
-.atlas-title {
+
+/* Заголовок сцены — сама строка про Россию, не «Ключевые цифры»: это и
+   есть ответ на «зачем тут глобус». Базовый текст стоит приглушённым
+   (--ink-faint), поверх лежит точная копия того же текста, ярко-белая
+   и обрезанная clip-path'ом — только эта копия и движется, ведёт её
+   aboutScene.js тем же прогрессом, что доворачивает шар (--geo-fill:
+   0…1). aria-hidden на копии — screen reader читает текст один раз,
+   из настоящего узла h2. */
+.atlas-geo {
+  position: relative;
   font-weight: 700;
   font-size: var(--fs-7); line-height: 1.04;
   letter-spacing: -0.035em; text-transform: uppercase;
-  color: var(--ink); margin-top: 4px;
+  color: var(--ink-faint); margin-top: 4px;
   transition: color 0.5s var(--ease);
+}
+.atlas-geo-fill {
+  position: absolute; inset: 0; z-index: 1;
+  color: var(--ink);
+  clip-path: inset(0 calc((1 - var(--geo-fill, 0)) * 100%) 0 0);
 }
 .atlas-head .eyebrow,
 .atlas-head .lead { transition: color 0.5s var(--ease); }
 .atlas-head .lead { margin-top: clamp(14px, 1.6vw, 22px); max-width: 30ch; font-size: var(--fs-2); }
 .atlas-head .pill { display: inline-flex; margin-top: clamp(18px, 2.2vw, 28px); transition: color 0.5s var(--ease), border-color 0.5s var(--ease); }
 
-/* ── Перекраска заголовка под синюю ночь ──
-   Тёмный текст на светлом старте к финалу оказывается на синей заливке
-   и там исчезает. Класс .is-night ставит aboutScene.js, когда ночь
-   набрала силу; переход плавный, поэтому шов смены не читается.
-   Номер рубрики светлеет в лазурь, как на всех тёмных секциях сайта. */
-.atlas-stage.is-night .atlas-title { color: #eef2f7; }
+/* ── Донастройка заголовка под синюю ночь ──
+   Текст светлый уже на чёрном старте (--ink чёрной темы), поэтому
+   здесь не смена тона, а его усиление под сгущающуюся синеву: чуть
+   выше непрозрачность, свой оттенок лазури у номера рубрики. Класс
+   .is-night ставит aboutScene.js, когда ночь набрала силу; переход
+   плавный, поэтому шов смены не читается. */
+.atlas-stage.is-night .atlas-geo { color: rgba(238, 242, 247, 0.34); }
+.atlas-stage.is-night .atlas-geo-fill { color: #eef2f7; }
 .atlas-stage.is-night .atlas-head .eyebrow { color: rgba(238, 242, 247, 0.66); }
 .atlas-stage.is-night .atlas-head .ey-no { color: #4db4e8; }
 .atlas-stage.is-night .atlas-head .ey-no .ey-den { color: rgba(238, 242, 247, 0.46); }
@@ -985,9 +953,9 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 /* ── Стеклянная карточка-факт ──
    Одна панель на все три факта: они лежат друг на друге в grid-слоте
    (высота слота = самая высокая карточка), видима ровно одна — её ведёт
-   скролл. Панель НЕ уходит: она остаётся светлым стеклом над синеющей
-   сценой, как белая карточка над глобусом в референсе. Дальше держится
-   на том, что стекло само берёт фон под собой (общий рецепт выше). */
+   скролл. Панель НЕ уходит и держится на том же месте всю сцену: тёмное
+   стекло на чёрной заливке акта I, свой ледяной рецепт под синей ночью
+   акта II (см. `.is-night .atlas-deck` ниже). */
 .atlas-deck {
   position: absolute; z-index: 3;
   right: var(--gut); top: 50%; transform: translateY(-50%);
@@ -995,27 +963,43 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   padding: clamp(20px, 2vw, 30px);
   transition: background 0.6s var(--ease), box-shadow 0.6s var(--ease), border-color 0.6s var(--ease);
 }
+/* Подписывает саму карточку, а не сцену: раньше «Ключевые цифры» стояли
+   заголовком слева, над строкой про Россию, — и цифры справа оставались
+   без подписи в глазах читателя. */
+.atlas-deck-kicker {
+  display: block; margin-bottom: clamp(12px, 1.4vw, 18px);
+  font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
 
 /* Ночная тональность стекла — свой рецепт поверх общего.
-   На светлой заливке общий рецепт (62% белого) в самый раз: под стеклом
-   нейтральный фон, разбавлять нечего. Но когда сцена ушла в синюю ночь,
-   та же плотная белая подложка гасит её почти в серый — синева под
-   стеклом просто не доходит до глаза. Здесь заливка разбавлена, тон
-   уведён в лёд, а насыщенность backdrop-filter поднята: то же стекло,
-   но настроенное вытягивать синий свет сцены, а не перекрывать его.
-   Текст остаётся тёмным всё время (см. комментарий выше), поэтому
-   разбавлять можно ровно до грани, где кегль ещё читается на глаз. */
+   Общий тёмный рецепт (55% почти-чёрного) в акте I в самый раз: под
+   стеклом нейтральная чёрная заливка, разбавлять нечего. Но когда сцена
+   ушла в синюю ночь, та же нейтральная тёмная подложка держит стекло
+   графитовым и глушит собственную синеву сцены — она под стеклом просто
+   не доходит до глаза.
+
+   Раньше здесь заливка уходила в лёд (светлое стекло) — решение из
+   эпохи «светлый день → синяя ночь». После перехода всего сайта на
+   единый чёрный (см. index.css:318 и заметку о редизайне) светлая
+   панель стала единственным светлым пятном на чёрном полотне — читалась
+   инородной плашкой, а белый текст чёрной темы (--ink-dim/--ink-faint)
+   на ней проваливался в контрасте. Вместо смены на светлый фон здесь
+   ниже держит тёмную сапфировую заливку — прозрачность понижена
+   (0.55 → 0.4), чтобы синева сцены проходила сквозь backdrop-filter, а
+   не терялась под плотным нейтральным слоем. Текст остаётся тем же
+   белым — на тёмном стекле он и так читается. */
 .atlas-stage.is-night .atlas-deck {
-  --glass-bg:    rgba(224, 235, 255, 0.5);
-  --glass-blur:  16px;
-  --glass-sat:   260%;
-  --glass-hl:    rgba(214, 231, 255, 0.85);
-  --glass-lo:    rgba(6, 20, 46, 0.26);
-  --glass-line:  rgba(190, 214, 255, 0.32);
+  --glass-bg:    rgba(8, 19, 38, 0.4);
+  --glass-blur:  20px;
+  --glass-sat:   220%;
+  --glass-hl:    rgba(130, 186, 255, 0.22);
+  --glass-lo:    rgba(2, 8, 18, 0.4);
+  --glass-line:  rgba(130, 186, 255, 0.18);
   --glass-shadow:
-    0 1px 2px rgba(6, 16, 36, 0.28),
-    0 24px 64px -14px rgba(8, 28, 64, 0.48),
-    0 0 90px -18px rgba(64, 150, 235, 0.55);
+    0 1px 2px rgba(2, 8, 18, 0.4),
+    0 24px 64px -14px rgba(4, 14, 32, 0.55),
+    0 0 80px -20px rgba(60, 140, 230, 0.4);
 }
 
 .atlas-slot { display: grid; }
@@ -1082,6 +1066,10 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .atlas.is-static .atlas-copy {
   position: static; right: auto; top: auto;
 }
+/* Заливку вести нечем без скролл-прогресса (aboutScene.js дальше setup'а
+   не идёт в этом режиме) — строка просто показывается уже прочитанной. */
+.atlas.is-static .atlas-geo { color: var(--ink); }
+.atlas.is-static .atlas-geo-fill { display: none; }
 .atlas.is-static .atlas-deck {
   position: static; transform: none; width: auto;
   margin-top: clamp(28px, 5vh, 56px);
@@ -1647,11 +1635,97 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .how-line { position: absolute; left: 27px; top: 18px; bottom: 18px; width: 1px; background: var(--line); }
 .how-line-fill { position: absolute; left: 27px; top: 18px; width: 1px; height: 0; background: var(--accent); }
 .step { position: relative; display: grid; grid-template-columns: 56px 1fr; gap: var(--s-4); padding: var(--s-3) 0; }
-.step-node { width: 56px; height: 56px; border-radius: 12px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; background: var(--bg-raised); border: 1px solid var(--line); font-family: var(--font-mono); font-size: var(--fs-2); font-weight: 500; color: var(--accent); transition: border-color 0.3s, box-shadow 0.3s; }
-.step.is-visible .step-node { border-color: var(--accent-line); }
+.step-node { width: 56px; height: 56px; border-radius: 12px; position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; background: var(--bg-raised); border: 1px solid var(--line); font-family: var(--font-mono); font-size: var(--fs-2); font-weight: 500; color: var(--ink-faint); transition: color 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease), background-color 0.4s var(--ease); }
+.step.is-visible .step-node {
+  color: var(--accent); background: var(--bg-raised-2); border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px var(--accent-line), 0 0 22px rgba(14,143,212,0.35);
+}
 .step-content { padding-top: 6px; }
 .step h3 { font-size: var(--fs-3); font-weight: 700; margin-bottom: var(--s-1); }
 .step p { font-size: var(--fs-1); color: var(--text-dim); line-height: 1.7; max-width: 62ch; }
+
+/* ════════════════════════════════════════════════
+   ЭКОНОМИКА БУРЕНИЯ
+   ────────────────────────────────────────────────
+   Тот же .split, что у «Как работает», но проблемы не последовательность
+   (у .step есть номер-узел и соединительная линия ровно потому, что там
+   порядок значим) — три независимые потери набраны колонками с волосяной
+   отбивкой, тем же приёмом, что .contact-card. ════════════════════════════════════════════════ */
+.econ-problems { display: flex; flex-direction: column; }
+.econ-problem { padding: var(--s-4) 0; border-top: 1px solid var(--line); }
+.econ-problem:first-child { border-top: 0; padding-top: 0; }
+.econ-problem-kicker {
+  display: block; font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--brand); margin-bottom: 10px;
+}
+.econ-problem h3 { font-size: var(--fs-3); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
+.econ-problem p { font-size: var(--fs-1); color: var(--text-dim); line-height: 1.7; max-width: 64ch; }
+
+/* Итог раздела — не карточка, а плоская панель на приподнятом слое:
+   единственное место секции, где текст читается как заключение, а не
+   как ещё один пункт списка. */
+.econ-synergy {
+  margin-top: var(--s-6); padding: clamp(28px, 3.4vw, 44px);
+  background: var(--bg-raised); border: 1px solid var(--line);
+}
+.econ-synergy-kicker {
+  font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.econ-synergy-title {
+  margin-top: 10px; font-size: var(--fs-4); font-weight: 700; letter-spacing: -0.02em;
+}
+.econ-synergy-text { margin-top: 14px; font-size: var(--fs-1); color: var(--text-dim); line-height: 1.7; max-width: 62ch; }
+.econ-stats {
+  display: flex; flex-wrap: wrap; gap: clamp(28px, 4vw, 56px);
+  margin-top: clamp(24px, 3vw, 34px); padding-top: clamp(20px, 2.4vw, 28px);
+  border-top: 1px solid var(--line);
+}
+.econ-stat { display: flex; flex-direction: column; gap: 6px; max-width: 260px; }
+.econ-stat-val { font-size: var(--fs-5); font-weight: 700; color: var(--brand); letter-spacing: -0.02em; }
+.econ-stat-label { font-size: var(--fs-1); color: var(--ink-dim); line-height: 1.5; }
+
+@media (max-width: 700px) {
+  .econ-synergy { margin-top: var(--s-5); }
+}
+
+/* ════════════════════════════════════════════════
+   УСЛУГИ
+   ────────────────────────────────────────────────
+   Две карточки, а не ряд из четырёх строк как в «Оборудовании»: асимметрия
+   долей (1.4fr / 1fr) не даёт ряду читаться шаблонной сеткой. */
+.car-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; margin-bottom: 48px; }
+
+.services-row {
+  display: flex; flex-wrap: wrap; gap: 1px;
+  margin: 0 var(--gut);
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.services-card {
+  flex: 1 1 420px;
+  padding: clamp(28px, 3.4vw, 48px);
+  background: var(--bg-raised);
+  display: flex; flex-direction: column;
+}
+.services-card.is-lead { flex-grow: 1.4; }
+.services-n { display: block; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--ink-faint); margin-bottom: var(--s-3); }
+.services-body h3 { font-size: var(--fs-4); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+.services-body p { font-size: var(--fs-1); color: var(--text-dim); line-height: 1.7; max-width: 56ch; }
+.services-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: clamp(20px, 2.4vw, 28px);
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--brand); text-decoration: none;
+}
+.services-link svg { width: 15px; height: 15px; transition: transform 0.25s var(--ease); }
+.services-link:hover { color: var(--ink); }
+.services-link:hover svg { transform: translateX(3px); }
+
+@media (max-width: 700px) {
+  .services-row { margin: 0 var(--gut); flex-direction: column; }
+  .services-card.is-lead { flex-grow: 1; }
+}
 
 /* ════════════════════════════════════════════════
    МАГАЗИН
@@ -1677,6 +1751,18 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   background: linear-gradient(90deg, var(--brand-line), transparent 55%);
 }
 .iframe-bar .url { margin-left: 12px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-faint); }
+/* Статус справа от адреса: тот же LIVE-язык, что на плитке real-time
+   монитора в Software.astro (.bento-live), — здесь он законен ровно
+   в том же смысле: подпись цитирует настоящее состояние соединения
+   с внешней системой под ней, а не украшает бар. */
+.iframe-live { margin-left: auto; text-shadow: none; }
+.iframe-proto {
+  font-size: 0.66rem; letter-spacing: 0.08em; color: var(--text-faint);
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .iframe-proto { display: none; }
+}
 
 /* ════════════════════════════════════════════════
    КОНТАКТЫ
@@ -1773,171 +1859,183 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 }
 
 /* ════════════════════════════════════════════════
-   ЛИНЕЙКА ОБОРУДОВАНИЯ · ряд-«аккордеон»
+   ЛИНЕЙКА ОБОРУДОВАНИЯ · ряды во всю ширину
    ────────────────────────────────────────────────
-   Карточки делят ряд поровну; под курсором нужная
-   забирает бо́льшую долю, соседние сжимаются и гаснут.
-   Ширина текстового блока фиксирована, поэтому подпись
-   не переверстывается на раскрытии — двигается только кадр.
+   Перенос секции «Продукция» из соседнего прототипа D:\Projects\Dmit:
+   строка = индекс + модель + описание + окантованная кнопка, видимые
+   сразу, без hover-раскрытия, и клик по всей строке поднимает шторку
+   ТТХ. У каждой строки собственная рамка с видимым зазором до соседней
+   (не волосяной шов встык, как у .services-row) — так у оригинала.
+   Чертёжные corner-marks и 3D-кнопка-куб из Dmit не переносятся — см.
+   PRODUCT.md → Anti-references. Фото продукции в строке нет вовсе —
+   убраны по прямой просьбе, ТТХ открывает не витрина, а текст.
 
-   Карточка светлая, и это не смена настроения. Рендеры
-   продукции сняты на белом фоне; прежняя вёрстка клала
-   их на всю площадь плитки, гасила до 0.82 и накрывала
-   градиентом до rgba(6,10,16,.97) — ради белого текста
-   поверх кадра. Белый фон рендера уходил в серую муть,
-   предмет тонул, а секция (заливка gray) получала внутри
-   пять чёрных плиток вместо цельного блока.
+   Шапка (.prod-head) — тоже перенос из Dmit, а не общий .car-head:
+   заголовок и лид стоят в двух колонках через волосяную вертикальную
+   черту, а не друг под другом. Подложка на всю ширину экрана (без
+   .container) — линии рамки должны доходить до края, как у рядов ниже.
 
-   Разводим слои: кадр остаётся на своей белой подложке
-   в верхней зоне, текст живёт на панели под ним. Тёмная
-   подложка не нужна — текст на изображение не заходит.
-   ════════════════════════════════════════════════ */
-.car-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; margin-bottom: 48px; }
-
-.exp-row {
-  display: flex; gap: 10px;
-  padding: 0 var(--gut);
-  height: clamp(440px, 68svh, 720px);
+   Фоновая топографическая рябь (#products::before) — замена видео
+   bg-topography.mp4 из Dmit, которого нет в этом проекте: та же идея
+   контурных линий, но процедурная SVG-подложка вместо стороннего
+   видеофайла, тем же приёмом, что trajectoryCanvas.js на hero. Слой лежит
+   под контентом (z-index: 0), сам контент явно поднят на z-index: 1. */
+#products { position: relative; overflow: hidden; }
+#products::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-repeat: repeat;
+  background-size: min(420px, 44vw) auto;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='150' viewBox='0 0 300 150'%3E%3Cpath d='M0,30 C37.5,10 112.5,50 150,30 C187.5,10 262.5,50 300,30' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3Cpath d='M0,80 C37.5,55 112.5,105 150,80 C187.5,55 262.5,105 300,80' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3Cpath d='M0,120 C37.5,100 112.5,140 150,120 C187.5,100 262.5,140 300,120' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E");
 }
-.exp-card {
-  position: relative; flex: 1 1 0; min-width: 0; overflow: hidden;
-  display: flex; flex-direction: column;
-  border-radius: var(--r);
-  background: var(--panel); border: 1px solid var(--line);
+#products > .prod-head, #products > .rig-list { position: relative; z-index: 1; }
+
+.prod-head {
+  display: grid;
+  grid-template-columns: minmax(240px, 34%) 1fr;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: clamp(28px, 3.6vw, 48px);
+}
+.prod-head-title {
+  padding: clamp(32px, 4vw, 56px) clamp(20px, 2.4vw, 32px) clamp(32px, 4vw, 56px) var(--gut);
+  display: flex; flex-direction: column; justify-content: center; gap: 16px;
+}
+.prod-head-lead {
+  display: flex; align-items: center;
+  padding: clamp(32px, 4vw, 56px) var(--gut) clamp(32px, 4vw, 56px) clamp(28px, 3.2vw, 44px);
+  border-left: 1px solid var(--line);
+}
+.prod-head-lead .lead {
+  border-left: 2px solid var(--brand);
+  padding-left: clamp(16px, 1.8vw, 22px);
+  max-width: 58ch;
+}
+
+.rig-list {
+  display: flex; flex-direction: column; gap: clamp(14px, 1.8vw, 22px);
+  margin: 0 var(--gut);
+}
+.rig-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: clamp(32px, 3.2vw, 48px) minmax(160px, 240px) 1fr auto;
+  align-items: center;
+  gap: clamp(20px, 2.6vw, 40px);
+  width: 100%; text-align: left;
+  padding: clamp(24px, 3vw, 40px);
+  background: var(--panel); border: 1px solid var(--line); color: inherit; font: inherit;
   cursor: pointer;
-  transition: flex-grow 0.6s var(--ease), border-color 0.45s var(--ease),
-              box-shadow 0.45s var(--ease);
+  transition: border-color 0.3s var(--ease), background-color 0.3s var(--ease);
 }
-.exp-card:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-/* флагман (телеметрическая система) стоит шире уже в покое — иначе ряд
-   читается как безликая сетка одинаковых плиток, а не техническая линейка */
-.exp-card:first-child { flex-grow: 1.4; }
+.rig-row:hover, .rig-row:focus-visible { border-color: var(--brand-line); background: var(--bg-raised); }
+.rig-row:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
-/* Кадр. cover, а не contain: у рендеров широкие собственные поля,
-   и обрезается именно они — предмет стоит в центре кадра. */
-.exp-frame { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
-.exp-img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: center;
-  transform: scale(1.02);
-  transition: transform 0.8s var(--ease), opacity 0.45s var(--ease);
-  -webkit-user-drag: none; user-select: none;
-}
-/* приборные засечки зажигаются только на раскрытой карточке:
-   на всех пяти сразу они читались бы рябью, а не прицелом */
-.exp-frame.instr-frame::after { opacity: 0; transition: opacity 0.4s var(--ease); }
-
-.exp-body {
-  position: relative; z-index: 2; flex: none;
-  padding: clamp(14px, 1.5vw, 22px);
-  border-top: 1px solid var(--line-soft);
-  background: var(--panel);
-}
-/* фиксированная мера подписи — иначе заголовок перебирается на раскрытии;
-   она же задаёт нижнюю границу сжатия карточки (см. flex-grow ниже) */
-.exp-head { width: clamp(130px, 11vw, 200px); }
-.exp-num {
-  display: block; margin-bottom: 6px;
-  font-size: 0.68rem; letter-spacing: 0.14em; color: var(--brand);
+.rig-num {
+  font-size: 0.7rem; letter-spacing: 0.12em; color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
 }
-/* строка тех-данных читается постоянно, не только на раскрытии карточки —
-   она же держит «приборный» тон секции, пока подпись ещё не выросла в текст */
-.exp-spec {
-  display: block; margin-bottom: 10px;
-  font-size: 0.58rem; letter-spacing: 0.09em; line-height: 1.5; text-transform: uppercase;
-  color: var(--ink-dim);
-}
-.exp-title {
-  font-size: var(--fs-1); font-weight: 500; line-height: 1.3; color: var(--ink);
-  transition: color 0.45s var(--ease);
-}
-/* 0fr → 1fr: высота раскрытия анимируется, не зная объёма текста;
-   max-height потребовал бы подобранной «на глаз» константы */
-.exp-more {
-  display: grid; grid-template-rows: 0fr; opacity: 0;
-  width: clamp(230px, 26vw, 420px);
-  transition: grid-template-rows 0.5s var(--ease), opacity 0.3s var(--ease);
-}
-.exp-more-in { overflow: hidden; }
-.exp-text { margin-top: 12px; font-size: var(--fs-1); line-height: 1.65; color: var(--ink-dim); }
+.rig-head { display: flex; flex-direction: column; gap: 6px; }
+.rig-title { font-size: var(--fs-3); font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.rig-line { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); }
+.rig-text { font-size: var(--fs-1); line-height: 1.6; color: var(--text-dim); max-width: 62ch; }
 
-/* раскрытие — только там, где есть настоящее наведение */
-@media (hover: hover) and (pointer: fine) {
-  /* Сжатие мягкое: карточка не должна становиться уже своей подписи,
-     иначе заголовок обрезается вместо переноса. Соседи гаснут кадром
-     и заголовком, а не brightness(): на светлой панели фильтр даёт
-     грязный серый прямоугольник вместо отступления на второй план. */
-  .exp-row:hover .exp-card,
-  .exp-row:focus-within .exp-card { flex-grow: 0.78; }
-  .exp-row:hover .exp-card .exp-img,
-  .exp-row:focus-within .exp-card .exp-img { opacity: 0.3; }
-  .exp-row:hover .exp-card .exp-title,
-  .exp-row:focus-within .exp-card .exp-title { color: var(--ink-faint); }
+.rig-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 22px;
+  border: 1px solid var(--line-strong);
+  font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink); white-space: nowrap;
+  transition: border-color 0.25s var(--ease), color 0.25s var(--ease);
+}
+.rig-cta svg { width: 14px; height: 14px; transition: transform 0.25s var(--ease); }
+.rig-row:hover .rig-cta, .rig-row:focus-visible .rig-cta { border-color: var(--brand); color: var(--brand); }
+.rig-row:hover .rig-cta svg, .rig-row:focus-visible .rig-cta svg { transform: translateX(3px); }
 
-  .exp-row:hover .exp-card:hover,
-  .exp-row:focus-within .exp-card:focus-within {
-    flex-grow: 2.4;
-    border-color: var(--brand-line);
-    box-shadow: var(--glass-shadow);
-  }
-  /* тот же вес селектора, что у гашения выше, но правило идёт следом */
-  .exp-row:hover .exp-card:hover .exp-img,
-  .exp-row:focus-within .exp-card:focus-within .exp-img { opacity: 1; transform: scale(1.06); }
-  .exp-row:hover .exp-card:hover .exp-title,
-  .exp-row:focus-within .exp-card:focus-within .exp-title { color: var(--ink); }
-
-  .exp-card:hover .exp-more,
-  .exp-card:focus-within .exp-more { grid-template-rows: 1fr; opacity: 1; }
-  .exp-card:hover .exp-frame.instr-frame::after,
-  .exp-card:focus-within .exp-frame.instr-frame::after { opacity: 1; }
+@media (max-width: 820px) {
+  .rig-row { grid-template-columns: 1fr; row-gap: 14px; }
+  .rig-cta { justify-self: start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .exp-card, .exp-img, .exp-more, .exp-title { transition: none; }
+  .rig-row, .rig-cta svg { transition: none; }
+}
+
+/* ════════════════════════════════════════════════
+   ШТОРКА СПЕЦИФИКАЦИЙ · боковая панель ТТХ
+   ────────────────────────────────────────────────
+   Общая для всей линейки: панели (.specs-panel, по одной на карточку)
+   лежат друг на друге в потоке шторки, JS (specsDrawer.js) переключает
+   видимость классом .is-on — тот же приём, что у .atlas-card в «О
+   компании». Сама шторка стеклянная (в списке .glass ниже по файлу),
+   overlay плоский тёмный. */
+.specs-overlay {
+  position: fixed; inset: 0; z-index: 290;
+  background: rgba(4, 6, 9, 0.6);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s var(--ease);
+}
+.specs-overlay.is-open { opacity: 1; pointer-events: auto; }
+
+.specs-drawer {
+  position: fixed; z-index: 300; top: 0; right: 0; bottom: 0;
+  width: min(460px, 92vw);
+  padding: clamp(28px, 4vw, 44px) clamp(24px, 3vw, 36px);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overscroll-behavior: contain;
+  border-radius: 0;
+  transform: translateX(100%);
+  transition: transform 0.5s var(--ease-out);
+}
+.specs-drawer.is-open { transform: translateX(0); }
+
+.specs-close {
+  position: absolute; top: clamp(20px, 2.6vw, 30px); right: clamp(20px, 2.6vw, 30px);
+  width: 36px; height: 36px; display: grid; place-items: center;
+  background: none; border: 1px solid var(--line); border-radius: 50%;
+  color: var(--ink-dim); cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.specs-close svg { width: 16px; height: 16px; }
+.specs-close:hover { border-color: var(--line-strong); color: var(--ink); }
+
+.specs-panel {
+  display: none; flex-direction: column; flex: 1;
+  padding-top: clamp(44px, 6vw, 60px);
+}
+.specs-panel.is-on { display: flex; }
+.specs-eyebrow {
+  font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--brand);
+}
+.specs-title {
+  margin-top: 10px; font-size: var(--fs-4); font-weight: 700;
+  letter-spacing: -0.02em; line-height: 1.2;
+}
+.specs-list { margin-top: clamp(20px, 3vw, 30px); }
+.specs-row {
+  display: flex; justify-content: space-between; gap: var(--s-3);
+  padding: 14px 0; border-bottom: 1px solid var(--line-soft);
+}
+.specs-row dt { color: var(--ink-faint); font-size: var(--fs-1); }
+.specs-row dd { color: var(--ink); font-size: var(--fs-1); font-weight: 500; text-align: right; }
+.specs-cta { margin-top: auto; padding-top: clamp(28px, 4vw, 40px); align-self: stretch; justify-content: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .specs-overlay, .specs-drawer { transition: none; }
 }
 
 /* ════════════════════════════════════════════════
    RESPONSIVE
    ════════════════════════════════════════════════ */
-@media (max-width: 1024px) {
-  /* пять карточек в ряд перестают читаться — раскладываем сеткой 2×N */
-  .exp-row { flex-wrap: wrap; height: auto; gap: 10px; }
-  .exp-card { flex: 1 1 calc(50% - 5px); height: clamp(300px, 48svh, 420px); }
-  /* сетке 2×N асимметрия ряда не нужна — плитки снова равны */
-  .exp-card:first-child { flex-grow: 1; }
-  /* мера подписи держала сжатие в ряду; в сетке сжимать нечего */
-  .exp-head, .exp-more { width: auto; }
-}
-
-/* ── Описание оборудования на тач-устройствах ──
-   Раскрытие по наведению здесь не работает: наводить нечем. Раньше
-   .exp-more просто скрывался, и с планшета и телефона пропадали разом
-   описание и теги — то есть весь смысл карточки, кроме названия.
-   Возвращаем их на место статично: карточка перестаёт быть «аккордеоном»
-   и становится обычной плиткой, где подпись видна сразу.
-
-   Прежняя тач-версия боролась с текстом поверх кадра — плотный градиент,
-   притемнённый до 0.62 снимок. Разведённые слои сняли и эту задачу:
-   текст стоит на панели, кадру гасить себя больше не нужно. */
-@media (hover: none), (pointer: coarse) {
-  /* ряд-«аккордеон» без наведения раскрываться не может, поэтому он и на
-     широком тач-экране становится обычной сеткой плиток */
-  .exp-row { flex-wrap: wrap; height: auto; gap: 10px; }
-  .exp-card { flex: 1 1 clamp(260px, 30%, 380px); height: auto; }
-  .exp-card:first-child { flex-grow: 1; }
-  /* кадр перестаёт тянуться: высоту карточки задаёт текст под ним */
-  .exp-frame { flex: none; height: clamp(190px, 28svh, 280px); }
-  .exp-head, .exp-more { width: auto; }
-  .exp-title { font-size: var(--fs-2); }
-  .exp-more { grid-template-rows: 1fr; opacity: 1; }
-  .exp-text { font-size: var(--fs-1); line-height: 1.6; }
-}
 @media (max-width: 700px) {
   /* (шапка уходит в бургер ниже 1200 — см. блок «МОБИЛЬНАЯ ОГРАНКА») */
   .car-head { flex-direction: column; align-items: flex-start; gap: 24px; }
-  .car-head .h-title { font-size: clamp(1.7rem, 7vw, 2.2rem); }
-  .exp-card { flex: 1 1 100%; height: auto; }
+  .car-head .h-title, .prod-head .h-title { font-size: clamp(1.7rem, 7vw, 2.2rem); }
+  .prod-head { grid-template-columns: 1fr; }
+  .prod-head-lead { border-left: none; border-top: 1px solid var(--line); padding-left: var(--gut); }
   .step { grid-template-columns: 44px 1fr; gap: 18px; }
   .step-node { width: 44px; height: 44px; }
   .how-line, .how-line-fill { left: 21px; }
@@ -1962,53 +2060,89 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 .sw-head-side .lead { max-width: 480px; }
 .sw-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
-/* bento-мозаика модулей платформы. Раньше кадр вписывался
-   (object-fit: contain) в ячейку с фиксированной высотой ряда — кадры
-   разной формы (1.72:1 у пульта бурения, 2.70:1 у таблицы КНБК) в неё
-   не попадали, и вокруг них оставались поля фона шириной в половину
-   плитки. Теперь aspect-ratio стоит прямо на самом кадре (.bento-shot),
-   а не на плитке: при ЛЮБОЙ ширине колонки картинка выходит без полей,
-   контейнер не приходится подгонять под неё — рамка сама следует за
-   кадром, а не наоборот. Колонки ниже подобраны на глаз для баланса
-   композиции, а не для точных пропорций — потому и не пересчитываются
-   при замене скриншота. */
-.sw-bento { display: flex; flex-direction: column; gap: 16px; }
+/* Один кадр на всю ширину секции, вкладки переключают модуль. Раньше
+   пять скриншотов делили сетку на герой-плитку (2 доли) и четыре
+   огрызка сбоку — КНБК (2.70:1) в узкой колонке превращался в
+   нечитаемую полоску, читаемым оставался только один кадр из пяти.
+   Теперь у каждого модуля по очереди вся ширина: .sw-frame держит
+   рамку и приборный уголок instr-frame один раз, а не пять — активная
+   .sw-slide подставляет свой скриншот через display, снятые с рамки
+   .bento-bar/.bento-body работают как раньше, просто внутри вкладки. */
+.sw-stage { margin-top: clamp(28px, 3vw, 40px); }
 
-/* Первый ряд: «Бурение» — крупная витринная плитка слева (2 доли),
-   «Инклинометрия» и «КНБК» — узкой парой справа (1 доля), одна над
-   другой. align-items: start — колонки не тянутся друг под друга: у
-   каждой плитки свой подвал с подписью, и их суммарная высота слева
-   и справа совпадает лишь приблизительно. */
-.bento-row-a {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: auto auto;
-  align-items: start;
-  gap: 16px;
+/* Вкладки вторят собственной верхней навигации Drill Monitor (см.
+   app-drilling.webp) — тот же приём подчёркивания, что у scrollspy
+   в шапке (.nav-links a.active), не новая форма. */
+.sw-tabs {
+  display: flex; flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: clamp(20px, 2.2vw, 30px);
 }
-.bt-drilling { grid-column: 1; grid-row: 1 / span 2; }
-.bt-survey   { grid-column: 2; grid-row: 1; }
-.bt-bha      { grid-column: 2; grid-row: 2; }
+.sw-tab {
+  position: relative;
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 0 clamp(14px, 1.6vw, 22px) 14px;
+  margin-right: clamp(8px, 1vw, 16px);
+  background: none; border: 0; cursor: pointer;
+  font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--text-faint);
+  transition: color 0.25s;
+}
+.sw-tab:first-child { padding-left: 0; }
+.sw-tab::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 2px; background: var(--accent);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease);
+}
+.sw-tab:hover { color: var(--text-dim); }
+.sw-tab.is-active { color: var(--ink); }
+.sw-tab.is-active::after { transform: scaleX(1); }
+.sw-tab-n { color: var(--live); }
+.sw-tab-label { font-family: var(--font-text); letter-spacing: 0.01em; }
 
-/* Второй ряд: «Каротаж» и «Паспорта» — равными долями бок о бок. */
-.bento-row-b {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: start;
-  gap: 16px;
+@media (max-width: 640px) {
+  /* Пять вкладок в один ряд на узком экране не помещаются без переноса
+     на вторую строку — вместо этого лента прокручивается горизонтально,
+     как собственная вкладочная навигация приложения на телефоне. */
+  .sw-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .sw-tabs::-webkit-scrollbar { display: none; }
+  .sw-tab { flex: 0 0 auto; }
 }
 
-.bento-tile {
+.sw-frame {
   position: relative; overflow: hidden;
-  display: flex; flex-direction: column;
   border: 1px solid var(--line); border-radius: 14px;
   background: var(--bg-raised);
   box-shadow: 0 40px 80px -34px rgba(0,0,0,0.7);
-  transition: border-color 0.35s var(--ease);
 }
-/* плитки ведут себя строго: на наведении только светлеет рамка —
-   ни подъёма, ни ореола, ни зума скриншота */
-.bento-tile:hover { border-color: var(--line-strong); }
+
+/* Скрытые вкладки не участвуют в раскладке (display: none), поэтому
+   рамка всегда высотой ровно в кадр активного модуля — даже когда
+   пропорции соседних скриншотов различаются в разы (1.72:1 у пульта
+   бурения против 2.70:1 у таблицы КНБК).
+
+   Внутри — не стопка «шапка на весь экран сверху, подпись строкой
+   снизу» (там огромный кадр отрывался от своей же подписи и текст
+   читался поодаль от того, что описывает), а асимметричный сплит:
+   скриншот и подпись сидят рядом, колонками, в той же пропорции
+   ~66/34, что и .split у «Как работает»/«Экономики» — швейцарский
+   канон сайта тот же, просто сплит свой (тот завязан на --rail-* шапки,
+   этот — на ширину рамки). align-items: start — обе колонки садятся
+   на общий верхний край, ни одна не тянется и не центрируется по
+   высоте соседа: у скриншота своя, у подписи своя. */
+.sw-slide { display: none; position: relative; }
+.sw-slide.is-active {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 34%);
+  align-items: start;
+  animation: sw-slide-in 0.35s var(--ease);
+}
+@keyframes sw-slide-in { from { opacity: 0 } to { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) {
+  .sw-slide.is-active { animation: none; }
+}
+
+.sw-slide-shot { position: relative; overflow: hidden; min-width: 0; }
 
 /* Кадр держит СВОЮ пропорцию (задана на .bt-<key> ниже) и никогда не
    растягивается флексом — высота считается из width: 100% и
@@ -2030,7 +2164,7 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 /* Бар поверх скриншота. Стеклянный, а не градиентный: градиент вниз
    притемнял верх кадра и на светлых снимках всё равно не спасал подпись,
    а стекло размывает ровно то, что под ним, и подпись читается на любом
-   кадре. Кромки только нижняя — бар прижат к трём краям плитки. */
+   кадре. Кромки только нижняя — бар прижат к трём краям кадра. */
 .bento-bar {
   position: absolute; top: 0; left: 0; right: 0; z-index: 3;
   display: flex; align-items: center; gap: var(--s-1);
@@ -2053,18 +2187,20 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 }
 .bento-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
 
-/* нижняя подпись — сплошной подвал, текст не на картинке */
+/* подпись — колонка рядом со снимком, не подвал под ним: волосяная
+   левая грань вместо верхней, заливка плоская (без градиента «в
+   продолжение» кадра — тут уже не над чем продолжать). */
 .bento-body {
-  position: relative; z-index: 3; flex: 0 0 auto;
-  padding: 15px clamp(16px, 1.7vw, 22px) 17px;
-  background: linear-gradient(180deg, var(--bg-raised), #070b13);
-  border-top: 1px solid var(--line);
+  position: relative; z-index: 3;
+  padding: clamp(20px, 2.2vw, 30px) clamp(18px, 2vw, 26px);
+  background: var(--bg-raised);
+  border-left: 1px solid var(--line);
+  min-width: 0;
 }
 .bento-body h3 {
   font-weight: 700; letter-spacing: -0.02em; line-height: 1.16;
   font-size: var(--fs-3); margin-bottom: 0;
 }
-.bento-tile.is-feature .bento-body h3 { font-size: clamp(1.5rem, 2.2vw, 1.95rem); }
 .bento-body p {
   font-size: var(--fs-1); color: var(--text-dim); line-height: 1.6;
   max-width: 56ch; margin-top: var(--s-1);
@@ -2073,9 +2209,9 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 
 /* ── Жизненный цикл оборудования ──
    Продолжение раздела, а не новая секция: тот же чёрный фон, отбивка
-   сверху отделяет его от мозаики. Набран колонками с волосяной чертой —
-   тем же приёмом, что контакты и линейка оборудования; плашек нет,
-   иначе блок спорил бы с плитками бенто за внимание. */
+   сверху отделяет его от кадра с вкладками. Набран колонками с волосяной
+   чертой — тем же приёмом, что контакты и линейка оборудования; плашек
+   нет, иначе блок спорил бы с кадром за внимание. */
 .sw-life {
   margin-top: clamp(48px, 5.5vw, 84px);
   padding-top: clamp(32px, 3.5vw, 52px);
@@ -2123,11 +2259,6 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   .sw-life-title { max-width: none; }
 }
 
-/* Планшетного брейкпоинта для мозаики больше нет: колонки строк заданы
-   пропорцией (fr), а не счётом ячеек, поэтому раскладка сама тянется
-   от 901px и выше без отдельного шага — планшет получает те же две
-   строки, просто уже. */
-
 @media (max-width: 900px) {
   /* Колонок нет — раскладывать нечего: сетка распускается в поток,
      и спаны обязаны сняться вместе с ней, иначе блок с «grid-column: 8»
@@ -2135,12 +2266,12 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   .sw-head { grid-template-columns: 1fr; gap: var(--s-3); align-items: start; }
   .sw-head > *:first-child,
   .sw-head > *:last-child { grid-column: auto; }
-  /* Подпись у всех плиток теперь в обычном подвале под кадром (не
-     оверлеем поверх него), поэтому её высоте не нужно отвоёвывать
-     место у картинки — aspect-ratio на .bento-shot (задан выше, вне
-     медиазапроса) работает одинаково что в две колонки, что в одну. */
-  .bento-row-a, .bento-row-b { grid-template-columns: 1fr; }
-  .bento-tile { grid-column: auto !important; grid-row: auto !important; }
+  /* Сплит скриншот/подпись в 34%-колонку прожимает кадр слишком узко
+     на планшете — та же причина, по которой .split здесь тоже
+     возвращается в один столбец. Подпись обратно под кадр, полной
+     шириной. */
+  .sw-slide.is-active { grid-template-columns: 1fr; }
+  .bento-body { border-left: 0; border-top: 1px solid var(--line); }
   .bento-body p { max-width: none; }
 }
 
@@ -2298,6 +2429,28 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 46%, transparent 82%);
   mask-image: linear-gradient(90deg, #000 0%, #000 46%, transparent 82%);
 }
+
+/* ── Курсорный readout AZ/INC · тот же экран ──
+   Азимут и зенитный угол — буквально то, что меряет MWD; здесь они
+   читают положение курсора над канвасом (heroReadout.js), а не поток
+   данных, поэтому и не носят бейдж LIVE настоящего readout'а. Только
+   там, где есть указатель: на тач нечему задавать позицию, и статичные
+   000.0° были бы просто мусором на экране. */
+.deck-cursor-readout {
+  display: none;
+  position: absolute; z-index: 2;
+  top: clamp(96px, 15vh, 150px); right: var(--gut);
+  gap: 20px;
+  font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.deck-cursor-readout b { color: var(--brand); font-weight: 500; font-variant-numeric: tabular-nums; }
+@media (hover: hover) and (pointer: fine) {
+  .deck-cursor-readout { display: flex; }
+}
+@media (max-width: 900px) {
+  .deck-cursor-readout { display: none !important; }
+}
 /* ── How: «бурящийся» таймлайн с метками глубины ──
    Свечения сняты: зелёный и ореолы — сигналы прибора, а не украшение
    интерфейса сайта. Линия и точка идут одним брендовым тоном. */
@@ -2409,7 +2562,7 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 @media (max-width: 1200px) {
   nav.nav, nav.nav.scrolled { display: flex; justify-content: space-between; padding-left: var(--gut); padding-right: var(--gut); }
   .nav-logo { padding-left: 0; }
-  .nav-links, .nav-cta { display: none; }
+  .nav-links, .nav-tail { display: none; }
   .nav-burger { display: flex; }
 }
 

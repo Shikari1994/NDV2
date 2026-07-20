@@ -71,3 +71,61 @@ if (burger && menu) {
     }
   })
 }
+
+/* ─── Часы MSK в шапке ───
+   Реальное время, не заглушка: буровая, диспетчерская и офис в разных
+   часовых поясах, единый ориентир на шапке экономит вопрос «сколько
+   там сейчас». Формат совпадает с остальными readout'ами сайта —
+   табличные цифры, чтобы строка не «дышала» посекундно. */
+{
+  const clock = document.getElementById('nav-clock')
+  if (clock) {
+    const tick = () => {
+      const t = new Date().toLocaleTimeString('ru-RU', {
+        timeZone: 'Europe/Moscow', hour: '2-digit', minute: '2-digit', second: '2-digit',
+      })
+      clock.textContent = 'MSK · ' + t
+    }
+    tick()
+    setInterval(tick, 1000)
+  }
+}
+
+/* ─── Scrollspy: активный пункт меню под текущим разделом ───
+   Тот же приём, что перекрашивает шапку под тему секции в motion.js:
+   полоска наблюдения схлопнута к верхней кромке экрана — «активна»
+   ровно та секция, что сейчас идёт под шапкой. Отдельный наблюдатель,
+   а не переиспользование того же в motion.js: nav.js грузится первым,
+   до разбора Lenis и GSAP, и бургер не должен ждать несвязанный модуль
+   ради подсветки пункта меню. */
+{
+  const links = [...document.querySelectorAll('.nav-links a[href^="#"]')]
+  const sections = []
+  const linkFor = new Map()
+  links.forEach((a) => {
+    const el = document.getElementById(a.getAttribute('href').slice(1))
+    if (el) {
+      sections.push(el)
+      linkFor.set(el, a)
+    }
+  })
+
+  if (sections.length && 'IntersectionObserver' in window) {
+    const visible = new Set()
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => (e.isIntersecting ? visible.add(e.target) : visible.delete(e.target)))
+        // последняя по DOM среди видимых — секция под шапкой прямо сейчас
+        for (let i = sections.length - 1; i >= 0; i--) {
+          if (visible.has(sections[i])) {
+            links.forEach((a) => a.classList.remove('active'))
+            linkFor.get(sections[i]).classList.add('active')
+            break
+          }
+        }
+      },
+      { rootMargin: '0px 0px -100% 0px', threshold: 0 },
+    )
+    sections.forEach((s) => io.observe(s))
+  }
+}

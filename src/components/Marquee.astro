@@ -1,7 +1,7 @@
 ---
 /* Бесконечная лента — «шов» между секциями вместо линии-разделителя.
    Список клонируется в motion.js; здесь только одна копия. */
-const { items, theme = 'light', dir = 'left', speed = 45 } = Astro.props
+const { items, theme = 'black', dir = 'left', speed = 45 } = Astro.props
 ---
 
 <div class="marquee" data-theme={theme} data-marquee-dir={dir} data-marquee-speed={speed}>

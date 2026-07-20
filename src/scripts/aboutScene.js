@@ -29,6 +29,7 @@ if (wrap) init(wrap)
 function init(wrap) {
   const stage = wrap.querySelector('[data-atlas-stage]')
   const nightEl = wrap.querySelector('.atlas-night')
+  const geoFillEl = wrap.querySelector('[data-atlas-geo-fill]')
   const cards = [...wrap.querySelectorAll('[data-atlas-card]')]
   const countEl = wrap.querySelector('[data-atlas-count]')
   const prevBtn = wrap.querySelector('[data-atlas-prev]')
@@ -67,6 +68,9 @@ function init(wrap) {
   const NIGHT_IN = 0.12
   const NIGHT_FULL = 0.85
   const NIGHT_SWAP = 0.52   // порог перекраски заголовка в светлый
+  // держать в паре с GLOBE_END в globeCanvas.js: подпись слева дозаполняется
+  // добела к тому же кадру, где глобус заканчивает разворот к России
+  const GEO_END = 0.9
 
   const progress = makeProgress(wrap, stage)
 
@@ -95,6 +99,9 @@ function init(wrap) {
 
     // синева наливается прозрачностью слоя, покадрово по прокрутке
     nightEl.style.opacity = span(p, NIGHT_IN, NIGHT_FULL).toFixed(3)
+
+    // строка про Россию заливается белым тем же прогрессом, что доворачивает шар
+    if (geoFillEl) geoFillEl.style.setProperty('--geo-fill', span(p, 0, GEO_END).toFixed(3))
 
     // заголовок перекрашивается в светлый, когда синевы стало достаточно
     const isNight = p >= NIGHT_SWAP

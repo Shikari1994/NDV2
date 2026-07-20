@@ -98,6 +98,17 @@ const TOTAL = String(SCREENS.length).padStart(2, '0')
         <div class="deck-inner">
           {s.canvas && <canvas class="hero-bg-canvas" aria-hidden="true"></canvas>}
 
+          {/* Курсорный readout: AZ/INC читают положение курсора над
+              канвасом, а не поток данных — интерактивная деталь того же
+              приборного языка, что у .deck-readout экрана 02. Только
+              на устройствах с настоящим указателем (см. CSS). */}
+          {s.canvas && (
+            <div class="deck-cursor-readout mono" data-cursor-readout aria-hidden="true">
+              <span>AZ <b data-cursor-az>000.0°</b></span>
+              <span>INC <b data-cursor-inc>00.0°</b></span>
+            </div>
+          )}
+
           {/* data-lift-x — ход выхода в процентах собственной ширины.
               Величины здесь, а не в CSS: transform целиком отдан GSAP,
               иначе он разберёт готовый transform в пиксельную базу и

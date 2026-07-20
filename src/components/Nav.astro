@@ -11,8 +11,8 @@ import { asset } from '../lib/asset.js'
    scripts/nav.js. Состояние ниже — исходное. */
 const LINKS = [
   ['#about', 'О компании'],
-  ['#software', 'Drill Monitor'],
   ['#products', 'Оборудование'],
+  ['#software', 'Drill Monitor'],
   ['#how', 'Технологии'],
   ['#store', 'Магазин ЗИП'],
 ]
@@ -32,7 +32,14 @@ const MOBILE_LINKS = [...LINKS, ['#contact', 'Контакты']]
       </li>
     ))}
   </ul>
-  <a class="pill nav-cta" href="#contact">Связаться</a>
+  <div class="nav-tail">
+    {/* Реальное московское время, не декорация: компания координирует
+        бригады по нескольким часовым поясам, и общий ориентир в шапке —
+        тот же приборный регистр, что у readout'ов на экранах Drill
+        Monitor. Тикает scripts/nav.js; здесь только состояние до JS. */}
+    <span class="nav-clock mono" id="nav-clock">MSK · --:--:--</span>
+    <a class="pill nav-cta" href="#contact">Связаться</a>
+  </div>
   <button
     class="nav-burger"
     aria-label="Открыть меню"

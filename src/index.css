@@ -698,8 +698,6 @@ nav.nav.scrolled,
 .nav-mobile,
 .deck-readout,
 .bento-bar,
-.bento-tile.is-sm .tag,
-.bento-tile.is-wide .tag,
 .deck-cta,
 .atlas-deck,
 .glass {
@@ -738,8 +736,6 @@ nav.nav.scrolled,
   .nav-mobile,
   .deck-readout,
   .bento-bar,
-  .bento-tile.is-sm .tag,
-  .bento-tile.is-wide .tag,
   .deck-cta,
   .atlas-deck,
   .glass { background: var(--glass-solid); }
@@ -754,8 +750,6 @@ nav.nav.scrolled,
   .nav-mobile,
   .deck-readout,
   .bento-bar,
-  .bento-tile.is-sm .tag,
-  .bento-tile.is-wide .tag,
   .deck-cta,
   .atlas-deck,
   .glass {
@@ -991,6 +985,29 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   right: var(--gut); top: 50%; transform: translateY(-50%);
   width: min(40vw, 460px);
   padding: clamp(20px, 2vw, 30px);
+  transition: background 0.6s var(--ease), box-shadow 0.6s var(--ease), border-color 0.6s var(--ease);
+}
+
+/* Ночная тональность стекла — свой рецепт поверх общего.
+   На светлой заливке общий рецепт (62% белого) в самый раз: под стеклом
+   нейтральный фон, разбавлять нечего. Но когда сцена ушла в синюю ночь,
+   та же плотная белая подложка гасит её почти в серый — синева под
+   стеклом просто не доходит до глаза. Здесь заливка разбавлена, тон
+   уведён в лёд, а насыщенность backdrop-filter поднята: то же стекло,
+   но настроенное вытягивать синий свет сцены, а не перекрывать его.
+   Текст остаётся тёмным всё время (см. комментарий выше), поэтому
+   разбавлять можно ровно до грани, где кегль ещё читается на глаз. */
+.atlas-stage.is-night .atlas-deck {
+  --glass-bg:    rgba(224, 235, 255, 0.5);
+  --glass-blur:  16px;
+  --glass-sat:   260%;
+  --glass-hl:    rgba(214, 231, 255, 0.85);
+  --glass-lo:    rgba(6, 20, 46, 0.26);
+  --glass-line:  rgba(190, 214, 255, 0.32);
+  --glass-shadow:
+    0 1px 2px rgba(6, 16, 36, 0.28),
+    0 24px 64px -14px rgba(8, 28, 64, 0.48),
+    0 0 90px -18px rgba(64, 150, 235, 0.55);
 }
 
 .atlas-slot { display: grid; }
@@ -1663,7 +1680,14 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
      «grid-column: 7» создало бы шесть неявных колонок и растянуло подвал
      далеко за экран. */
   .footer-top { grid-template-columns: 1fr; gap: var(--s-5); padding-bottom: var(--s-5); }
-  .footer-top > * { grid-column: auto; }
+  /* та же специфичность (класс + nth-child), что и у спанов выше, —
+     иначе .footer-top > * их не перебивает, и колонки продолжают
+     требовать grid-column: 7/span 3 и 10/span 3 на сетке из одной
+     колонки, раздувая подвал далеко за экран. Марка (span 5) — той же
+     причины ради, своей строкой ниже. */
+  .footer-top > *:nth-child(2),
+  .footer-top > *:nth-child(3) { grid-column: auto; }
+  .footer-brand { grid-column: auto; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
 }
 
@@ -1712,6 +1736,9 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
               box-shadow 0.45s var(--ease);
 }
 .exp-card:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+/* флагман (телеметрическая система) стоит шире уже в покое — иначе ряд
+   читается как безликая сетка одинаковых плиток, а не техническая линейка */
+.exp-card:first-child { flex-grow: 1.4; }
 
 /* Кадр. cover, а не contain: у рендеров широкие собственные поля,
    и обрезается именно они — предмет стоит в центре кадра. */
@@ -1737,8 +1764,16 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
    она же задаёт нижнюю границу сжатия карточки (см. flex-grow ниже) */
 .exp-head { width: clamp(130px, 11vw, 200px); }
 .exp-num {
-  display: block; margin-bottom: 8px;
+  display: block; margin-bottom: 6px;
   font-size: 0.68rem; letter-spacing: 0.14em; color: var(--brand);
+  font-variant-numeric: tabular-nums;
+}
+/* строка тех-данных читается постоянно, не только на раскрытии карточки —
+   она же держит «приборный» тон секции, пока подпись ещё не выросла в текст */
+.exp-spec {
+  display: block; margin-bottom: 10px;
+  font-size: 0.58rem; letter-spacing: 0.09em; line-height: 1.5; text-transform: uppercase;
+  color: var(--ink-dim);
 }
 .exp-title {
   font-size: var(--fs-1); font-weight: 500; line-height: 1.3; color: var(--ink);
@@ -1753,11 +1788,6 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 }
 .exp-more-in { overflow: hidden; }
 .exp-text { margin-top: 12px; font-size: var(--fs-1); line-height: 1.65; color: var(--ink-dim); }
-.exp-tags {
-  display: block; margin-top: 12px;
-  font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ink-faint);
-}
 
 /* раскрытие — только там, где есть настоящее наведение */
 @media (hover: hover) and (pointer: fine) {
@@ -1801,6 +1831,8 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   /* пять карточек в ряд перестают читаться — раскладываем сеткой 2×N */
   .exp-row { flex-wrap: wrap; height: auto; gap: 10px; }
   .exp-card { flex: 1 1 calc(50% - 5px); height: clamp(300px, 48svh, 420px); }
+  /* сетке 2×N асимметрия ряда не нужна — плитки снова равны */
+  .exp-card:first-child { flex-grow: 1; }
   /* мера подписи держала сжатие в ряду; в сетке сжимать нечего */
   .exp-head, .exp-more { width: auto; }
 }
@@ -1820,6 +1852,7 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
      широком тач-экране становится обычной сеткой плиток */
   .exp-row { flex-wrap: wrap; height: auto; gap: 10px; }
   .exp-card { flex: 1 1 clamp(260px, 30%, 380px); height: auto; }
+  .exp-card:first-child { flex-grow: 1; }
   /* кадр перестаёт тянуться: высоту карточки задаёт текст под ним */
   .exp-frame { flex: none; height: clamp(190px, 28svh, 280px); }
   .exp-head, .exp-more { width: auto; }
@@ -1856,13 +1889,42 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 .sw-head-side .lead { max-width: 480px; }
 .sw-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
-/* bento-мозаика модулей платформы */
-.sw-bento {
+/* bento-мозаика модулей платформы. Раньше кадр вписывался
+   (object-fit: contain) в ячейку с фиксированной высотой ряда — кадры
+   разной формы (1.72:1 у пульта бурения, 2.70:1 у таблицы КНБК) в неё
+   не попадали, и вокруг них оставались поля фона шириной в половину
+   плитки. Теперь aspect-ratio стоит прямо на самом кадре (.bento-shot),
+   а не на плитке: при ЛЮБОЙ ширине колонки картинка выходит без полей,
+   контейнер не приходится подгонять под неё — рамка сама следует за
+   кадром, а не наоборот. Колонки ниже подобраны на глаз для баланса
+   композиции, а не для точных пропорций — потому и не пересчитываются
+   при замене скриншота. */
+.sw-bento { display: flex; flex-direction: column; gap: 16px; }
+
+/* Первый ряд: «Бурение» — крупная витринная плитка слева (2 доли),
+   «Инклинометрия» и «КНБК» — узкой парой справа (1 доля), одна над
+   другой. align-items: start — колонки не тянутся друг под друга: у
+   каждой плитки свой подвал с подписью, и их суммарная высота слева
+   и справа совпадает лишь приблизительно. */
+.bento-row-a {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: clamp(252px, 25vw, 326px);
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: auto auto;
+  align-items: start;
   gap: 16px;
 }
+.bt-drilling { grid-column: 1; grid-row: 1 / span 2; }
+.bt-survey   { grid-column: 2; grid-row: 1; }
+.bt-bha      { grid-column: 2; grid-row: 2; }
+
+/* Второй ряд: «Каротаж» и «Паспорта» — равными долями бок о бок. */
+.bento-row-b {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 16px;
+}
+
 .bento-tile {
   position: relative; overflow: hidden;
   display: flex; flex-direction: column;
@@ -1874,29 +1936,22 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
 /* плитки ведут себя строго: на наведении только светлеет рамка —
    ни подъёма, ни ореола, ни зума скриншота */
 .bento-tile:hover { border-color: var(--line-strong); }
-/* Три размера — ровно те, что раздаёт Software.jsx. Варианты is-tall
-   и is-md убраны: их не просил ни один модуль, а тянулись они через
-   пять правил и два медиазапроса. */
-.bento-tile.is-lg   { grid-column: span 8;  grid-row: span 2; }
-.bento-tile.is-sm   { grid-column: span 4;  grid-row: span 1; }
-.bento-tile.is-wide { grid-column: span 12; grid-row: span 1; }
-/* Мобильная плитка ушла в свою секцию, и справа от «Бурения» осталось
-   4 колонки на два ряда — их занимают инклинометрия и КНБК, по ряду
-   каждая. Отдельного правила ширины у КНБК поэтому больше нет: is-sm
-   даёт ровно те 4 колонки, что нужны. */
 
-/* Скриншот занимает всё место над подвалом и всегда показан целиком.
-   Плитки бенто меняют пропорцию вместе с шириной вьюпорта, а кадры
-   приложения — от 1.72:1 (пульт бурения) до 2.7:1 (таблица КНБК), и
-   cover при любом раскладе срезал у кого-то существенное: боковые
-   колонки телеметрии, 3D-ствол, крайние столбцы таблицы. Поля добирает
-   фон #05080f — он совпадает с фоном самих скриншотов, стык не читается.
-   Исключений по модулям здесь больше нет: правило одно на все кадры. */
+/* Кадр держит СВОЮ пропорцию (задана на .bt-<key> ниже) и никогда не
+   растягивается флексом — высота считается из width: 100% и
+   aspect-ratio, а не выдаётся родителем. object-fit: contain остаётся
+   подстраховкой на случай долей пикселя, а не рабочим механизмом:
+   рамка и кадр по построению совпадают. */
 .bento-shot {
-  flex: 1 1 auto; min-height: 0; z-index: 0;
-  width: 100%; height: 100%; object-fit: contain; object-position: center;
+  display: block; width: 100%; height: auto; z-index: 0;
+  object-fit: contain; object-position: center;
   background: #05080f;
 }
+.bt-drilling .bento-shot { aspect-ratio: 1.724; }
+.bt-survey   .bento-shot { aspect-ratio: 1.812; }
+.bt-bha      .bento-shot { aspect-ratio: 2.698; }
+.bt-logging  .bento-shot { aspect-ratio: 1.835; }
+.bt-park     .bento-shot { aspect-ratio: 2.258; }
 
 /* верхний readout-бар — тонкий оверлей поверх скриншота */
 /* Бар поверх скриншота. Стеклянный, а не градиентный: градиент вниз
@@ -1936,46 +1991,12 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   font-weight: 700; letter-spacing: -0.02em; line-height: 1.16;
   font-size: var(--fs-3); margin-bottom: 0;
 }
-.bento-tile.is-lg .bento-body h3 { font-size: clamp(1.5rem, 2.2vw, 1.95rem); }
+.bento-tile.is-feature .bento-body h3 { font-size: clamp(1.5rem, 2.2vw, 1.95rem); }
 .bento-body p {
   font-size: var(--fs-1); color: var(--text-dim); line-height: 1.6;
   max-width: 56ch; margin-top: var(--s-1);
 }
 .bento-body .tag-row { margin-top: 16px; }
-
-/* мелкие плитки — скриншот во всю высоту, подпись поверх лёгким градиентом */
-/* Подпись поверх кадра держится затемнением, и затемнение здесь
-   рассчитано на ХУДШИЙ кадр, а не на средний. Худший — инклинометрия:
-   3D-ствол нарисован на белом планшете, и белый заголовок ложится
-   ровно на него. Прежние стопы (0 → 0.55 на 38%) на тёмных скриншотах
-   выглядели аккуратнее, но на этом одном кадре заголовок пропадал.
-
-   Стопы сдвинуты так, чтобы к высоте заголовка подложка уже набрала
-   вес: 0.72 к четверти высоты вместо 0.55 к трети. Верх остаётся
-   прозрачным — кадр не должен выглядеть залитым. */
-.bento-tile.is-sm .bento-body,
-.bento-tile.is-wide .bento-body {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  border-top: none;
-  padding: 40px 16px 15px;
-  background: linear-gradient(180deg,
-    rgba(5,8,15,0) 0%, rgba(5,8,15,0.72) 26%,
-    rgba(5,8,15,0.90) 52%, rgba(5,8,15,0.96) 100%);
-}
-.bento-tile.is-sm .bento-body h3,
-.bento-tile.is-wide .bento-body h3 { text-shadow: 0 1px 10px rgba(0,0,0,0.7); }
-.bento-tile.is-sm .bento-body .tag-row,
-.bento-tile.is-wide .bento-body .tag-row { margin-top: 12px; }
-/* Теги на этих плитках лежат прямо на скриншоте, поэтому они —
-   плавающая хрома и берут общий рецепт стекла. Заливку и размытие
-   он уже дал; здесь возвращается только форма таблетки, которую
-   рецепт перебил своим радиусом, и снимается лишняя тень: чип
-   размером в строку от неё выглядит наклейкой. */
-.bento-tile.is-sm .tag,
-.bento-tile.is-wide .tag {
-  border-radius: 20px;
-  box-shadow: inset 0 1px 0 var(--glass-hl);
-}
 
 /* ── Жизненный цикл оборудования ──
    Продолжение раздела, а не новая секция: тот же чёрный фон, отбивка
@@ -2029,18 +2050,10 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   .sw-life-title { max-width: none; }
 }
 
-/* ── Планшет: мозаика в две колонки ──
-   Двенадцатиколоночная сетка на планшете рассыпается (плитка в 4 колонки
-   становится уже своей подписи), а одна колонка превращает раздел в
-   бесконечную ленту почти квадратных плиток. Промежуточный шаг —
-   шесть колонок: широкие плитки занимают ряд целиком, обычные встают
-   парами. Мозаика остаётся мозаикой, просто крупнее шаг. */
-@media (min-width: 901px) and (max-width: 1180px) {
-  .sw-bento { grid-template-columns: repeat(6, 1fr); grid-auto-rows: clamp(230px, 24vw, 300px); }
-  .bento-tile.is-lg   { grid-column: span 6; grid-row: span 2; }
-  .bento-tile.is-sm   { grid-column: span 3; grid-row: span 1; }
-  .bento-tile.is-wide { grid-column: span 6; grid-row: span 1; }
-}
+/* Планшетного брейкпоинта для мозаики больше нет: колонки строк заданы
+   пропорцией (fr), а не счётом ячеек, поэтому раскладка сама тянется
+   от 901px и выше без отдельного шага — планшет получает те же две
+   строки, просто уже. */
 
 @media (max-width: 900px) {
   /* Колонок нет — раскладывать нечего: сетка распускается в поток,
@@ -2049,27 +2062,13 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
   .sw-head { grid-template-columns: 1fr; gap: var(--s-3); align-items: start; }
   .sw-head > *:first-child,
   .sw-head > *:last-child { grid-column: auto; }
-  .sw-bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
-  .bento-tile { grid-column: auto !important; grid-row: auto !important; min-height: 340px; }
-  .bento-tile.is-lg { min-height: 400px; }
+  /* Подпись у всех плиток теперь в обычном подвале под кадром (не
+     оверлеем поверх него), поэтому её высоте не нужно отвоёвывать
+     место у картинки — aspect-ratio на .bento-shot (задан выше, вне
+     медиазапроса) работает одинаково что в две колонки, что в одну. */
+  .bento-row-a, .bento-row-b { grid-template-columns: 1fr; }
+  .bento-tile { grid-column: auto !important; grid-row: auto !important; }
   .bento-body p { max-width: none; }
-
-  /* Широкие кадры (видео-каротаж 3.76:1, таблица КНБК 2.68:1) на узком
-     экране распускать в поток нечем: подпись у них короткая, и без
-     заданной пропорции плитка сжалась бы до высоты подписи. Держим окно
-     3:2 — вписанный кадр получает максимум ширины, а оверлей-подпись
-     ложится на тёмные поля снизу и контент не перекрывает. */
-  .bento-tile.bt-logging,
-  .bento-tile.bt-bha,
-  .bento-tile.bt-survey { min-height: 0; aspect-ratio: 3 / 2; }
-
-  /* у «Бурения» подвал с абзацем и тремя тегами — задать пропорцию всей
-     плитке нельзя, кадру осталась бы полоска. Пропорцию держит сам
-     скриншот, а плитка растёт под него плюс подпись. */
-  .bento-tile.bt-drilling { min-height: 0; }
-  .bento-tile.bt-drilling .bento-shot {
-    flex: 0 0 auto; height: auto; aspect-ratio: 1600 / 928;
-  }
 }
 
 /* ════════════════════════════════════════════════
@@ -2362,9 +2361,6 @@ footer { border-top: 1px solid var(--line); padding: 80px 0 0; }
             mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 96%);
   }
 
-  /* bento: короче плитки — меньше «бесконечной простыни» */
-  .bento-tile { min-height: 300px; }
-  .bento-tile.is-lg { min-height: 360px; }
 }
 
 @media (max-width: 380px) {

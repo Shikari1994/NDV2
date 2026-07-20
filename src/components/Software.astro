@@ -4,6 +4,9 @@ import { asset } from '../lib/asset.js'
 /* Плитки только настольной версии: мобильный клиент вынесен в отдельную
    секцию (Mobile.astro) и показан там во всю ширину. Плиткой он оставался
    бы одним скриншотом среди пяти, а это отдельный продукт. */
+/* Пропорции кадров (ширина/высота) зашиты и в разметку (row), и в CSS
+   (.bt-<key>) — оба места должны совпадать, если заменится скриншот.
+   drilling 1.72:1 · survey 1.81:1 · bha 2.70:1 · logging 1.84:1 · park 2.26:1 */
 const MODULES = [
   {
     key: 'drilling',
@@ -12,7 +15,7 @@ const MODULES = [
     // единственный настоящий real-time монитор — только он носит бейдж LIVE
     live: true,
     img: '/app-drilling.webp',
-    size: 'lg',
+    row: 'a',
     title: 'Мониторинг бурения в реальном времени',
     text: 'Единый пульт бурильщика: проходка, нагрузка на долото, момент, обороты, давление и вибрация — десятки каналов телеметрии с обновлением в реальном времени. Компас азимута и автоматическая SCC-коррекция.',
     tags: ['Real-time', 'Телеметрия MWD', 'Коррекция азимута'],
@@ -23,7 +26,7 @@ const MODULES = [
     tab: 'Инклинометрия',
     img: '/app-survey.webp',
     video: '/app-survey.mp4',
-    size: 'sm',
+    row: 'a',
     title: 'Инклинометрия и 3D-траектория',
     tags: ['3D-ствол', 'План / факт'],
   },
@@ -32,8 +35,9 @@ const MODULES = [
     n: '04',
     tab: 'Оборудование',
     img: '/app-bha.webp',
-    size: 'sm',
+    row: 'a',
     title: 'Компоновка КНБК и ресурс',
+    text: 'Не только этот рейс — весь парк техники.',
     tags: ['КНБК / BHA', 'Ресурс до ТО'],
   },
   {
@@ -42,9 +46,19 @@ const MODULES = [
     tab: 'Каротаж',
     img: '/app-logging.webp',
     video: '/app-logging.mp4',
-    size: 'wide',
+    row: 'b',
     title: 'Каротажный планшет LWD',
     tags: ['Гамма-каротаж', 'Экспорт LAS / PDF'],
+  },
+  {
+    key: 'park',
+    n: '05',
+    tab: 'Паспорта',
+    img: '/dd.png',
+    row: 'b',
+    title: 'Паспорт и наработка прибора',
+    text: 'Живёт с прибором, а не со скважиной.',
+    tags: ['Наработка', 'История рейсов', 'ЗИП'],
   },
 ]
 
@@ -100,34 +114,38 @@ const LIFECYCLE = [
     </div>
 
     <div class="sw-bento">
-      {MODULES.map((m) => (
-        <article class={`bento-tile instr-frame is-${m.size} bt-${m.key} reveal`}>
-          {m.video ? (
-            <video
-              class="bento-shot"
-              poster={asset(m.img)}
-              data-lazy-video={asset(m.video)}
-              muted
-              loop
-              playsinline
-              preload="none"
-              aria-label={m.title}
-            />
-          ) : (
-            <img class="bento-shot" src={asset(m.img)} alt={m.title} loading="lazy" />
-          )}
-          <div class="bento-bar">
-            <span class="bento-kicker mono"><span class="bento-n">{m.n}</span> · {m.tab}</span>
-            {m.live && <span class="bento-live"><span class="bento-live-dot" />LIVE</span>}
-          </div>
-          <div class="bento-body">
-            <h3>{m.title}</h3>
-            {m.text && <p>{m.text}</p>}
-            <div class="tag-row">
-              {m.tags.map((t) => <span class="tag">{t}</span>)}
-            </div>
-          </div>
-        </article>
+      {['a', 'b'].map((row) => (
+        <div class={`bento-row bento-row-${row}`}>
+          {MODULES.filter((m) => m.row === row).map((m) => (
+            <article class={`bento-tile instr-frame bt-${m.key} ${m.key === 'drilling' ? 'is-feature' : ''} reveal`}>
+              {m.video ? (
+                <video
+                  class="bento-shot"
+                  poster={asset(m.img)}
+                  data-lazy-video={asset(m.video)}
+                  muted
+                  loop
+                  playsinline
+                  preload="none"
+                  aria-label={m.title}
+                />
+              ) : (
+                <img class="bento-shot" src={asset(m.img)} alt={m.title} loading="lazy" />
+              )}
+              <div class="bento-bar">
+                <span class="bento-kicker mono"><span class="bento-n">{m.n}</span> · {m.tab}</span>
+                {m.live && <span class="bento-live"><span class="bento-live-dot" />LIVE</span>}
+              </div>
+              <div class="bento-body">
+                <h3>{m.title}</h3>
+                {m.text && <p>{m.text}</p>}
+                <div class="tag-row">
+                  {m.tags.map((t) => <span class="tag">{t}</span>)}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
       ))}
     </div>
 
@@ -135,7 +153,7 @@ const LIFECYCLE = [
       <div class="sw-life-head reveal">
         <span class="sw-life-kicker mono">Между рейсами</span>
         <h3 class="sw-life-title">
-          Drill&nbsp;Monitor ведёт парк оборудования, а не только скважину
+          От учёта до паспорта — без единой таблицы вручную
         </h3>
       </div>
       <div class="sw-life-grid">

@@ -110,11 +110,11 @@ const TOTAL = String(SCREENS.length).padStart(2, '0')
           {s.stage && (
             <div class="deck-devices" aria-hidden="true">
               <div class="deck-stage">
-                <div class="deck-note" data-device data-lift-x="46">
+                <div class="deck-note" data-device data-lift-x="46" style="--lift-x: 46%">
                   <img src={asset(s.stage.note)} alt="" loading="lazy" draggable="false" />
                 </div>
                 <div class="deck-phone">
-                  <div class="deck-phone-move" data-device data-lift-x="235">
+                  <div class="deck-phone-move" data-device data-lift-x="235" style="--lift-x: 235%">
                     <img src={asset(s.stage.phone)} alt="" loading="lazy" draggable="false" />
                   </div>
                 </div>

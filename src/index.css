@@ -911,6 +911,14 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .atlas-stage {
   position: sticky; top: 0; height: 100svh; overflow: hidden;
   background: var(--surface);
+  /* На мобильном адресная строка прячется по ходу скролла, и реальный
+     вьюпорт вырастает за пределы «малого» 100svh — под прибитой сценой
+     открывается голая заливка секции (#about, светлая) до самого низа
+     экрана. 100dvh гонится за текущим вьюпортом и полосу закрывает; для
+     progress()-расчёта в scrollProgress.js ничего не меняется — он
+     читает offsetHeight живьём, каким бы он ни был. Строка ниже — не
+     дубль, а фолбэк: где dvh не понимают, работает первое значение. */
+  height: 100dvh;
 }
 
 /* Ночь — отдельный слой над заливкой и под шаром. Тот же тёмно-синий
@@ -1135,6 +1143,9 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
 .deck-screen {
   position: sticky; top: 0;
   height: 100svh; overflow: hidden; padding: 0;
+  /* Тот же зазор под адресную строку, что и у .atlas-stage выше —
+     на графитовом экране он не белый, а тёмный шов, но природа та же. */
+  height: 100dvh;
 }
 .deck-inner {
   position: relative;
@@ -1144,6 +1155,56 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
   justify-content: flex-end;
   padding-bottom: clamp(28px, 3vw, 44px);
   backface-visibility: hidden;
+}
+
+/* ── Компенсация наезда: нативный scroll-driven timeline ──
+   Раньше встречный твин на .deck-inner/[data-device]/.deck-rig считал
+   GSAP ScrollTrigger — main-thread. На тач-скролле нативная прокрутка
+   идёт композитором отдельным потоком, и твин на инерции отставал на
+   кадр-другой: заливка (композитор) едет гладко, содержимое (main
+   thread) дёргается следом. Со стороны это читалось как дрожь
+   контента второго экрана колоды.
+
+   view-timeline считает прогресс тем же композитором, что двигает
+   сам sticky-скролл, — рассинхрону взяться неоткуда. Спецификация
+   явно игнорирует position: sticky при расчёте прогресса и берёт
+   позицию бокса «как если бы» он не был липким, поэтому окно entry
+   ровно совпадает с накатом экрана: 100svh высоты экрана = 100%
+   прогресса. Диапазон exit у первого экрана — то же окно со стороны
+   уходящего бокса, для параллакса снаряда.
+
+   Там, где браузер не умеет animation-timeline, остаётся прежний
+   GSAP-путь (см. motion.js) — дрожь на этих браузерах не устранена,
+   но и не хуже, чем была. При reduced-motion анимации нет вообще —
+   элементы стоят в исходном (typографика, left/bottom) положении. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .deck-screen { view-timeline-axis: block; }
+    .deck-screen:first-child { view-timeline-name: --deck-s0; }
+    .deck-screen:last-child { view-timeline-name: --deck-s1; }
+
+    @keyframes deck-enter-y { from { transform: translateY(-100%); } }
+    .deck-screen:last-child .deck-inner {
+      animation: deck-enter-y linear both;
+      animation-timeline: --deck-s1;
+      animation-range: entry;
+    }
+
+    @keyframes deck-enter-x { from { transform: translateX(var(--lift-x, 0%)); } }
+    .deck-screen:last-child [data-device] {
+      animation: deck-enter-x linear both;
+      animation-timeline: --deck-s1;
+      animation-range: entry;
+    }
+
+    /* 0.11 * 100vw — тот же коэффициент параллакса, что раньше считал JS */
+    @keyframes deck-rig-parallax { to { transform: translateX(11vw); } }
+    .deck-rig {
+      animation: deck-rig-parallax linear both;
+      animation-timeline: --deck-s0;
+      animation-range: exit;
+    }
+  }
 }
 
 /* ── типографика экранов ── */

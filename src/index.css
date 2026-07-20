@@ -1176,8 +1176,20 @@ nav.nav[data-theme] .nav-burger span { background: var(--ink); }
    Там, где браузер не умеет animation-timeline, остаётся прежний
    GSAP-путь (см. motion.js) — дрожь на этих браузерах не устранена,
    но и не хуже, чем была. При reduced-motion анимации нет вообще —
-   элементы стоят в исходном (typографика, left/bottom) положении. */
-@media (prefers-reduced-motion: no-preference) {
+   элементы стоят в исходном (typографика, left/bottom) положении.
+
+   ─── На тач тряска осталась и с view-timeline — временно выключено ───
+   Спецификация предписывает игнорировать sticky при расчёте прогресса,
+   но на живом телефоне (в отличие от эмулятора) она всё равно дёргается —
+   похоже на баг конкретно связки sticky + animation-timeline в мобильном
+   движке, а не на нашу разметку. Чинить сам этот баг — отдельная задача.
+
+   Сейчас на тач (hover: none, pointer: coarse) весь блок ниже просто не
+   применяется: элементы стоят в исходном left/bottom-положении, разъезда
+   константы на переходе экранов нет, зато дёргать нечего — твина нет
+   вообще, ни CSS, ни (см. motion.js) GSAP-фолбэка. Десктоп с мышью/тачпадом
+   не тронут — там ни разу не воспроизвелась ни исходная тряска, ни эта. */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   @supports (animation-timeline: view()) {
     .deck-screen { view-timeline-axis: block; }
     .deck-screen:first-child { view-timeline-name: --deck-s0; }

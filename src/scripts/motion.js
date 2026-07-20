@@ -254,8 +254,15 @@ if (!reduce) {
    отстаёт на тач-инерции (см. комментарий в index.css у .deck-inner).
    Там, где браузер это умеет, JS-версию нужно ПОГАСИТЬ — иначе два
    твина одновременно правят один transform. Где не умеет — GSAP остаётся
-   единственным источником движения, как и было. */
+   единственным источником движения, как и было.
+
+   На тач тряска осталась и с CSS-версией — судя по всему, баг самой
+   связки sticky + animation-timeline в мобильном движке, а не в твине.
+   Поэтому на тач (см. тот же media-гейт в index.css) не включаем и
+   GSAP-фолбэк тоже: на мобильном сейчас никакого скролл-твина нет
+   вообще, ни CSS, ни JS — дёргать нечему. */
 const supportsViewTimeline = !!window.CSS?.supports?.('animation-timeline', 'view()')
+const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
 
 const deck = reduce ? null : document.querySelector('.deck')
 
@@ -270,7 +277,7 @@ if (rig) {
   gsap.from(rig.parentElement, { x: '-92%', duration: 1.5, ease: EASE, delay: 0.5 })
 }
 
-if (deck && !supportsViewTimeline) {
+if (deck && !supportsViewTimeline && isFinePointer) {
   /* Окно наката i-го экрана: экран скролла на секцию, отсчёт от самой
      колоды. Конфиг собирается заново на каждый вызов — ScrollTrigger
      дописывает в переданный объект ссылку на свою анимацию, и общий
